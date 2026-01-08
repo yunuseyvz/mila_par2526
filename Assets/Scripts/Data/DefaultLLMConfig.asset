@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fb5249611a312749a626692e566b083, type: 3}
   m_Name: DefaultLLMConfig
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.LLMConfig
-  serviceUrl: http://127.0.0.1:11434
+  serviceUrl: http://bh0wto9ow0kusnsf.myfritz.net:11434
   endpointPath: /api/generate
-  modelName: llama3
+  modelName: qwen3-vl:8b
   maxTokens: 512
   temperature: 0.7
   enableStreaming: 0

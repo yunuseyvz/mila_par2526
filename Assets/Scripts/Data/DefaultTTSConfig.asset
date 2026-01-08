@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 395ab87d31790394fbf1b1a67b85f3ee, type: 3}
   m_Name: DefaultTTSConfig
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.TTSConfig
-  serviceUrl: http://127.0.0.1:7851
-  endpointPath: /api/tts-generate
+  serviceUrl: http://bh0wto9ow0kusnsf.myfritz.net:7851
+  endpointPath: /api/tts-generate-streaming
   defaultVoice: male_01.wav
   defaultLanguage: en
   speechRate: 1

@@ -81,57 +81,89 @@ namespace LanguageTutor.Services
             string cacheKey,
             TaskCompletionSource<AudioClip> tcs)
         {
+            // Build request according to AllTalk API docs
+            string voice = voiceName ?? _config.defaultVoice;
+            string lang = language ?? _config.defaultLanguage;
+            string outputFile = $"unitytts{System.Guid.NewGuid():N}"; // No extension or special chars
+            
             WWWForm form = new WWWForm();
             form.AddField("text_input", text);
-            form.AddField("character_voice", voiceName ?? _config.defaultVoice);
-            form.AddField("language", language ?? _config.defaultLanguage);
             form.AddField("text_filtering", "standard");
-            form.AddField("autoplay", "false");
+            form.AddField("character_voice_gen", voice);
             form.AddField("narrator_enabled", "false");
-
-            _currentRequest = UnityWebRequest.Post(_config.GetFullUrl(), form);
+            form.AddField("narrator_voice_gen", voice);
+            form.AddField("text_not_inside", "character");
+            form.AddField("language", lang);
+            form.AddField("output_file_name", outputFile);
+            form.AddField("output_file_timestamp", "true");
+            form.AddField("autoplay", "false");
+            form.AddField("autoplay_volume", "0.8");
+            
+            string generateUrl = _config.serviceUrl.TrimEnd('/') + "/api/tts-generate";
+            
+            Debug.Log($"[AllTalkService] Generating TTS:");
+            Debug.Log($"[AllTalkService]   URL: {generateUrl}");
+            Debug.Log($"[AllTalkService]   Text: {text.Substring(0, Math.Min(50, text.Length))}...");
+            Debug.Log($"[AllTalkService]   Voice: {voice}");
+            
+            _currentRequest = UnityWebRequest.Post(generateUrl, form);
             _currentRequest.timeout = _config.timeoutSeconds;
-
+            _currentRequest.certificateHandler = new BypassCertificateHandler();
+            
             yield return _currentRequest.SendWebRequest();
-
+            
             if (_currentRequest.result != UnityWebRequest.Result.Success)
             {
-                tcs.SetException(new Exception($"AllTalk request failed: {_currentRequest.error}"));
+                Debug.LogError($"[AllTalkService] Generation failed: {_currentRequest.error}");
+                tcs.SetException(new Exception($"AllTalk generation failed: {_currentRequest.error}"));
                 _currentRequest = null;
                 yield break;
             }
-
+            
             string responseText = _currentRequest.downloadHandler.text;
+            Debug.Log($"[AllTalkService] Generation response: {responseText}");
             
-            Debug.Log($"[AllTalkService] Response: {responseText}");
+            // Parse response according to docs
+            AllTalkResponse response = JsonUtility.FromJson<AllTalkResponse>(responseText);
             
-            AllTalkResponse response = null;
-            
-            // Parse response
-            response = JsonUtility.FromJson<AllTalkResponse>(responseText);
-            
-            if (response == null || string.IsNullOrEmpty(response.output_file_path))
+            if (response == null || response.status != "generate-success")
             {
-                tcs.SetException(new Exception("AllTalk returned empty file path"));
+                Debug.LogError($"[AllTalkService] Generation failed, status: {response?.status}");
+                tcs.SetException(new Exception("AllTalk generation failed"));
                 _currentRequest = null;
                 yield break;
             }
-
-            Debug.Log($"[AllTalkService] Loading audio from disk: {response.output_file_path}");
             
-            // Load the audio file (use file:// not file:///)
-            string audioUrl = "file://" + response.output_file_path;
+            Debug.Log($"[AllTalkService] Generation successful:");
+            Debug.Log($"[AllTalkService]   output_file_url: {response.output_file_url}");
+            Debug.Log($"[AllTalkService]   output_file_path: {response.output_file_path}");
             
+            // Construct full URL from relative path
+            // According to docs: output_file_url is like "/audio/filename.wav"
+            string audioUrl = _config.serviceUrl.TrimEnd('/') + response.output_file_url;
+            Debug.Log($"[AllTalkService] Full audio URL: {audioUrl}");
+            
+            // Wait a moment for file to be ready
+            yield return new WaitForSeconds(0.3f);
+            
+            // Fetch the audio file
             using (UnityWebRequest audioRequest = UnityWebRequestMultimedia.GetAudioClip(audioUrl, AudioType.WAV))
             {
+                audioRequest.timeout = _config.timeoutSeconds;
+                audioRequest.certificateHandler = new BypassCertificateHandler();
+                
                 yield return audioRequest.SendWebRequest();
-
+                
+                Debug.Log($"[AllTalkService] Audio fetch result: {audioRequest.result}");
+                
                 if (audioRequest.result == UnityWebRequest.Result.Success)
                 {
                     AudioClip clip = DownloadHandlerAudioClip.GetContent(audioRequest);
                     
                     if (clip != null)
                     {
+                        Debug.Log($"[AllTalkService] Audio loaded! Length: {clip.length}s");
+                        
                         // Cache the clip
                         if (_config.enableCaching)
                         {
@@ -142,12 +174,15 @@ namespace LanguageTutor.Services
                     }
                     else
                     {
-                        tcs.SetException(new Exception("Failed to create AudioClip from WAV data"));
+                        Debug.LogError("[AllTalkService] AudioClip is null");
+                        tcs.SetException(new Exception("Failed to create AudioClip"));
                     }
                 }
                 else
                 {
-                    tcs.SetException(new Exception($"Failed to load audio file: {audioRequest.error}"));
+                    Debug.LogError($"[AllTalkService] Failed to load audio: {audioRequest.error}");
+                    Debug.LogError($"[AllTalkService] Response code: {audioRequest.responseCode}");
+                    tcs.SetException(new Exception($"Failed to load audio: {audioRequest.error}"));
                 }
             }
 
@@ -173,11 +208,12 @@ namespace LanguageTutor.Services
 
             _audioCache[key] = clip;
         }
-
+        
         #region DTOs
         [Serializable]
         private class AllTalkResponse
         {
+            public string status; // "generate-success" or "generate-failure"
             public string output_file_path;
             public string output_file_url;
             public string output_cache_url;

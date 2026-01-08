@@ -206,22 +206,42 @@ namespace LanguageTutor.Core
 
         private async void HandleRecordingCompleted(AudioClip audioClip)
         {
+            Debug.Log("[NPCController] Recording completed, starting processing...");
+            
             if (audioClip == null)
             {
+                Debug.LogError("[NPCController] AudioClip is null!");
                 npcView.ShowErrorMessage("Failed to record audio");
                 npcView.SetIdleState();
                 return;
             }
 
+            Debug.Log($"[NPCController] AudioClip received - Length: {audioClip.length}s, Samples: {audioClip.samples}");
+
             _isProcessing = true;
 
             // Execute the conversation pipeline
+            Debug.Log($"[NPCController] Executing pipeline with action: {_currentAction?.GetType().Name}");
             var result = await _conversationPipeline.ExecuteAsync(audioClip, _currentAction);
 
-            if (result.Success && result.TTSAudioClip != null && conversationConfig.autoPlayTTS)
+            Debug.Log($"[NPCController] Pipeline completed - Success: {result.Success}");
+            
+            if (result.Success)
             {
-                npcView.PlayAudio(result.TTSAudioClip);
-                npcView.SetSpeakingState();
+                Debug.Log($"[NPCController] Transcription: {result.TranscribedText}");
+                Debug.Log($"[NPCController] LLM Response: {result.LLMResponse}");
+                Debug.Log($"[NPCController] TTS Clip present: {result.TTSAudioClip != null}");
+                
+                if (result.TTSAudioClip != null && conversationConfig.autoPlayTTS)
+                {
+                    Debug.Log("[NPCController] Playing TTS audio");
+                    npcView.PlayAudio(result.TTSAudioClip);
+                    npcView.SetSpeakingState();
+                }
+            }
+            else
+            {
+                Debug.LogError($"[NPCController] Pipeline failed: {result.ErrorMessage}");
             }
 
             _isProcessing = false;
@@ -345,12 +365,9 @@ namespace LanguageTutor.Core
         private void Update()
         {
             // If audio finished playing, return to idle state
-            if (!_isProcessing && !_audioInput.IsRecording && !npcView.IsAudioPlaying())
+            if (!_isProcessing && !_audioInput.IsRecording && npcView != null && !npcView.IsAudioPlaying())
             {
-                if (npcView != null)
-                {
-                    npcView.SetIdleState();
-                }
+                npcView.SetIdleState();
             }
         }
     }

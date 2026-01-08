@@ -79,32 +79,86 @@ namespace LanguageTutor.Services
             string json = JsonUtility.ToJson(request);
             byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
 
-            using (UnityWebRequest webRequest = new UnityWebRequest(_config.GetFullUrl(), "POST"))
+            string fullUrl = _config.GetFullUrl();
+            
+            // DEBUG: Log request details
+            Debug.Log($"[OllamaService] Sending request to: {fullUrl}");
+            Debug.Log($"[OllamaService] Model: {_config.modelName}");
+            Debug.Log($"[OllamaService] Prompt length: {fullPrompt.Length} chars");
+            Debug.Log($"[OllamaService] Request JSON: {json}");
+
+            using (UnityWebRequest webRequest = new UnityWebRequest(fullUrl, "POST"))
             {
                 webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
                 webRequest.downloadHandler = new DownloadHandlerBuffer();
                 webRequest.SetRequestHeader("Content-Type", "application/json");
+                webRequest.SetRequestHeader("Accept", "application/json");
                 webRequest.timeout = _config.timeoutSeconds;
+                
+                // Disable certificate validation for local network (helps with IP addresses)
+                webRequest.certificateHandler = new BypassCertificateHandler();
+                
+                // Don't follow redirects automatically
+                webRequest.redirectLimit = 0;
 
-                yield return webRequest.SendWebRequest();
+                Debug.Log($"[OllamaService] Request timeout: {_config.timeoutSeconds}s");
+                Debug.Log($"[OllamaService] Sending web request...");
+                
+                float startTime = Time.time;
+                var operation = webRequest.SendWebRequest();
+                
+                // Manual timeout with progress tracking
+                while (!operation.isDone)
+                {
+                    float elapsed = Time.time - startTime;
+                    if (elapsed > _config.timeoutSeconds)
+                    {
+                        Debug.LogError($"[OllamaService] Manual timeout after {elapsed}s");
+                        webRequest.Abort();
+                        tcs.SetException(new System.Exception($"Request timed out after {elapsed}s"));
+                        yield break;
+                    }
+                    
+                    if (elapsed > 5f && Mathf.FloorToInt(elapsed) % 5 == 0)
+                    {
+                        Debug.Log($"[OllamaService] Still waiting... {elapsed:F1}s elapsed, progress: {operation.progress:P0}");
+                    }
+                    
+                    yield return null;
+                }
+                
+                Debug.Log($"[OllamaService] Request completed in {Time.time - startTime:F2}s");
+
+                // DEBUG: Log response details
+                Debug.Log($"[OllamaService] Response received!");
+                Debug.Log($"[OllamaService] Result: {webRequest.result}");
+                Debug.Log($"[OllamaService] Response Code: {webRequest.responseCode}");
+                Debug.Log($"[OllamaService] Error: {webRequest.error}");
 
                 if (webRequest.result == UnityWebRequest.Result.Success)
                 {
+                    Debug.Log($"[OllamaService] Response body: {webRequest.downloadHandler.text}");
+                    
                     try
                     {
                         var response = JsonUtility.FromJson<OllamaResponse>(webRequest.downloadHandler.text);
                         
                         if (string.IsNullOrEmpty(response.response))
                         {
+                            Debug.LogError("[OllamaService] Empty response from Ollama service");
                             tcs.SetException(new Exception("Empty response from Ollama service"));
                         }
                         else
                         {
+                            Debug.Log($"[OllamaService] Success! Response length: {response.response.Length} chars");
+                            Debug.Log($"[OllamaService] Response preview: {response.response.Substring(0, Mathf.Min(100, response.response.Length))}...");
                             tcs.SetResult(response.response);
                         }
                     }
                     catch (Exception ex)
                     {
+                        Debug.LogError($"[OllamaService] Failed to parse response: {ex.Message}");
+                        Debug.LogError($"[OllamaService] Raw response: {webRequest.downloadHandler.text}");
                         tcs.SetException(new Exception($"Failed to parse Ollama response: {ex.Message}"));
                     }
                 }
@@ -113,6 +167,9 @@ namespace LanguageTutor.Services
                     string errorMsg = $"Ollama request failed: {webRequest.error}";
                     if (webRequest.responseCode == 404)
                         errorMsg += " - Model not found. Run 'ollama pull " + _config.modelName + "'";
+                    
+                    Debug.LogError($"[OllamaService] {errorMsg}");
+                    Debug.LogError($"[OllamaService] Response body: {webRequest.downloadHandler?.text}");
                     
                     tcs.SetException(new Exception(errorMsg));
                 }
@@ -174,5 +231,17 @@ namespace LanguageTutor.Services
             public bool done;
         }
         #endregion
+    }
+    
+    /// <summary>
+    /// Bypass certificate validation for local network requests.
+    /// Only use for development with local LLM servers.
+    /// </summary>
+    public class BypassCertificateHandler : CertificateHandler
+    {
+        protected override bool ValidateCertificate(byte[] certificateData)
+        {
+            return true; // Accept all certificates for local development
+        }
     }
 }
