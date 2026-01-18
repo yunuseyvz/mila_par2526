@@ -96,27 +96,11 @@ git lfs track "*.extension"
 ```
 This will update the `.gitattributes` file.
 
-### Development Guidelines
-
-When contributing code:
-1. Follow the existing architecture patterns
-2. Use interfaces for new service implementations
-3. Add configuration to ScriptableObjects
-4. Emit events for component communication
-5. Add XML documentation comments
-6. See [ARCHITECTURE.md](Assets/_Project/ARCHITECTURE.md) for detailed guidelines
 
 ## Documentation
 
 - **[SETUP_GUIDE.md](Assets/_Project/SETUP_GUIDE.md)** - Complete setup instructions
 - **[ARCHITECTURE.md](Assets/_Project/ARCHITECTURE.md)** - Architecture overview and extension guide
-
-## License
-
-[Your License Here]
-1.  Open **Unity Hub**.
-2.  Click **Add** and select the `PAR_WS2526` folder.
-3.  Click on the project name to open it in the Unity Editor.
 
 ## Git LFS Configuration
 
@@ -130,11 +114,3 @@ To verify LFS is working, you can run:
 ```bash
 git lfs ls-files
 ```
-
-## Contributing
-
-When adding new large binary files, ensure they are tracked by LFS. You can add new file types using:
-```bash
-git lfs track "*.extension"
-```
-This will update the `.gitattributes` file.
