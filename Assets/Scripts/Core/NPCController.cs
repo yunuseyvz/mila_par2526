@@ -23,6 +23,7 @@ namespace LanguageTutor.Core
         [Header("Components")]
         [SerializeField] private WhisperManager whisperManager;
         [SerializeField] private NPCView npcView;
+        [SerializeField] private AvatarAnimationController avatarAnimationController;
 
         [Header("Action Mode")]
         [SerializeField] private ActionMode defaultActionMode = ActionMode.Chat;
@@ -52,6 +53,8 @@ namespace LanguageTutor.Core
             SetDefaultAction();
 
             npcView.SetIdleState();
+            if (avatarAnimationController != null)
+                avatarAnimationController.SetIdle();
             Debug.Log("[NPCController] Initialized successfully");
         }
 
@@ -237,6 +240,10 @@ namespace LanguageTutor.Core
                     Debug.Log("[NPCController] Playing TTS audio");
                     npcView.PlayAudio(result.TTSAudioClip);
                     npcView.SetSpeakingState();
+                    
+                    // Trigger talking animation when TTS begins
+                    if (avatarAnimationController != null)
+                        avatarAnimationController.SetTalking();
                 }
             }
             else
@@ -249,6 +256,8 @@ namespace LanguageTutor.Core
             if (!result.Success)
             {
                 npcView.SetIdleState();
+                if (avatarAnimationController != null)
+                    avatarAnimationController.SetIdle();
             }
         }
 
@@ -256,6 +265,8 @@ namespace LanguageTutor.Core
         {
             npcView.ShowErrorMessage(error);
             npcView.SetIdleState();
+            if (avatarAnimationController != null)
+                avatarAnimationController.SetIdle();
             _isProcessing = false;
         }
 
@@ -269,18 +280,26 @@ namespace LanguageTutor.Core
             {
                 case PipelineStage.Transcribing:
                     npcView.SetProcessingState("Transcribing...");
+                    if (avatarAnimationController != null)
+                        avatarAnimationController.SetThinking();
                     break;
                 case PipelineStage.GeneratingResponse:
                     npcView.SetProcessingState("Thinking...");
+                    if (avatarAnimationController != null)
+                        avatarAnimationController.SetThinking();
                     break;
                 case PipelineStage.SynthesizingSpeech:
                     npcView.SetProcessingState("Generating voice...");
+                    if (avatarAnimationController != null)
+                        avatarAnimationController.SetThinking();
                     break;
                 case PipelineStage.Complete:
                     // Will be handled when audio finishes playing
                     break;
                 case PipelineStage.Error:
                     npcView.SetIdleState();
+                    if (avatarAnimationController != null)
+                        avatarAnimationController.SetIdle();
                     break;
             }
         }
@@ -326,16 +345,16 @@ namespace LanguageTutor.Core
             switch (mode)
             {
                 case ActionMode.Chat:
-                    _currentAction = new ChatAction(llmConfig.conversationPracticePrompt);
+                    _currentAction = new ChatAction(llmConfig.defaultSystemPrompt);
                     break;
                 case ActionMode.GrammarCheck:
-                    _currentAction = new GrammarCheckAction(conversationConfig.targetLanguage);
+                    _currentAction = new GrammarCheckAction(conversationConfig.targetLanguage, llmConfig.grammarCorrectionPrompt);
                     break;
                 case ActionMode.VocabularyTeach:
-                    _currentAction = new VocabularyTeachAction(conversationConfig.targetLanguage);
+                    _currentAction = new VocabularyTeachAction(conversationConfig.targetLanguage, llmConfig.vocabularyTeachingPrompt);
                     break;
                 case ActionMode.ConversationPractice:
-                    _currentAction = new ConversationPracticeAction("casual conversation");
+                    _currentAction = new ConversationPracticeAction("casual conversation", llmConfig.conversationPracticePrompt);
                     break;
             }
 
@@ -368,6 +387,12 @@ namespace LanguageTutor.Core
             if (!_isProcessing && !_audioInput.IsRecording && npcView != null && !npcView.IsAudioPlaying())
             {
                 npcView.SetIdleState();
+                
+                // Return avatar to idle animation
+                if (avatarAnimationController != null && avatarAnimationController.GetCurrentState() != AnimationState.Idle)
+                {
+                    avatarAnimationController.SetIdle();
+                }
             }
         }
     }

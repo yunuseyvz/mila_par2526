@@ -180,28 +180,36 @@ namespace LanguageTutor.Services
         {
             var sb = new StringBuilder();
 
-            // Add system prompt
+            // Use Ollama's recommended format with clear role separation
+            // System prompt should be strongly emphasized
             if (!string.IsNullOrEmpty(systemPrompt))
             {
+                sb.AppendLine("### System Instructions ###");
                 sb.AppendLine(systemPrompt);
+                sb.AppendLine("### End System Instructions ###");
+                sb.AppendLine();
+                sb.AppendLine("You MUST follow the system instructions above in all your responses.");
                 sb.AppendLine();
             }
 
             // Add conversation history (if any)
             if (history != null && history.Count > 0)
             {
-                sb.AppendLine("Previous conversation:");
+                sb.AppendLine("### Conversation History ###");
                 foreach (var msg in history)
                 {
-                    string role = msg.Role == MessageRole.User ? "User" : "Assistant";
+                    string role = msg.Role == MessageRole.User ? "Human" : "Assistant";
                     sb.AppendLine($"{role}: {msg.Content}");
                 }
+                sb.AppendLine("### End Conversation History ###");
                 sb.AppendLine();
             }
 
-            // Add current user prompt
-            sb.Append("User says: ");
-            sb.Append(userPrompt);
+            // Add current user prompt with clear role marker
+            sb.AppendLine("### Current Message ###");
+            sb.AppendLine($"Human: {userPrompt}");
+            sb.AppendLine();
+            sb.Append("Assistant:");
 
             return sb.ToString();
         }

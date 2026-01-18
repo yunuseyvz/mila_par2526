@@ -11,6 +11,7 @@ namespace LanguageTutor.Actions
     public class ConversationPracticeAction : ILLMAction
     {
         private readonly string _scenario;
+        private readonly string _customSystemPrompt;
         private const string DEFAULT_CONVERSATION_PROMPT = 
             @"You are a native speaker having a natural conversation in {0}. 
 Scenario: {1}
@@ -19,9 +20,10 @@ Respond naturally as if you're really in this situation. Use appropriate idioms 
 Keep the conversation flowing naturally. Match the user's language level - if they use simple language, respond simply. 
 Be friendly and encouraging.";
 
-        public ConversationPracticeAction(string scenario = "casual conversation")
+        public ConversationPracticeAction(string scenario = "casual conversation", string customSystemPrompt = null)
         {
             _scenario = scenario;
+            _customSystemPrompt = customSystemPrompt;
         }
 
         public string GetActionName() => "ConversationPractice";
@@ -43,7 +45,10 @@ Be friendly and encouraging.";
                     ? context.Parameters["scenario"].ToString()
                     : _scenario;
 
-                string systemPrompt = string.Format(DEFAULT_CONVERSATION_PROMPT, language, scenario);
+                // Use custom prompt if provided, otherwise use default template
+                string systemPrompt = !string.IsNullOrEmpty(_customSystemPrompt)
+                    ? _customSystemPrompt
+                    : string.Format(DEFAULT_CONVERSATION_PROMPT, language, scenario);
 
                 string response = await llmService.GenerateResponseAsync(
                     context.UserInput, 

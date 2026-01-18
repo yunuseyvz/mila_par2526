@@ -1,6 +1,8 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Text;
 
 namespace LanguageTutor.UI
 {
@@ -12,6 +14,7 @@ namespace LanguageTutor.UI
     {
         [Header("UI Components")]
         [SerializeField] private TextMeshProUGUI subtitleText;
+        [SerializeField] private TextMeshProUGUI modeText; // Optional: for status messages
         [SerializeField] private Button talkButton;
         [SerializeField] private Image statusIndicator;
 
@@ -25,7 +28,14 @@ namespace LanguageTutor.UI
         [SerializeField] private Color idleColor = Color.white;
         [SerializeField] private Color errorColor = Color.red;
 
+        [Header("Conversation Settings")]
+        [SerializeField] private int maxConversationLines = 10;
+        [SerializeField] private bool showConversationHistory = true;
+        [SerializeField] private bool showStatusInConversation = false;
+
         private string _currentSubtitle;
+        private string _conversationText;
+        private List<string> _conversationHistory = new List<string>();
 
         private void Awake()
         {
@@ -49,8 +59,17 @@ namespace LanguageTutor.UI
         /// </summary>
         public void ShowUserMessage(string message)
         {
-            _currentSubtitle = $"<color=cyan>Player:</color> {message}";
-            UpdateSubtitle();
+            Debug.Log($"[NPCView] ShowUserMessage called. History enabled: {showConversationHistory}, Message: {message}");
+            if (showConversationHistory)
+            {
+                AddToConversationHistory($"<color=blue>Player:</color> {message}");
+                UpdateSubtitle();
+            }
+            else
+            {
+                _currentSubtitle = $"<color=blue>Player:</color> {message}";
+                UpdateSubtitle();
+            }
         }
 
         /// <summary>
@@ -58,8 +77,17 @@ namespace LanguageTutor.UI
         /// </summary>
         public void ShowNPCMessage(string message)
         {
-            _currentSubtitle = $"<color=green>NPC:</color> {message}";
-            UpdateSubtitle();
+            Debug.Log($"[NPCView] ShowNPCMessage called. History enabled: {showConversationHistory}, Message: {message}");
+            if (showConversationHistory)
+            {
+                AddToConversationHistory($"<color=green>NPC:</color> {message}");
+                UpdateSubtitle();
+            }
+            else
+            {
+                _currentSubtitle = $"<color=green>NPC:</color> {message}";
+                UpdateSubtitle();
+            }
         }
 
         /// <summary>
@@ -67,8 +95,18 @@ namespace LanguageTutor.UI
         /// </summary>
         public void ShowStatusMessage(string message)
         {
-            _currentSubtitle = $"<color=yellow>{message}</color>";
-            UpdateSubtitle();
+            // If modeText is assigned, use it for status
+            if (modeText != null)
+            {
+                modeText.text = $"<color=yellow>{message}</color>";
+            }
+            else if (showStatusInConversation)
+            {
+                // Show status in subtitle area without clearing conversation
+                _currentSubtitle = $"{_conversationText}\n\n<color=yellow><i>{message}</i></color>";
+                UpdateSubtitle();
+            }
+            // Otherwise, don't overwrite the conversation
         }
 
         /// <summary>
@@ -76,8 +114,16 @@ namespace LanguageTutor.UI
         /// </summary>
         public void ShowErrorMessage(string error)
         {
-            _currentSubtitle = $"<color=red>Error:</color> {error}";
-            UpdateSubtitle();
+            if (showConversationHistory)
+            {
+                AddToConversationHistory($"<color=red>Error:</color> {error}");
+                UpdateSubtitle();
+            }
+            else
+            {
+                _currentSubtitle = $"<color=red>Error:</color> {error}";
+                UpdateSubtitle();
+            }
             SetStatusColor(errorColor);
         }
 
@@ -87,7 +133,43 @@ namespace LanguageTutor.UI
         public void ClearSubtitle()
         {
             _currentSubtitle = string.Empty;
+            _conversationText = string.Empty;
+            _conversationHistory.Clear();
             UpdateSubtitle();
+            if (modeText != null)
+            {
+                modeText.text = string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Add a line to the conversation history.
+        /// </summary>
+        private void AddToConversationHistory(string line)
+        {
+            _conversationHistory.Add(line);
+            Debug.Log($"[NPCView] Added to history. Total messages: {_conversationHistory.Count}");
+            
+            // Keep only the last N lines
+            if (_conversationHistory.Count > maxConversationLines)
+            {
+                _conversationHistory.RemoveAt(0);
+            }
+            
+            // Build the full conversation text
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < _conversationHistory.Count; i++)
+            {
+                sb.AppendLine(_conversationHistory[i]);
+                if (i < _conversationHistory.Count - 1)
+                {
+                    sb.AppendLine(); // Add extra line break between messages
+                }
+            }
+            
+            _conversationText = sb.ToString();
+            _currentSubtitle = _conversationText;
+            Debug.Log($"[NPCView] Conversation text built: {_conversationText.Length} characters, {_conversationHistory.Count} messages");
         }
 
         /// <summary>

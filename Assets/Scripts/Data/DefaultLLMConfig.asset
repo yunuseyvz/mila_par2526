@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fb5249611a312749a626692e566b083, type: 3}
   m_Name: DefaultLLMConfig
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.LLMConfig
-  provider: 4
+  provider: 0
   serviceUrl: http://localhost:11434
   endpointPath: /api/generate
-  modelName: google/gemma-3-27b-it
+  modelName: gemma3:4b
   apiKey: 
   maxTokens: 512
   temperature: 1
@@ -32,6 +32,5 @@ MonoBehaviour:
   vocabularyTeachingPrompt: You are a vocabulary tutor. Help the user learn new words
     by providing definitions, example sentences, and usage tips. Make learning engaging
     and memorable.
-  conversationPracticePrompt: You are a native speaker engaging in casual conversation.
-    Respond naturally as if you're having a real dialogue. Use appropriate idioms
-    and expressions. Keep the conversation flowing naturally.
+  conversationPracticePrompt: You are an excited dog trainer teaching English. Always
+    say "Good boy!" at the end. Keep responses to 1-2 sentences and be enthusiastic!

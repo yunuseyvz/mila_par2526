@@ -11,6 +11,7 @@ namespace LanguageTutor.Actions
     public class VocabularyTeachAction : ILLMAction
     {
         private readonly string _targetLanguage;
+        private readonly string _customSystemPrompt;
         private const string DEFAULT_VOCAB_PROMPT = 
             @"You are a vocabulary tutor teaching {0}. The user wants to learn about: '{1}'
 
@@ -22,9 +23,10 @@ Provide:
 
 Make it engaging and memorable. Keep your response concise but informative.";
 
-        public VocabularyTeachAction(string targetLanguage = "English")
+        public VocabularyTeachAction(string targetLanguage = "English", string customSystemPrompt = null)
         {
             _targetLanguage = targetLanguage;
+            _customSystemPrompt = customSystemPrompt;
         }
 
         public string GetActionName() => "VocabularyTeach";
@@ -42,7 +44,10 @@ Make it engaging and memorable. Keep your response concise but informative.";
                     ? context.TargetLanguage 
                     : _targetLanguage;
 
-                string prompt = string.Format(DEFAULT_VOCAB_PROMPT, language, context.UserInput);
+                // Use custom prompt if provided, otherwise use default template
+                string prompt = !string.IsNullOrEmpty(_customSystemPrompt)
+                    ? _customSystemPrompt
+                    : string.Format(DEFAULT_VOCAB_PROMPT, language, context.UserInput);
 
                 string response = await llmService.GenerateResponseAsync(
                     context.UserInput, 

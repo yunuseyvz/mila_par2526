@@ -11,6 +11,7 @@ namespace LanguageTutor.Actions
     public class GrammarCheckAction : ILLMAction
     {
         private readonly string _targetLanguage;
+        private readonly string _customSystemPrompt;
         private const string DEFAULT_GRAMMAR_PROMPT = 
             @"You are a language tutor focused on grammar correction. The user is learning {0}.
 
@@ -26,9 +27,10 @@ If there are no errors, praise the user and confirm the grammar is correct.
 
 Keep your response concise and clear.";
 
-        public GrammarCheckAction(string targetLanguage = "English")
+        public GrammarCheckAction(string targetLanguage = "English", string customSystemPrompt = null)
         {
             _targetLanguage = targetLanguage;
+            _customSystemPrompt = customSystemPrompt;
         }
 
         public string GetActionName() => "GrammarCheck";
@@ -46,9 +48,11 @@ Keep your response concise and clear.";
                     ? context.TargetLanguage 
                     : _targetLanguage;
 
-                string prompt = string.Format(DEFAULT_GRAMMAR_PROMPT, language, context.UserInput);
+                // Use custom prompt if provided, otherwise use default template
+                string prompt = !string.IsNullOrEmpty(_customSystemPrompt)
+                    ? _customSystemPrompt
+                    : string.Format(DEFAULT_GRAMMAR_PROMPT, language, context.UserInput);
 
-                // Use the system prompt from context if provided, otherwise use our constructed prompt
                 string response = await llmService.GenerateResponseAsync(
                     context.UserInput, 
                     prompt, 

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.TTSConfig
   serviceUrl: http://bh0wto9ow0kusnsf.myfritz.net:7851
   endpointPath: /api/tts-generate-streaming
-  defaultVoice: male_01.wav
+  defaultVoice: female_01.wav
   defaultLanguage: en
   speechRate: 1
   pitch: 1
