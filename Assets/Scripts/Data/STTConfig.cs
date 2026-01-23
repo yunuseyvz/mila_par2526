@@ -9,10 +9,16 @@ namespace LanguageTutor.Data
     [CreateAssetMenu(fileName = "STTConfig", menuName = "Language Tutor/STT Config", order = 3)]
     public class STTConfig : ScriptableObject
     {
-        [Header("Service Configuration")]
-        [Tooltip("Speech-to-text provider (Whisper, Azure, Google, etc.)")]
-        public STTProvider provider = STTProvider.Whisper;
+        [Header("Provider Selection")]
+        [Tooltip("Speech-to-text provider. WhisperLocal runs on device, HuggingFace uses cloud API.")]
+        public STTProvider provider = STTProvider.HuggingFace;
 
+        [Header("Authentication (for Cloud Providers)")]
+        [Tooltip("API Key for cloud providers (HuggingFace, Azure, Google, AWS). Leave empty for local Whisper.")]
+        [TextArea(1, 3)]
+        public string apiKey = "";
+
+        [Header("Language Settings")]
         [Tooltip("Default language code for transcription (e.g., 'en', 'de', 'es')")]
         public string defaultLanguage = "en";
 
@@ -52,19 +58,37 @@ namespace LanguageTutor.Data
         [Range(0, 5)]
         public int maxRetries = 2;
 
-        [Header("Whisper-Specific Settings")]
-        [Tooltip("Whisper model size (tiny, base, small, medium, large)")]
+        [Header("Whisper Model Settings")]
+        [Tooltip("For HuggingFace: Model name (e.g., 'openai/whisper-large-v3-turbo'). For Local: model size (tiny, base, small, medium, large)")]
+        public string whisperModelName = "openai/whisper-large-v3-turbo";
+
+        [Tooltip("For local Whisper: Model size (tiny, base, small, medium, large). Ignored for cloud providers.")]
         public string whisperModelSize = "base";
 
-        [Tooltip("Enable translation to English")]
+        [Tooltip("Enable translation to English (if supported by provider)")]
         public bool whisperTranslateToEnglish = false;
     }
 
+    /// <summary>
+    /// Available STT providers.
+    /// WhisperLocal: Runs Whisper on device (slow on Quest, fast on PC with GPU)
+    /// HuggingFace: Uses HuggingFace Inference API (requires API key, fast on any device)
+    /// </summary>
     public enum STTProvider
     {
-        Whisper,
+        [Tooltip("Local on-device Whisper using Whisper.Unity package")]
+        WhisperLocal,
+        
+        [Tooltip("HuggingFace Inference API (Whisper models via cloud)")]
+        HuggingFace,
+        
+        [Tooltip("Azure Speech Services (not yet implemented)")]
         Azure,
+        
+        [Tooltip("Google Cloud Speech-to-Text (not yet implemented)")]
         Google,
+        
+        [Tooltip("AWS Transcribe (not yet implemented)")]
         AWS
     }
 }

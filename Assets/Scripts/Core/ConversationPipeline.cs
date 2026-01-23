@@ -1,7 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
-using LanguageTutor.Services;
+using LanguageTutor.Services.STT;
+using LanguageTutor.Services.TTS;
 using LanguageTutor.Actions;
 
 namespace LanguageTutor.Core

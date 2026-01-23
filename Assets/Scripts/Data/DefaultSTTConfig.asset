@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: DefaultSTTConfig
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.STTConfig
   provider: 0
+  apiKey: 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
   defaultLanguage: en
   maxRecordingDuration: 30
   sampleRate: 44100
@@ -23,5 +24,6 @@ MonoBehaviour:
   enablePronunciationAssessment: 0
   timeoutSeconds: 30
   maxRetries: 2
+  whisperModelName: openai/whisper-large-v3-turbo
   whisperModelSize: base
   whisperTranslateToEnglish: 0

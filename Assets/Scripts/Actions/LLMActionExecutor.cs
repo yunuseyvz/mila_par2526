@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using LanguageTutor.Services;
+using LanguageTutor.Services.LLM;
 using UnityEngine;
 
 namespace LanguageTutor.Actions

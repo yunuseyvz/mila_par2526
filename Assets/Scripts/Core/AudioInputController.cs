@@ -116,7 +116,7 @@ namespace LanguageTutor.Core
                 Debug.LogError($"[AudioInputController] Failed to stop recording: {ex.Message}");
                 OnRecordingError?.Invoke($"Failed to stop recording: {ex.Message}");
                 _isRecording = false;
-            }
+            } 
         }
 
         /// <summary>

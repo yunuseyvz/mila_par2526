@@ -1,6 +1,8 @@
 using UnityEngine;
 using Whisper;
-using LanguageTutor.Services;
+using LanguageTutor.Services.LLM;
+using LanguageTutor.Services.STT;
+using LanguageTutor.Services.TTS;
 using LanguageTutor.Actions;
 using LanguageTutor.Data;
 using LanguageTutor.UI;
@@ -42,6 +44,9 @@ namespace LanguageTutor.Core
         // Current Action
         private ILLMAction _currentAction;
 
+        // Last TTS Audio for Replay
+        private AudioClip _lastTTSClip;
+
         // State
         private bool _isProcessing;
 
@@ -76,9 +81,10 @@ namespace LanguageTutor.Core
                 return;
             }
 
-            if (whisperManager == null)
+            // WhisperManager is only required for local Whisper provider
+            if (STTServiceFactory.RequiresWhisperManager(sttConfig.provider) && whisperManager == null)
             {
-                Debug.LogError("[NPCController] WhisperManager is not assigned!");
+                Debug.LogError("[NPCController] WhisperManager is required for WhisperLocal provider! Either assign it or switch to HuggingFace provider in STTConfig.");
                 enabled = false;
                 return;
             }
@@ -86,9 +92,9 @@ namespace LanguageTutor.Core
             // Initialize services
             _llmService = LLMServiceFactory.CreateService(llmConfig, this);
             _ttsService = new AllTalkService(ttsConfig, this);
-            _sttService = new WhisperService(sttConfig, whisperManager);
+            _sttService = STTServiceFactory.CreateService(sttConfig, this, whisperManager);
 
-            Debug.Log($"[NPCController] Services initialized - LLM: {_llmService.GetModelName()}, TTS: {ttsConfig.defaultVoice}");
+            Debug.Log($"[NPCController] Services initialized - LLM: {_llmService.GetModelName()}, TTS: {ttsConfig.defaultVoice}, STT: {sttConfig.provider}");
         }
 
         /// <summary>
@@ -238,6 +244,7 @@ namespace LanguageTutor.Core
                 if (result.TTSAudioClip != null && conversationConfig.autoPlayTTS)
                 {
                     Debug.Log("[NPCController] Playing TTS audio");
+                    _lastTTSClip = result.TTSAudioClip; // Store for replay
                     npcView.PlayAudio(result.TTSAudioClip);
                     npcView.SetSpeakingState();
                     
@@ -367,6 +374,7 @@ namespace LanguageTutor.Core
         public void ResetConversation()
         {
             _conversationPipeline.ResetConversation();
+            _lastTTSClip = null;
             npcView.ClearSubtitle();
             npcView.ShowStatusMessage("Conversation reset");
         }
@@ -377,6 +385,35 @@ namespace LanguageTutor.Core
         public ConversationSummary GetConversationSummary()
         {
             return _conversationHistory.GetSummary();
+        }
+
+        public void SetTTSSpeed(float speed)
+        {
+            if (_ttsService != null)
+            {
+                _ttsService.SetSpeed(speed);
+            }
+        }
+
+        /// <summary>
+        /// Replay the last generated TTS audio.
+        /// </summary>
+        public void ReplayLastMessage()
+        {
+            if (_lastTTSClip != null)
+            {
+                Debug.Log("[NPCController] Replaying last TTS audio");
+                npcView.PlayAudio(_lastTTSClip);
+                npcView.SetSpeakingState();
+                
+                if (avatarAnimationController != null)
+                    avatarAnimationController.SetTalking();
+            }
+            else
+            {
+                Debug.LogWarning("[NPCController] No last TTS clip to replay");
+                npcView.ShowStatusMessage("No audio to replay");
+            }
         }
 
         #endregion
