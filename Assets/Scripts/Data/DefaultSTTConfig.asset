@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DefaultSTTConfig
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.STTConfig
   provider: 0
-  apiKey: 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
+  apiKey: 
   defaultLanguage: en
   maxRecordingDuration: 30
   sampleRate: 44100
