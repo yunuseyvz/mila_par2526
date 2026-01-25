@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: DefaultLLMConfig
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.LLMConfig
   provider: 0
-  serviceUrl: http://localhost:11434
-  endpointPath: /api/generate
-  modelName: gemma3:4b
+  ollamaServiceUrl: http://127.0.0.1:11434
+  ollamaEndpointPath: /api/generate
+  ollamaModelName: gemma3:1b
+  huggingFaceApiUrl: https://router.huggingface.co/v1/chat/completions
+  huggingFaceModelName: google/gemma-3-27b-it
+  geminiApiUrl: https://generativelanguage.googleapis.com/v1beta
+  geminiModelName: gemini-pro
   apiKey: 
   maxTokens: 512
   temperature: 1

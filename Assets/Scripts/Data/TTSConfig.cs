@@ -6,19 +6,74 @@ namespace LanguageTutor.Data
     /// Configuration for Text-to-Speech service.
     /// Create via: Assets -> Create -> Language Tutor -> TTS Config
     /// </summary>
+    /// <summary>
+    /// TTS provider types.
+    /// </summary>
+    public enum TTSProvider
+    {
+        AllTalk,
+        HuggingFace
+    }
+
     [CreateAssetMenu(fileName = "TTSConfig", menuName = "Language Tutor/TTS Config", order = 2)]
     public class TTSConfig : ScriptableObject
     {
-        [Header("Service Configuration")]
-        [Tooltip("Base URL for the TTS service (e.g., http://127.0.0.1:7851)")]
-        public string serviceUrl = "http://127.0.0.1:7851";
+        [Header("Provider Selection")]
+        [Tooltip("Choose the TTS provider to use")]
+        public TTSProvider provider = TTSProvider.AllTalk;
 
-        [Tooltip("API endpoint path (e.g., /api/tts-generate for AllTalk)")]
-        public string endpointPath = "/api/tts-generate";
+        [Header("═══════════ LOCAL SERVICES (AllTalk) ═══════════")]
+        [Tooltip("Base URL for local AllTalk service")]
+        public string allTalkServiceUrl = "http://127.0.0.1:7851";
+
+        [Tooltip("API endpoint path for AllTalk")]
+        public string allTalkEndpointPath = "/api/tts-generate";
+
+        [Tooltip("Voice file for AllTalk (e.g., male_01.wav)")]
+        public string allTalkVoice = "male_01.wav";
+
+        [Header("═══════════ API SERVICES ═══════════")]
+        [Space(10)]
+        [Header("HuggingFace API")]
+        [Tooltip("HuggingFace TTS API URL (or router URL like https://router.huggingface.co/fal-ai/fal-ai/kokoro/american-english)")]
+        public string huggingFaceApiUrl = "https://router.huggingface.co/fal-ai/fal-ai/kokoro/american-english";
+
+        [Header("Authentication")]
+        [Tooltip("API Key for HuggingFace API. Leave empty for local AllTalk.")]
+        [TextArea(1, 3)]
+        public string apiKey = "";
+
+        // Backward compatibility properties
+        public string serviceUrl
+        {
+            get
+            {
+                return provider switch
+                {
+                    TTSProvider.AllTalk => allTalkServiceUrl,
+                    TTSProvider.HuggingFace => huggingFaceApiUrl,
+                    _ => allTalkServiceUrl
+                };
+            }
+        }
+
+        public string endpointPath
+        {
+            get
+            {
+                return provider == TTSProvider.AllTalk ? allTalkEndpointPath : "";
+            }
+        }
+
+        public string defaultVoice
+        {
+            get
+            {
+                return provider == TTSProvider.AllTalk ? allTalkVoice : "default";
+            }
+        }
 
         [Header("Voice Settings")]
-        [Tooltip("Default voice to use for speech synthesis")]
-        public string defaultVoice = "male_01.wav";
 
         [Tooltip("Default language code (e.g., 'en', 'de', 'es', 'fr')")]
         public string defaultLanguage = "en";

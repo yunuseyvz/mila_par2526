@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 395ab87d31790394fbf1b1a67b85f3ee, type: 3}
   m_Name: DefaultTTSConfig
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.TTSConfig
-  serviceUrl: http://bh0wto9ow0kusnsf.myfritz.net:7851
-  endpointPath: /api/tts-generate-streaming
-  defaultVoice: female_01.wav
+  provider: 0
+  allTalkServiceUrl: http://127.0.0.1:7851
+  allTalkEndpointPath: /api/tts-generate
+  allTalkVoice: male_01.wav
+  huggingFaceApiUrl: https://router.huggingface.co/fal-ai/fal-ai/kokoro/american-english
+  apiKey: 
   defaultLanguage: en
   speechRate: 1
   pitch: 1

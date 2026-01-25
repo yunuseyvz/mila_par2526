@@ -25,20 +25,78 @@ namespace LanguageTutor.Data
         [Tooltip("Choose the LLM provider to use")]
         public LLMProvider provider = LLMProvider.Ollama;
 
-        [Header("Service Configuration")]
-        [Tooltip("Base URL for the LLM service (e.g., http://127.0.0.1:11434 for Ollama)")]
-        public string serviceUrl = "http://127.0.0.1:11434";
+        [Header("═══════════ LOCAL SERVICES (Ollama) ═══════════")]
+        [Tooltip("Base URL for local Ollama service")]
+        public string ollamaServiceUrl = "http://127.0.0.1:11434";
 
-        [Tooltip("API endpoint path (e.g., /api/generate for Ollama)")]
-        public string endpointPath = "/api/generate";
+        [Tooltip("API endpoint path for Ollama")]
+        public string ollamaEndpointPath = "/api/generate";
 
-        [Tooltip("Model name to use (e.g., llama3, gpt-4, gemini-pro, etc.)")]
-        public string modelName = "llama3";
+        [Tooltip("Local Ollama model name (e.g., llama3, mistral)")]
+        public string ollamaModelName = "llama3";
+
+        [Header("═══════════ API SERVICES ═══════════")]
+        [Space(10)]
+        [Header("HuggingFace API")]
+        [Tooltip("HuggingFace API URL (e.g., https://router.huggingface.co/v1/chat/completions)")]
+        public string huggingFaceApiUrl = "https://router.huggingface.co/v1/chat/completions";
+
+        [Tooltip("HuggingFace model name (e.g., meta-llama/Llama-3-70b-chat-hf)")]
+        public string huggingFaceModelName = "google/gemma-3-27b-it";
+
+        [Space(10)]
+        [Header("Gemini API")]
+        [Tooltip("Gemini API URL")]
+        public string geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta";
+
+        [Tooltip("Gemini model name (e.g., gemini-pro)")]
+        public string geminiModelName = "gemini-pro";
 
         [Header("Authentication")]
-        [Tooltip("API Key for cloud providers (Gemini, OpenAI, Azure). Leave empty for local Ollama.")]
+        [Tooltip("API Key for cloud providers (HuggingFace, Gemini, OpenAI). Leave empty for local Ollama.")]
         [TextArea(1, 3)]
         public string apiKey = "";
+
+        // Backward compatibility properties
+        public string serviceUrl
+        {
+            get
+            {
+                return provider switch
+                {
+                    LLMProvider.Ollama => ollamaServiceUrl,
+                    LLMProvider.HuggingFace => huggingFaceApiUrl,
+                    LLMProvider.Gemini => geminiApiUrl,
+                    _ => ollamaServiceUrl
+                };
+            }
+        }
+
+        public string endpointPath
+        {
+            get
+            {
+                return provider switch
+                {
+                    LLMProvider.Ollama => ollamaEndpointPath,
+                    _ => ""
+                };
+            }
+        }
+
+        public string modelName
+        {
+            get
+            {
+                return provider switch
+                {
+                    LLMProvider.Ollama => ollamaModelName,
+                    LLMProvider.HuggingFace => huggingFaceModelName,
+                    LLMProvider.Gemini => geminiModelName,
+                    _ => ollamaModelName
+                };
+            }
+        }
 
         [Header("Request Settings")]
         [Tooltip("Maximum number of tokens in the response")]

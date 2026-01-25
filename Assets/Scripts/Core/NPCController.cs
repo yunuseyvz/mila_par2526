@@ -76,19 +76,19 @@ namespace LanguageTutor.Core
                 return;
             }
 
-            if (whisperManager == null)
+            if (whisperManager == null && sttConfig.provider == STTProvider.Whisper)
             {
-                Debug.LogError("[NPCController] WhisperManager is not assigned!");
+                Debug.LogError("[NPCController] WhisperManager is not assigned but Whisper STT provider is selected!");
                 enabled = false;
                 return;
             }
 
             // Initialize services
             _llmService = LLMServiceFactory.CreateService(llmConfig, this);
-            _ttsService = new AllTalkService(ttsConfig, this);
+            _ttsService = TTSServiceFactory.CreateService(ttsConfig, this);
             _sttService = new WhisperService(sttConfig, whisperManager);
 
-            Debug.Log($"[NPCController] Services initialized - LLM: {_llmService.GetModelName()}, TTS: {ttsConfig.defaultVoice}");
+            Debug.Log($"[NPCController] Services initialized - LLM: {_llmService.GetModelName()}, TTS: {ttsConfig.provider}, STT: {sttConfig.provider}");
         }
 
         /// <summary>
