@@ -58,8 +58,9 @@ namespace LanguageTutor.Core
             SetDefaultAction();
 
             npcView.SetIdleState();
+            // Play greeting animation when game starts
             if (avatarAnimationController != null)
-                avatarAnimationController.SetIdle();
+                avatarAnimationController.PlayGreeting();
             Debug.Log("[NPCController] Initialized successfully");
         }
 

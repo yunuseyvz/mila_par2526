@@ -13,8 +13,10 @@ namespace LanguageTutor.UI
     public class NPCView : MonoBehaviour
     {
         [Header("UI Components")]
-        [SerializeField] private TextMeshProUGUI subtitleText;
-        [SerializeField] private TextMeshProUGUI modeText; // Optional: for status messages
+        [SerializeField] private ScrollingSubtitles scrollingSubtitles;
+        [SerializeField] private EventLog eventLog;
+        [SerializeField] private TextMeshProUGUI subtitleText; // Legacy - kept for backward compatibility
+        [SerializeField] private TextMeshProUGUI statusText; // Displays current system status
         [SerializeField] private Button talkButton;
         [SerializeField] private Image statusIndicator;
 
@@ -44,8 +46,11 @@ namespace LanguageTutor.UI
 
         private void ValidateComponents()
         {
-            if (subtitleText == null)
-                Debug.LogError("[NPCView] SubtitleText is not assigned!");
+            if (scrollingSubtitles == null && subtitleText == null)
+                Debug.LogWarning("[NPCView] Neither ScrollingSubtitles nor SubtitleText is assigned! Subtitle display will not work.");
+            
+            if (eventLog == null)
+                Debug.LogWarning("[NPCView] EventLog is not assigned! Events will not be logged.");
             
             if (audioSource == null)
                 Debug.LogError("[NPCView] AudioSource is not assigned!");
@@ -59,33 +64,59 @@ namespace LanguageTutor.UI
         /// </summary>
         public void ShowUserMessage(string message)
         {
-            Debug.Log($"[NPCView] ShowUserMessage called. History enabled: {showConversationHistory}, Message: {message}");
-            if (showConversationHistory)
+            Debug.Log($"[NPCView] ShowUserMessage called. Message: {message}");
+            
+            // Log to event log
+            if (eventLog != null)
             {
-                AddToConversationHistory($"<color=blue>Player:</color> {message}");
+                eventLog.LogInfo($"User said: {message}");
+            }
+            
+            // Use new scrolling subtitle system if available
+            if (scrollingSubtitles != null)
+            {
+                scrollingSubtitles.AddUserMessage(message);
+            }
+            // Fallback to legacy system
+            else if (showConversationHistory)
+            {
+                AddToConversationHistory($"<color=blue>User:</color> {message}");
                 UpdateSubtitle();
             }
             else
             {
-                _currentSubtitle = $"<color=blue>Player:</color> {message}";
+                _currentSubtitle = $"<color=blue>User:</color> {message}";
                 UpdateSubtitle();
             }
         }
 
         /// <summary>
-        /// Display NPC's response.
+        /// Display tutor's response.
         /// </summary>
         public void ShowNPCMessage(string message)
         {
-            Debug.Log($"[NPCView] ShowNPCMessage called. History enabled: {showConversationHistory}, Message: {message}");
-            if (showConversationHistory)
+            Debug.Log($"[NPCView] ShowNPCMessage called. Message: {message}");
+            
+            // Log to event log
+            if (eventLog != null)
             {
-                AddToConversationHistory($"<color=green>NPC:</color> {message}");
+                eventLog.LogInfo($"Tutor said: {message}");
+            }
+            
+            // Use new scrolling subtitle system if available
+            if (scrollingSubtitles != null)
+            {
+                scrollingSubtitles.AddTutorMessage(message);
+            }
+            // Fallback to legacy system
+            else if (showConversationHistory)
+            {
+                AddToConversationHistory($"<color=green>Tutor:</color> {message}");
                 UpdateSubtitle();
             }
             else
             {
-                _currentSubtitle = $"<color=green>NPC:</color> {message}";
+                _currentSubtitle = $"<color=green>Tutor:</color> {message}";
                 UpdateSubtitle();
             }
         }
@@ -95,10 +126,21 @@ namespace LanguageTutor.UI
         /// </summary>
         public void ShowStatusMessage(string message)
         {
-            // If modeText is assigned, use it for status
-            if (modeText != null)
+            // Don't log every status message to event log - too verbose
+            // Only important events are logged from specific methods
+            
+            // If statusText is assigned, use it for status
+            if (statusText != null)
             {
-                modeText.text = $"<color=yellow>{message}</color>";
+                statusText.text = message;
+            }
+            
+            // Also show in scrolling subtitles if available (non-intrusive)
+            if (scrollingSubtitles != null && showStatusInConversation)
+            {
+                // Don't add every status update to avoid clutter
+                // Only add significant status messages
+                // scrollingSubtitles.AddStatusMessage(message);
             }
             else if (showStatusInConversation)
             {
@@ -114,15 +156,28 @@ namespace LanguageTutor.UI
         /// </summary>
         public void ShowErrorMessage(string error)
         {
-            if (showConversationHistory)
+            // Log errors to event log only, not to subtitles
+            if (eventLog != null)
             {
-                AddToConversationHistory($"<color=red>Error:</color> {error}");
-                UpdateSubtitle();
+                eventLog.LogError(error);
             }
             else
             {
-                _currentSubtitle = $"<color=red>Error:</color> {error}";
-                UpdateSubtitle();
+                // Fallback to subtitle if no event log
+                if (scrollingSubtitles != null)
+                {
+                    scrollingSubtitles.AddErrorMessage(error);
+                }
+                else if (showConversationHistory)
+                {
+                    AddToConversationHistory($"<color=red>Error:</color> {error}");
+                    UpdateSubtitle();
+                }
+                else
+                {
+                    _currentSubtitle = $"<color=red>Error:</color> {error}";
+                    UpdateSubtitle();
+                }
             }
             SetStatusColor(errorColor);
         }
@@ -132,23 +187,30 @@ namespace LanguageTutor.UI
         /// </summary>
         public void ClearSubtitle()
         {
+            // Clear new scrolling subtitle system
+            if (scrollingSubtitles != null)
+            {
+                scrollingSubtitles.ClearSubtitles();
+            }
+            
+            // Clear legacy system
             _currentSubtitle = string.Empty;
             _conversationText = string.Empty;
             _conversationHistory.Clear();
             UpdateSubtitle();
-            if (modeText != null)
+            if (statusText != null)
             {
-                modeText.text = string.Empty;
+                statusText.text = string.Empty;
             }
         }
 
         /// <summary>
-        /// Add a line to the conversation history.
+        /// Add a line to the conversation history (legacy system).
         /// </summary>
         private void AddToConversationHistory(string line)
         {
             _conversationHistory.Add(line);
-            Debug.Log($"[NPCView] Added to history. Total messages: {_conversationHistory.Count}");
+            Debug.Log($"[NPCView] Added to legacy history. Total messages: {_conversationHistory.Count}");
             
             // Keep only the last N lines
             if (_conversationHistory.Count > maxConversationLines)
@@ -180,18 +242,28 @@ namespace LanguageTutor.UI
             if (audioSource == null)
             {
                 Debug.LogError("[NPCView] Cannot play audio - AudioSource is null! Make sure AudioSource component is assigned.");
+                if (eventLog != null)
+                {
+                    eventLog.LogError("Audio playback failed - AudioSource not assigned");
+                }
                 return;
             }
             
             if (clip == null)
             {
                 Debug.LogError("[NPCView] Cannot play audio - AudioClip is null!");
+                if (eventLog != null)
+                {
+                    eventLog.LogError("Audio playback failed - AudioClip is null");
+                }
                 return;
             }
 
             Debug.Log($"[NPCView] Playing audio clip: {clip.name}, length: {clip.length}s, samples: {clip.samples}, channels: {clip.channels}, frequency: {clip.frequency}");
             Debug.Log($"[NPCView] Audio Source - Volume: {audioSource.volume}, Mute: {audioSource.mute}, Spatial Blend: {audioSource.spatialBlend}");
             Debug.Log($"[NPCView] Unity Audio - Sample Rate: {AudioSettings.outputSampleRate}, Speaker Mode: {AudioSettings.speakerMode}");
+            
+            // Audio playback logged separately - don't duplicate here
             
             audioSource.clip = clip;
             audioSource.Play();
@@ -261,6 +333,10 @@ namespace LanguageTutor.UI
         /// </summary>
         public void SetListeningState()
         {
+            if (eventLog != null)
+            {
+                eventLog.LogSystem("Started listening for user input");
+            }
             ShowStatusMessage("Listening...");
             SetStatusColor(listeningColor);
             SetButtonText("Stop");
@@ -271,6 +347,7 @@ namespace LanguageTutor.UI
         /// </summary>
         public void SetProcessingState(string stage)
         {
+            // Don't log processing stages - too verbose
             ShowStatusMessage(stage);
             SetStatusColor(processingColor);
             SetButtonInteractable(false);
@@ -281,7 +358,8 @@ namespace LanguageTutor.UI
         /// </summary>
         public void SetSpeakingState()
         {
-            ShowStatusMessage("NPC is speaking...");
+            // Don't log - audio playback is already logged
+            ShowStatusMessage("Tutor is speaking...");
             SetStatusColor(speakingColor);
         }
 
@@ -290,6 +368,8 @@ namespace LanguageTutor.UI
         /// </summary>
         public void SetIdleState()
         {
+            // Don't log every time we return to idle - too verbose
+            ShowStatusMessage("Ready");
             SetStatusColor(idleColor);
             SetButtonInteractable(true);
             SetButtonText("Talk");

@@ -15,6 +15,7 @@ namespace LanguageTutor.Core
         [SerializeField] private string idleTrigger = "Idle";
         [SerializeField] private string thinkingTrigger = "Thinking";
         [SerializeField] private string talkingTrigger = "Talking";
+        [SerializeField] private string greetingTrigger = "Greeting";
 
         [Header("Animation State Names (Optional)")]
         [SerializeField] private string idleStateName = "Idle";
@@ -81,6 +82,19 @@ namespace LanguageTutor.Core
                 animator.SetTrigger(talkingTrigger);
                 _currentState = AnimationState.Talking;
                 Debug.Log("[AvatarAnimationController] Animation set to: Talking");
+            }
+        }
+
+        /// <summary>
+        /// Play greeting animation.
+        /// Used when the character starts up or greets the user.
+        /// </summary>
+        public void PlayGreeting()
+        {
+            if (animator != null)
+            {
+                animator.SetTrigger(greetingTrigger);
+                Debug.Log("[AvatarAnimationController] Playing greeting animation");
             }
         }
 
