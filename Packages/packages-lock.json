@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.coplaydev.unity-mcp": {
+      "version": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.2"
+      },
+      "hash": "6b1c2c97c436feaa61acf030bc03c1e6afe680ba"
+    },
     "com.meta.xr.mrutilitykit": {
       "version": "83.0.1",
       "depth": 1,
