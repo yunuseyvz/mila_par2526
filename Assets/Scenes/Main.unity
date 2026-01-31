@@ -84958,7 +84958,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85eaa0bd1ae44ad44a0e63415cd1d96c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRButtonInput
-  talkButton: {fileID: 0}
+  talkButton: {fileID: 1917642231}
 --- !u!114 &1924949633
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84998,10 +84998,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e999196bff1224f88a05863b63afff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Core.NPCController
-  llmConfig: {fileID: 11400000, guid: c8347c042f2fa374e813dd146c88d8e2, type: 2}
-  ttsConfig: {fileID: 11400000, guid: bdc4a25971d8bf04d80b8f2ac7566d0a, type: 2}
-  sttConfig: {fileID: 11400000, guid: eb31903ea192c7644b761917c1aab09c, type: 2}
-  conversationConfig: {fileID: 11400000, guid: 46eaf9c14c3c4b04e99eb0711976e5ba, type: 2}
+  llmConfig: {fileID: 11400000, guid: da5da16df9d5c1b43a53ee24aab15c48, type: 2}
+  ttsConfig: {fileID: 11400000, guid: 969f0c65f94a485499460b1a28381ca1, type: 2}
+  sttConfig: {fileID: 11400000, guid: 66944d1858adc6b40a8cce152a6ba7c9, type: 2}
+  conversationConfig: {fileID: 11400000, guid: 056569cad107d884a9399416aa1f0678, type: 2}
   whisperManager: {fileID: 774315166}
   npcView: {fileID: 1924949633}
   avatarAnimationController: {fileID: 1924949637}
