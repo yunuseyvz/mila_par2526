@@ -92,10 +92,10 @@ namespace LanguageTutor.Core
 
             // Initialize services
             _llmService = LLMServiceFactory.CreateService(llmConfig, this);
-            _ttsService = new AllTalkService(ttsConfig, this);
+            _ttsService = TTSServiceFactory.CreateService(ttsConfig, this);
             _sttService = STTServiceFactory.CreateService(sttConfig, this, whisperManager);
 
-            Debug.Log($"[NPCController] Services initialized - LLM: {_llmService.GetModelName()}, TTS: {ttsConfig.defaultVoice}, STT: {sttConfig.provider}");
+            Debug.Log($"[NPCController] Services initialized - LLM: {_llmService.GetModelName()}, TTS: {ttsConfig.provider}, STT: {sttConfig.provider}");
         }
 
         /// <summary>
