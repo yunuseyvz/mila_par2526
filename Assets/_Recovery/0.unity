@@ -2711,24 +2711,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!1 &83523225 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5118954723816089657, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-  m_PrefabInstance: {fileID: 1273285769}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &83523229
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 83523225}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8025c20b2a081841bfde27382b4ea24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.UI.GameModeSelector
-  targetMode: 4
 --- !u!1 &91174595
 GameObject:
   m_ObjectHideFlags: 0
@@ -58617,34 +58599,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1042363243791212267, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1042363243791212267, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1042363243791212267, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 83523229}
-    - target: {fileID: 1042363243791212267, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1042363243791212267, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ActivateMode
-      objectReference: {fileID: 0}
-    - target: {fileID: 1042363243791212267, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: LanguageTutor.UI.GameModeSelector, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 1042363243791212267, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
-      objectReference: {fileID: 0}
     - target: {fileID: 1680284426383318130, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -59867,10 +59821,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6345901854121875349, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
       insertIndex: 1
       addedObject: {fileID: 1039842364}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5118954723816089657, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 83523229}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 71d814cc718e6ea45b6a1a719d081f29, type: 3}
 --- !u!4 &1280587727 stripped
 Transform:

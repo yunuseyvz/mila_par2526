@@ -1,2 +1,18 @@
 fileFormatVersion: 2
 guid: a9e999196bff1224f88a05863b63afff
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - llmConfig: {fileID: 11400000, guid: da5da16df9d5c1b43a53ee24aab15c48, type: 2}
+  - ttsConfig: {fileID: 11400000, guid: 969f0c65f94a485499460b1a28381ca1, type: 2}
+  - sttConfig: {fileID: 11400000, guid: 66944d1858adc6b40a8cce152a6ba7c9, type: 2}
+  - conversationConfig: {fileID: 11400000, guid: 056569cad107d884a9399416aa1f0678, type: 2}
+  - whisperManager: {instanceID: 0}
+  - npcView: {instanceID: 0}
+  - avatarAnimationController: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
