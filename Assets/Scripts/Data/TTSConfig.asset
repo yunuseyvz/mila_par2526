@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 395ab87d31790394fbf1b1a67b85f3ee, type: 3}
+  m_Name: TTSConfig
+  m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.TTSConfig
+  provider: 0
+  allTalkServiceUrl: http://127.0.0.1:7851
+  allTalkEndpointPath: /api/tts-generate
+  allTalkVoice: male_01.wav
+  huggingFaceApiUrl: https://router.huggingface.co/fal-ai/fal-ai/kokoro/american-english
+  apiKey: 
+  defaultLanguage: en
+  speechRate: 1
+  pitch: 1
+  sampleRate: 22050
+  outputFormat: 0
+  timeoutSeconds: 20
+  maxRetries: 2
+  enableCaching: 1
+  maxCacheSize: 50
+  enableTextChunking: 1
+  maxChunkLength: 200

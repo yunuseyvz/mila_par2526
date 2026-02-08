@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using UnityEngine;
 using Whisper;
 using LanguageTutor.Services.LLM;
@@ -322,9 +323,26 @@ namespace LanguageTutor.Core
 
         private void HandleLLMResponseReceived(string response)
         {
+            // In Word Reordering mode, show the scrambled sentence in subtitles
+            // (the response text is already the scrambled version)
             if (conversationConfig.showSubtitles)
             {
                 npcView.ShowNPCMessage(response);
+            }
+
+            // Handle Word Reordering mode — display word bubbles above NPC head
+            if (_currentAction is WordReorderingAction wordAction)
+            {
+                WordReorderingGameController gameController = FindObjectOfType<WordReorderingGameController>();
+                if (gameController != null)
+                {
+                    gameController.DisplayWordReorderingGame(wordAction);
+                    Debug.Log($"[NPCController] Word cloud game triggered — correct sentence: {wordAction.CurrentSentence}");
+                }
+                else
+                {
+                    Debug.LogWarning("[NPCController] WordReorderingGameController not found in scene!");
+                }
             }
         }
 
@@ -364,6 +382,9 @@ namespace LanguageTutor.Core
                 case ActionMode.ConversationPractice:
                     _currentAction = new ConversationPracticeAction("casual conversation", llmConfig.conversationPracticePrompt);
                     break;
+                case ActionMode.WordReordering:
+                    _currentAction = new WordReorderingAction(llmConfig.wordReorderingPrompt);
+                    break;
             }
 
             Debug.Log($"[NPCController] Action mode set to: {mode}");
@@ -393,6 +414,87 @@ namespace LanguageTutor.Core
             if (_ttsService != null)
             {
                 _ttsService.SetSpeed(speed);
+            }
+        }
+
+        /// <summary>
+        /// Set a roleplay scenario for conversation practice mode.
+        /// </summary>
+        public void SetRoleplayScenario(Data.RoleplayScenarioConfig scenario)
+        {
+            if (scenario == null)
+            {
+                Debug.LogWarning("[NPCController] Roleplay scenario is null, using default conversation practice");
+                SetActionMode(ActionMode.ConversationPractice);
+                return;
+            }
+
+            // Create a conversation practice action with the roleplay scenario
+            string scenarioDescription = $"{scenario.aiRole} at {scenario.setting}";
+            if (!string.IsNullOrEmpty(scenario.additionalContext))
+            {
+                scenarioDescription += $". {scenario.additionalContext}";
+            }
+
+            _currentAction = new ConversationPracticeAction(scenarioDescription, scenario.systemPrompt);
+            defaultActionMode = ActionMode.ConversationPractice;
+
+            Debug.Log($"[NPCController] Roleplay scenario set: {scenario.scenarioName} - {scenarioDescription}");
+            
+            // Optionally show a greeting from the AI character
+            if (npcView != null)
+            {
+                npcView.ShowStatusMessage($"Roleplay: {scenario.scenarioName}");
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // Word Reordering helpers (called by WordReorderingGameController)
+        // ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Create a fresh WordReorderingAction using the currently configured prompt.
+        /// </summary>
+        public WordReorderingAction CreateWordReorderingAction()
+        {
+            return new WordReorderingAction(llmConfig.wordReorderingPrompt);
+        }
+
+        /// <summary>
+        /// Execute a word reordering round: send a prompt to the LLM via the action executor,
+        /// process the response, and return success/failure.
+        /// Does NOT play TTS — the game controller handles display.
+        /// </summary>
+        public async Task<bool> ExecuteWordReorderingRoundAsync(WordReorderingAction action, string userPrompt)
+        {
+            if (action == null || _actionExecutor == null)
+                return false;
+
+            try
+            {
+                var context = new LLMActionContext(userPrompt)
+                {
+                    ConversationHistory = _conversationHistory.GetRecentMessages(5),
+                    SystemPrompt = llmConfig.wordReorderingPrompt,
+                    TargetLanguage = conversationConfig.targetLanguage,
+                    UserLevel = conversationConfig.userLevel.ToString()
+                };
+
+                var result = await _actionExecutor.ExecuteAsync(action, context);
+
+                if (result.Success)
+                {
+                    Debug.Log($"[NPCController] Word reordering round generated: {action.CurrentSentence}");
+                    return true;
+                }
+
+                Debug.LogError($"[NPCController] Word reordering generation failed: {result.ErrorMessage}");
+                return false;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[NPCController] Word reordering round error: {ex.Message}");
+                return false;
             }
         }
 
@@ -443,6 +545,7 @@ namespace LanguageTutor.Core
         Chat,
         GrammarCheck,
         VocabularyTeach,
-        ConversationPractice
+        ConversationPractice,
+        WordReordering
     }
 }

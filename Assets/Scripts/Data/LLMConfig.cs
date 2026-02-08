@@ -82,6 +82,10 @@ namespace LanguageTutor.Data
         [TextArea(3, 6)]
         public string conversationPracticePrompt = "You are a native speaker engaging in casual conversation. Respond naturally as if you're having a real dialogue. Use appropriate idioms and expressions. Keep the conversation flowing naturally.";
 
+        [Tooltip("System prompt for word reordering mode")]
+        [TextArea(3, 6)]
+        public string wordReorderingPrompt = "You are a language tutor creating word reordering exercises. Generate a single, grammatically correct sentence in the target language. The sentence should be 4-8 words long and appropriate for the learner's level. Return ONLY the correct sentence, nothing else — no explanations, no translations, no quotation marks, no numbering.";
+
         /// <summary>
         /// Get the full service URL (base + endpoint)
         /// </summary>
