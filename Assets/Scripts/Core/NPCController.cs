@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using Whisper;
@@ -40,7 +41,9 @@ namespace LanguageTutor.Core
         private AudioInputController _audioInput;
         private ConversationPipeline _conversationPipeline;
         private LLMActionExecutor _actionExecutor;
-        private ConversationHistory _conversationHistory;
+        private readonly Dictionary<string, ConversationHistory> _historyByMode = new Dictionary<string, ConversationHistory>();
+        private RoleplayScenarioConfig _activeRoleplayScenario;
+        private string _currentSystemPrompt;
 
         // Current Action
         private ILLMAction _currentAction;
@@ -104,28 +107,24 @@ namespace LanguageTutor.Core
         /// </summary>
         private void InitializeSystems()
         {
-            // Create conversation history
-            _conversationHistory = new ConversationHistory(
-                conversationConfig.maxHistoryLength,
-                conversationConfig.autoSummarizeHistory
-            );
+            var initialHistory = CreateConversationHistory();
 
-            // Create action executor
+            _historyByMode.Clear();
+            _historyByMode[GetHistoryKey(defaultActionMode, null)] = initialHistory;
+
             _actionExecutor = new LLMActionExecutor(
                 _llmService,
                 llmConfig.maxRetries,
                 llmConfig.retryDelaySeconds
             );
 
-            // Create conversation pipeline
             _conversationPipeline = new ConversationPipeline(
                 _sttService,
                 _ttsService,
                 _actionExecutor,
-                _conversationHistory
+                initialHistory
             );
 
-            // Create audio input controller
             _audioInput = new AudioInputController(
                 sttConfig.maxRecordingDuration,
                 sttConfig.sampleRate,
@@ -362,11 +361,73 @@ namespace LanguageTutor.Core
         #region Public API
 
         /// <summary>
+        /// Create a new conversation history instance.
+        /// </summary>
+        private ConversationHistory CreateConversationHistory()
+        {
+            return new ConversationHistory(
+                conversationConfig.maxHistoryLength,
+                conversationConfig.autoSummarizeHistory
+            );
+        }
+
+        private string GetHistoryKey(ActionMode mode, RoleplayScenarioConfig scenario)
+        {
+            if (mode == ActionMode.ConversationPractice && scenario != null)
+            {
+                return $"Roleplay:{scenario.GetInstanceID()}";
+            }
+
+            return mode.ToString();
+        }
+
+        private string GetSystemPromptForMode(ActionMode mode, RoleplayScenarioConfig scenario)
+        {
+            if (mode == ActionMode.ConversationPractice && scenario != null)
+            {
+                return scenario.systemPrompt;
+            }
+
+            switch (mode)
+            {
+                case ActionMode.Chat:
+                    return llmConfig.defaultSystemPrompt;
+                case ActionMode.GrammarCheck:
+                    return llmConfig.grammarCorrectionPrompt;
+                case ActionMode.VocabularyTeach:
+                    return llmConfig.vocabularyTeachingPrompt;
+                case ActionMode.ConversationPractice:
+                    return llmConfig.conversationPracticePrompt;
+                case ActionMode.WordReordering:
+                    return llmConfig.wordReorderingPrompt;
+                default:
+                    return llmConfig.defaultSystemPrompt;
+            }
+        }
+
+        private void ApplyModeContext(ActionMode mode, RoleplayScenarioConfig scenario, string systemPrompt)
+        {
+            _currentSystemPrompt = systemPrompt;
+
+            string key = GetHistoryKey(mode, scenario);
+            if (!_historyByMode.TryGetValue(key, out var history))
+            {
+                history = CreateConversationHistory();
+                _historyByMode[key] = history;
+            }
+
+            _conversationPipeline.SetConversationHistory(history);
+            _conversationPipeline.SetSystemPrompt(systemPrompt);
+            _conversationPipeline.ResetConversation(systemPrompt, true);
+        }
+
+        /// <summary>
         /// Set the current action mode for conversation.
         /// </summary>
         public void SetActionMode(ActionMode mode)
         {
             defaultActionMode = mode;
+            _activeRoleplayScenario = null;
 
             switch (mode)
             {
@@ -387,6 +448,9 @@ namespace LanguageTutor.Core
                     break;
             }
 
+            string systemPrompt = GetSystemPromptForMode(mode, null);
+            ApplyModeContext(mode, null, systemPrompt);
+
             Debug.Log($"[NPCController] Action mode set to: {mode}");
         }
 
@@ -395,7 +459,7 @@ namespace LanguageTutor.Core
         /// </summary>
         public void ResetConversation()
         {
-            _conversationPipeline.ResetConversation();
+            _conversationPipeline.ResetConversation(_currentSystemPrompt, true);
             _lastTTSClip = null;
             npcView.ClearSubtitle();
             npcView.ShowStatusMessage("Conversation reset");
@@ -406,7 +470,7 @@ namespace LanguageTutor.Core
         /// </summary>
         public ConversationSummary GetConversationSummary()
         {
-            return _conversationHistory.GetSummary();
+            return _conversationPipeline.History.GetSummary();
         }
 
         public void SetTTSSpeed(float speed)
@@ -429,6 +493,8 @@ namespace LanguageTutor.Core
                 return;
             }
 
+            _activeRoleplayScenario = scenario;
+
             // Create a conversation practice action with the roleplay scenario
             string scenarioDescription = $"{scenario.aiRole} at {scenario.setting}";
             if (!string.IsNullOrEmpty(scenario.additionalContext))
@@ -439,8 +505,11 @@ namespace LanguageTutor.Core
             _currentAction = new ConversationPracticeAction(scenarioDescription, scenario.systemPrompt);
             defaultActionMode = ActionMode.ConversationPractice;
 
+            string systemPrompt = GetSystemPromptForMode(ActionMode.ConversationPractice, scenario);
+            ApplyModeContext(ActionMode.ConversationPractice, scenario, systemPrompt);
+
             Debug.Log($"[NPCController] Roleplay scenario set: {scenario.scenarioName} - {scenarioDescription}");
-            
+
             // Optionally show a greeting from the AI character
             if (npcView != null)
             {
@@ -474,7 +543,7 @@ namespace LanguageTutor.Core
             {
                 var context = new LLMActionContext(userPrompt)
                 {
-                    ConversationHistory = _conversationHistory.GetRecentMessages(5),
+                    ConversationHistory = _conversationPipeline.GetRecentContextMessages(5),
                     SystemPrompt = llmConfig.wordReorderingPrompt,
                     TargetLanguage = conversationConfig.targetLanguage,
                     UserLevel = conversationConfig.userLevel.ToString()

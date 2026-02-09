@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using LanguageTutor.Services.STT;
 using LanguageTutor.Services.TTS;
+using LanguageTutor.Services.LLM;
 using LanguageTutor.Actions;
 
 namespace LanguageTutor.Core
@@ -16,7 +18,8 @@ namespace LanguageTutor.Core
         private readonly ISTTService _sttService;
         private readonly ITTSService _ttsService;
         private readonly LLMActionExecutor _actionExecutor;
-        private readonly ConversationHistory _conversationHistory;
+        private ConversationHistory _conversationHistory;
+        private string _currentSystemPrompt;
 
         public ConversationHistory History => _conversationHistory;
 
@@ -50,9 +53,9 @@ namespace LanguageTutor.Core
                 // Stage 1: Speech-to-Text
                 OnStageChanged?.Invoke(PipelineStage.Transcribing);
                 Debug.Log("[ConversationPipeline] Stage 1: Transcribing speech...");
-                
+
                 string transcribedText = await _sttService.TranscribeAsync(userAudio);
-                
+
                 if (string.IsNullOrWhiteSpace(transcribedText))
                 {
                     OnPipelineError?.Invoke("Transcription resulted in empty text");
@@ -64,7 +67,7 @@ namespace LanguageTutor.Core
                 result.TranscribedText = transcribedText;
                 OnTranscriptionCompleted?.Invoke(transcribedText);
                 _conversationHistory.AddUserMessage(transcribedText);
-                
+
                 Debug.Log($"[ConversationPipeline] Transcribed: {transcribedText}");
 
                 // Stage 2: LLM Processing
@@ -73,7 +76,8 @@ namespace LanguageTutor.Core
 
                 var context = new LLMActionContext(transcribedText)
                 {
-                    ConversationHistory = _conversationHistory.GetRecentMessages(10)
+                    ConversationHistory = GetRecentContextMessages(10),
+                    SystemPrompt = _currentSystemPrompt
                 };
 
                 var actionResult = await _actionExecutor.ExecuteAsync(action, context);
@@ -89,7 +93,7 @@ namespace LanguageTutor.Core
                 result.LLMResponse = actionResult.ResponseText;
                 OnLLMResponseReceived?.Invoke(actionResult.ResponseText);
                 _conversationHistory.AddAssistantMessage(actionResult.ResponseText);
-                
+
                 Debug.Log($"[ConversationPipeline] LLM Response: {actionResult.ResponseText}");
 
                 // Stage 3: Text-to-Speech
@@ -108,7 +112,7 @@ namespace LanguageTutor.Core
 
                 result.TTSAudioClip = ttsAudio;
                 OnTTSAudioGenerated?.Invoke(ttsAudio);
-                
+
                 Debug.Log($"[ConversationPipeline] TTS audio generated: {ttsAudio.length:F2}s");
 
                 // Success!
@@ -121,7 +125,7 @@ namespace LanguageTutor.Core
                 Debug.LogError($"[ConversationPipeline] Pipeline error: {ex.Message}");
                 OnPipelineError?.Invoke(ex.Message);
                 OnStageChanged?.Invoke(PipelineStage.Error);
-                
+
                 result.Success = false;
                 result.ErrorMessage = ex.Message;
                 return result;
@@ -169,11 +173,60 @@ namespace LanguageTutor.Core
         }
 
         /// <summary>
+        /// Update the active conversation history instance.
+        /// </summary>
+        public void SetConversationHistory(ConversationHistory history)
+        {
+            _conversationHistory = history ?? throw new ArgumentNullException(nameof(history));
+        }
+
+        /// <summary>
+        /// Update the active system prompt for future requests.
+        /// </summary>
+        public void SetSystemPrompt(string systemPrompt)
+        {
+            _currentSystemPrompt = systemPrompt;
+        }
+
+        /// <summary>
+        /// Get recent messages excluding system prompts for LLM context.
+        /// </summary>
+        public List<ConversationMessage> GetRecentContextMessages(int count)
+        {
+            var messages = _conversationHistory.GetRecentMessages(count);
+            return FilterOutSystemMessages(messages);
+        }
+
+        private static List<ConversationMessage> FilterOutSystemMessages(List<ConversationMessage> messages)
+        {
+            if (messages == null || messages.Count == 0)
+            {
+                return new List<ConversationMessage>();
+            }
+
+            var filtered = new List<ConversationMessage>(messages.Count);
+            foreach (var message in messages)
+            {
+                if (message.Role != MessageRole.System)
+                {
+                    filtered.Add(message);
+                }
+            }
+
+            return filtered;
+        }
+
+        /// <summary>
         /// Clear conversation history.
         /// </summary>
-        public void ResetConversation()
+        public void ResetConversation(string systemPrompt = null, bool addSystemMessage = false)
         {
             _conversationHistory.Clear();
+            if (addSystemMessage && !string.IsNullOrWhiteSpace(systemPrompt))
+            {
+                _conversationHistory.AddSystemMessage(systemPrompt);
+            }
+
             Debug.Log("[ConversationPipeline] Conversation reset");
         }
     }
