@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using UnityEngine;
 
@@ -18,6 +19,9 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     [SerializeField] private bool logDiagnostics = true;
     [SerializeField] private LanguageTutor.UI.EventLog eventLog;
     [SerializeField] private float uiLogInterval = 0.5f;
+    [SerializeField] private bool logToFile = true;
+    [SerializeField] private string logFileName = "detections.txt";
+    [SerializeField] private float fileLogInterval = 1.0f;
 
 #if MRUK_INSTALLED
     private ObjectDetectionAgent _agent;
@@ -25,6 +29,8 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     private readonly StringBuilder _logBuilder = new();
     private bool _loggedMissingDeps;
     private float _nextUiLogTime;
+    private float _nextFileLogTime;
+    private string _logFilePath;
 
     private void Awake()
     {
@@ -37,6 +43,15 @@ public class ObjectDetectionListRecorder : MonoBehaviour
             {
                 Debug.LogWarning("[ObjectDetectionListRecorder] EventLog not found in scene.");
             }
+        }
+
+        if (logToFile)
+        {
+            if (string.IsNullOrWhiteSpace(logFileName))
+            {
+                logFileName = "detections.txt";
+            }
+            _logFilePath = Path.Combine(Application.persistentDataPath, logFileName);
         }
     }
 
@@ -111,6 +126,32 @@ public class ObjectDetectionListRecorder : MonoBehaviour
         {
             _nextUiLogTime = Time.time + uiLogInterval;
             eventLog.LogInfo(BuildLog());
+        }
+
+        if (logToFile && Time.time >= _nextFileLogTime)
+        {
+            _nextFileLogTime = Time.time + fileLogInterval;
+            TryAppendToFile(BuildLog());
+        }
+    }
+
+    private void TryAppendToFile(string content)
+    {
+        if (string.IsNullOrWhiteSpace(_logFilePath) || string.IsNullOrWhiteSpace(content))
+        {
+            return;
+        }
+
+        try
+        {
+            File.AppendAllText(_logFilePath, content + System.Environment.NewLine);
+        }
+        catch (Exception e)
+        {
+            if (logDiagnostics)
+            {
+                Debug.LogWarning($"[ObjectDetectionListRecorder] Failed to write log file: {e.Message}");
+            }
         }
     }
 
