@@ -16,17 +16,28 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     [SerializeField] private float duplicateDistanceThreshold = 0.35f;
     [SerializeField] private bool logToConsole = true;
     [SerializeField] private bool logDiagnostics = true;
+    [SerializeField] private LanguageTutor.UI.EventLog eventLog;
+    [SerializeField] private float uiLogInterval = 0.5f;
 
 #if MRUK_INSTALLED
     private ObjectDetectionAgent _agent;
     private ObjectDetectionVisualizer _visualizer;
     private readonly StringBuilder _logBuilder = new();
     private bool _loggedMissingDeps;
+    private float _nextUiLogTime;
 
     private void Awake()
     {
         _agent = GetComponent<ObjectDetectionAgent>();
         _visualizer = GetComponent<ObjectDetectionVisualizer>();
+        if (eventLog == null)
+        {
+            eventLog = FindObjectOfType<LanguageTutor.UI.EventLog>(true);
+            if (logDiagnostics && eventLog == null)
+            {
+                Debug.LogWarning("[ObjectDetectionListRecorder] EventLog not found in scene.");
+            }
+        }
     }
 
     private void Start()
@@ -94,6 +105,12 @@ public class ObjectDetectionListRecorder : MonoBehaviour
         else if (logDiagnostics)
         {
             Debug.Log($"[ObjectDetectionListRecorder] Updated registry. Entries: {registry.Entries.Count}");
+        }
+
+        if (eventLog != null && Time.time >= _nextUiLogTime)
+        {
+            _nextUiLogTime = Time.time + uiLogInterval;
+            eventLog.LogInfo(BuildLog());
         }
     }
 
