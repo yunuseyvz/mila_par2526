@@ -7,7 +7,7 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "6b1c2c97c436feaa61acf030bc03c1e6afe680ba"
+      "hash": "286d0c6df1b8987820e2bce7c9281957c6c9e35f"
     },
     "com.meta.xr.mrutilitykit": {
       "version": "83.0.4",
