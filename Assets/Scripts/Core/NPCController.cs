@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -5,9 +6,11 @@ using Whisper;
 using LanguageTutor.Services.LLM;
 using LanguageTutor.Services.STT;
 using LanguageTutor.Services.TTS;
+using LanguageTutor.Services.Vision;
 using LanguageTutor.Actions;
 using LanguageTutor.Data;
 using LanguageTutor.UI;
+using Meta.XR;
 
 namespace LanguageTutor.Core
 {
@@ -29,6 +32,10 @@ namespace LanguageTutor.Core
         [SerializeField] private NPCView npcView;
         [SerializeField] private AvatarAnimationController avatarAnimationController;
 
+        [Header("Vision / Object Tagging")]
+        [SerializeField] private PassthroughCameraAccess passthroughCameraAccess;
+        [SerializeField] private float objectTaggingCaptureDelaySeconds = 0.5f;
+
         [Header("Action Mode")]
         [SerializeField] private ActionMode defaultActionMode = ActionMode.Chat;
 
@@ -36,6 +43,7 @@ namespace LanguageTutor.Core
         private ILLMService _llmService;
         private ITTSService _ttsService;
         private ISTTService _sttService;
+        private IVisionService _visionService;
 
         // Core Systems
         private AudioInputController _audioInput;
@@ -98,6 +106,7 @@ namespace LanguageTutor.Core
             _llmService = LLMServiceFactory.CreateService(llmConfig, this);
             _ttsService = TTSServiceFactory.CreateService(ttsConfig, this);
             _sttService = STTServiceFactory.CreateService(sttConfig, this, whisperManager);
+            _visionService = new OpenAIVisionService(llmConfig, this);
 
             Debug.Log($"[NPCController] Services initialized - LLM: {_llmService.GetModelName()}, TTS: {ttsConfig.provider}, STT: {sttConfig.provider}");
         }
@@ -230,6 +239,13 @@ namespace LanguageTutor.Core
 
             _isProcessing = true;
 
+            if (defaultActionMode == ActionMode.ObjectTaggingVision)
+            {
+                await HandleObjectTaggingVisionAsync(audioClip);
+                _isProcessing = false;
+                return;
+            }
+
             // Execute the conversation pipeline
             Debug.Log($"[NPCController] Executing pipeline with action: {_currentAction?.GetType().Name}");
             var result = await _conversationPipeline.ExecuteAsync(audioClip, _currentAction);
@@ -358,6 +374,146 @@ namespace LanguageTutor.Core
 
         #endregion
 
+        #region Vision / Object Tagging
+
+        private async Task HandleObjectTaggingVisionAsync(AudioClip audioClip)
+        {
+            if (_visionService == null)
+            {
+                npcView.ShowErrorMessage("Vision service not initialized");
+                return;
+            }
+
+            try
+            {
+                npcView.SetProcessingState("Transcribing...");
+                if (avatarAnimationController != null)
+                    avatarAnimationController.SetThinking();
+
+                string transcribedText = await _conversationPipeline.TranscribeOnlyAsync(audioClip);
+                if (string.IsNullOrWhiteSpace(transcribedText))
+                {
+                    npcView.ShowErrorMessage("Could not understand speech");
+                    return;
+                }
+
+                Debug.Log($"[NPCController] Object Tagging STT: {transcribedText}");
+
+                if (conversationConfig.showSubtitles)
+                {
+                    npcView.ShowUserMessage(transcribedText);
+                }
+
+                _conversationPipeline.History.AddUserMessage(transcribedText);
+
+                npcView.SetProcessingState("Capturing image...");
+                Texture2D capturedTexture = await CapturePassthroughFrameAsync();
+                if (capturedTexture == null)
+                {
+                    npcView.ShowErrorMessage("Failed to capture passthrough frame");
+                    return;
+                }
+
+                string framePath = VisionDebugLogger.SaveFrame(capturedTexture);
+                if (!string.IsNullOrWhiteSpace(framePath))
+                {
+                    Debug.Log($"[NPCController] Captured frame saved: {framePath}");
+                }
+
+                try
+                {
+                    npcView.SetProcessingState("Analyzing image...");
+
+                    string systemPrompt = llmConfig != null
+                        ? llmConfig.objectTaggingVisionPrompt
+                        : "";
+
+                    string responseText = await _visionService.GenerateResponseAsync(transcribedText, capturedTexture, systemPrompt);
+                    if (string.IsNullOrWhiteSpace(responseText))
+                    {
+                        npcView.ShowErrorMessage("Vision model returned an empty response");
+                        return;
+                    }
+
+                    Debug.Log($"[NPCController] VLM response: {responseText}");
+
+                    npcView.ShowNPCMessage(responseText);
+                    _conversationPipeline.History.AddAssistantMessage(responseText);
+
+                    AudioClip ttsAudio = await _conversationPipeline.SynthesizeSpeechOnlyAsync(responseText);
+                    if (ttsAudio != null && conversationConfig.autoPlayTTS)
+                    {
+                        Debug.Log($"[NPCController] TTS ready (Object Tagging): {ttsAudio.length:F2}s");
+                        _lastTTSClip = ttsAudio;
+                        npcView.PlayAudio(ttsAudio);
+                        npcView.SetSpeakingState();
+
+                        if (avatarAnimationController != null)
+                            avatarAnimationController.SetTalking();
+                    }
+                }
+                finally
+                {
+                    Destroy(capturedTexture);
+                }
+            }
+            catch (Exception ex)
+            {
+                npcView.ShowErrorMessage($"Vision request failed: {ex.Message}");
+            }
+        }
+
+        private Task<Texture2D> CapturePassthroughFrameAsync()
+        {
+            var tcs = new TaskCompletionSource<Texture2D>();
+            StartCoroutine(CapturePassthroughFrameCoroutine(tcs));
+            return tcs.Task;
+        }
+
+        private System.Collections.IEnumerator CapturePassthroughFrameCoroutine(TaskCompletionSource<Texture2D> tcs)
+        {
+            if (!TryResolveCameraAccess(out var access) || !access.IsPlaying)
+            {
+                tcs.SetResult(null);
+                yield break;
+            }
+
+            if (objectTaggingCaptureDelaySeconds > 0f)
+            {
+                yield return new WaitForSeconds(objectTaggingCaptureDelaySeconds);
+            }
+
+            yield return new WaitForEndOfFrame();
+
+            var texture = CapturePassthroughFrame(access);
+            tcs.SetResult(texture);
+        }
+
+        private bool TryResolveCameraAccess(out PassthroughCameraAccess access)
+        {
+            access = passthroughCameraAccess ? passthroughCameraAccess : FindAnyObjectByType<PassthroughCameraAccess>();
+            passthroughCameraAccess = access;
+            return access != null;
+        }
+
+        private static Texture2D CapturePassthroughFrame(PassthroughCameraAccess access)
+        {
+            var resolution = access.CurrentResolution;
+            if (resolution == Vector2Int.zero)
+                return null;
+
+            var colors = access.GetColors();
+            if (!colors.IsCreated)
+                return null;
+
+            var texture = new Texture2D(resolution.x, resolution.y, TextureFormat.RGBA32, false);
+            texture.SetPixelData(colors, 0);
+            texture.Apply();
+            return texture;
+        }
+
+        #endregion
+
         #region Public API
 
         /// <summary>
@@ -400,6 +556,8 @@ namespace LanguageTutor.Core
                     return llmConfig.conversationPracticePrompt;
                 case ActionMode.WordReordering:
                     return llmConfig.wordReorderingPrompt;
+                case ActionMode.ObjectTaggingVision:
+                    return llmConfig.objectTaggingVisionPrompt;
                 default:
                     return llmConfig.defaultSystemPrompt;
             }
@@ -445,6 +603,9 @@ namespace LanguageTutor.Core
                     break;
                 case ActionMode.WordReordering:
                     _currentAction = new WordReorderingAction(llmConfig.wordReorderingPrompt);
+                    break;
+                case ActionMode.ObjectTaggingVision:
+                    _currentAction = null;
                     break;
             }
 
@@ -615,6 +776,7 @@ namespace LanguageTutor.Core
         GrammarCheck,
         VocabularyTeach,
         ConversationPractice,
-        WordReordering
+        WordReordering,
+        ObjectTaggingVision
     }
 }

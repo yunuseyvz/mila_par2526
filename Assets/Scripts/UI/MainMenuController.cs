@@ -175,8 +175,8 @@ namespace LanguageTutor.UI
             
             isUpdatingToggles = false;
             
-            npcController.SetActionMode(ActionMode.GrammarCheck);
-            Debug.Log("[MainMenuController] ✏️ Object Tagging Mode activated - Grammar correction");
+            npcController.SetActionMode(ActionMode.ObjectTaggingVision);
+            Debug.Log("[MainMenuController] ✏️ Object Tagging Mode activated - Vision object tagging");
         }
 
         /// <summary>

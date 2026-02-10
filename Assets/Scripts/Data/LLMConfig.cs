@@ -86,6 +86,14 @@ namespace LanguageTutor.Data
         [TextArea(3, 6)]
         public string wordReorderingPrompt = "You are a language tutor creating word reordering exercises. Generate a single, grammatically correct sentence in the target language. The sentence should be 4-8 words long and appropriate for the learner's level. Return ONLY the correct sentence, nothing else — no explanations, no translations, no quotation marks, no numbering.";
 
+        [Header("Vision / Object Tagging")]
+        [Tooltip("Vision model name (e.g., gpt-4o-mini or Qwen/Qwen2.5-VL-32B-Instruct)")]
+        public string visionModelName = "Qwen/Qwen2.5-VL-32B-Instruct";
+
+        [Tooltip("System prompt for object tagging vision mode")]
+        [TextArea(3, 6)]
+        public string objectTaggingVisionPrompt = "You are a vision assistant. The user is pointing at an object in the image. Identify the object and respond with a short answer.";
+
         /// <summary>
         /// Get the full service URL (base + endpoint)
         /// </summary>
