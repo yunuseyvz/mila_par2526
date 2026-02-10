@@ -1,11 +1,11 @@
 {
   "dependencies": {
     "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
-    "com.meta.xr.sdk.all": "83.0.1",
+    "com.meta.xr.sdk.all": "83.0.4",
     "com.unity.2d.enhancers": "1.0.0",
     "com.unity.ai.assistant": "1.5.0-pre.2",
     "com.unity.ai.generators": "1.5.0-pre.2",
-    "com.unity.ai.inference": "2.4.1",
+    "com.unity.ai.inference": "2.2.2",
     "com.unity.ai.navigation": "2.0.9",
     "com.unity.collab-proxy": "2.10.2",
     "com.unity.device-simulator.devices": "1.0.1",
@@ -18,7 +18,8 @@
     "com.unity.timeline": "1.8.9",
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.9",
-    "com.unity.xr.openxr": "1.16.1",
+    "com.unity.xr.meta-openxr": "2.4.0",
+    "com.unity.xr.openxr": "1.16.0",
     "com.whisper.unity": "https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
