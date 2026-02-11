@@ -15,15 +15,17 @@ public class SpellingGameAction : ILLMAction
 private const float SLOT_SPACING = 0.25f;
 private const float BLOCK_SPACING = 0.20f;
 
-// Height: 1.0m (approx table height)
-private const float GAME_HEIGHT = 1.0f;
+    // Height: Slots at distinct height, Blocks higher up
+    private const float SLOT_HEIGHT = 1.5f; 
+    private const float BLOCK_HEIGHT = 1.9f; 
 
-// Depth: Slots in back (0.7m), Blocks in front (0.4m)
-private const float SLOT_DISTANCE = 0.7f;
-private const float BLOCK_DISTANCE = 0.4f;
+    // Depth: Slots in back (0.6m), Blocks in front (0.8m)
+    private const float SLOT_DISTANCE = 0.6f; 
+    private const float BLOCK_DISTANCE = 0.8f; // Further away (User: "deutlich weiter weg")
 
-// Horizontal offset to keep blocks away from UI (left of camera)
-private const float LEFT_OFFSET = 0.4f;
+    // Horizontal offset: Shift everything to the RIGHT (reduced from 0.6f)
+    private const float HORIZONTAL_SHIFT = 0.3f; // More left, but not center (User request: "nicht in die mitte")
+    private const float BLOCK_OFFSET_RANGE = 0.3f;
 
 // Number of extra "wrong" letters
 private const int EXTRA_LETTERS_COUNT = 3;
@@ -39,8 +41,9 @@ private Vector3 SLOT_SCALE = new Vector3(0.14f, 0.02f, 0.14f);
     { 
         "laptop", "lamp", "person", "mouse", "bottle", "screen" 
     };
-private List<LetterSlot> activeSlots = new List<LetterSlot>();
-private bool isGameRunning = false;
+    private List<LetterSlot> activeSlots = new List<LetterSlot>();
+    private List<GameObject> spawnedObjects = new List<GameObject>(); // Track everything for cleanup
+    private bool isGameRunning = false;
 
 public string GetActionName() => "SpellingGame";
 public bool CanExecute(LLMActionContext context) => true;
@@ -72,11 +75,13 @@ public bool CanExecute(LLMActionContext context) => true;
     Vector3 flatForward = new Vector3(cam.forward.x, 0, cam.forward.z).normalized;
     Vector3 flatRight = new Vector3(cam.right.x, 0, cam.right.z).normalized;
 
-    Vector3 slotCenter = cam.position + (flatForward * SLOT_DISTANCE) - (flatRight * LEFT_OFFSET);
-    slotCenter.y = GAME_HEIGHT;
+        // Slots: Shifted RIGHT, slightly further
+        Vector3 slotCenter = cam.position + (flatForward * SLOT_DISTANCE) + (flatRight * HORIZONTAL_SHIFT);
+        slotCenter.y = SLOT_HEIGHT;
 
-    Vector3 blockCenter = cam.position + (flatForward * BLOCK_DISTANCE) - (flatRight * LEFT_OFFSET);
-    blockCenter.y = GAME_HEIGHT;
+        // Blocks: Shifted RIGHT, closer, higher up
+        Vector3 blockCenter = cam.position + (flatForward * BLOCK_DISTANCE) + (flatRight * HORIZONTAL_SHIFT);
+        blockCenter.y = BLOCK_HEIGHT;
 
     // Rotation: Strictly forward (no tilting)
     Quaternion uprightRotation = Quaternion.LookRotation(flatForward, Vector3.up);
@@ -100,10 +105,24 @@ public bool CanExecute(LLMActionContext context) => true;
                 controller.PlaySuccessAnimation();
                 controller.Speak($"Correct! {targetWord} is right!");
             }
+
+            // --- CLEANUP AFTER 10 SECONDS ---
+            await Task.Delay(10000); 
+            CleanupGame();
         }
     }
 
     return LLMActionResult.CreateSuccess("Game Won");
+}
+
+private void CleanupGame()
+{
+    foreach (var obj in spawnedObjects)
+    {
+        if (obj != null) Object.Destroy(obj);
+    }
+    spawnedObjects.Clear();
+    activeSlots.Clear();
 }
 
 private void SpawnSlots(Vector3 center, Vector3 right, Quaternion rotation)
@@ -119,6 +138,7 @@ private void SpawnSlots(Vector3 center, Vector3 right, Quaternion rotation)
         Vector3 pos = startPos + (right * (i * SLOT_SPACING));
         GameObject slot = Object.Instantiate(slotPrefab, pos, rotation);
         slot.transform.localScale = SLOT_SCALE;
+        spawnedObjects.Add(slot);
 
         // FIX: Disable physics to prevent wobbling
         var rb = slot.GetComponent<Rigidbody>();
@@ -161,6 +181,7 @@ private void SpawnScrambledBlocks(Vector3 center, Vector3 right, Quaternion rota
 
         GameObject block = Object.Instantiate(blockPrefab, pos, rotation);
         block.transform.localScale = Vector3.one * BLOCK_SCALE;
+        spawnedObjects.Add(block);
 
         // --- GRAVITY FIX (Standard API) ---
         var rb = block.GetComponent<Rigidbody>();
