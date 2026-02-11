@@ -6,7 +6,7 @@ namespace LanguageTutor.Services.TTS
 {
     /// <summary>
     /// Interface for Text-to-Speech service providers.
-    /// Enables swappable TTS backends (AllTalk, Azure, Google, etc.)
+    /// Enables swappable TTS backends (ElevenLabs, Azure, Google, etc.)
     /// </summary>
     public interface ITTSService
     {
