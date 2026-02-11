@@ -14,7 +14,7 @@ namespace LanguageTutor.Services.STT
     /// </summary>
     public class HuggingFaceSTTService : ISTTService
     {
-        private readonly STTConfig _config;
+        private readonly STTSettings _config;
         private readonly MonoBehaviour _coroutineRunner;
         private bool _isCancelled;
 
@@ -22,14 +22,14 @@ namespace LanguageTutor.Services.STT
         private const string DEFAULT_MODEL = "openai/whisper-large-v3-turbo";
         private const string HUGGINGFACE_INFERENCE_BASE = "https://router.huggingface.co/hf-inference/models/";
 
-        public HuggingFaceSTTService(STTConfig config, MonoBehaviour coroutineRunner)
+        public HuggingFaceSTTService(STTSettings config, MonoBehaviour coroutineRunner)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _coroutineRunner = coroutineRunner ?? throw new ArgumentNullException(nameof(coroutineRunner));
 
             if (string.IsNullOrWhiteSpace(_config.apiKey))
             {
-                Debug.LogWarning("[HuggingFaceSTTService] API key (HF_TOKEN) is not set. Please add your HuggingFace token in the STTConfig.");
+                Debug.LogWarning("[HuggingFaceSTTService] API key (HF_TOKEN) is not set. Please add your HuggingFace token in the LanguageTutorConfig.");
             }
 
             Debug.Log($"[HuggingFaceSTTService] Initialized with model: {GetModelName()}");
@@ -49,7 +49,7 @@ namespace LanguageTutor.Services.STT
                 throw new ArgumentNullException(nameof(audioClip));
 
             if (string.IsNullOrWhiteSpace(_config.apiKey))
-                throw new InvalidOperationException("API key (HF_TOKEN) is required for HuggingFace STT service. Please set it in the STTConfig.");
+                throw new InvalidOperationException("API key (HF_TOKEN) is required for HuggingFace STT service. Please set it in the LanguageTutorConfig.");
 
             _isCancelled = false;
 

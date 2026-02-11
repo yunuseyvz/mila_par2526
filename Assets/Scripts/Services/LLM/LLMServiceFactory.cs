@@ -15,7 +15,7 @@ namespace LanguageTutor.Services.LLM
         /// <param name="config">The LLM configuration</param>
         /// <param name="coroutineRunner">MonoBehaviour to run coroutines</param>
         /// <returns>An ILLMService implementation</returns>
-        public static ILLMService CreateService(LLMConfig config, MonoBehaviour coroutineRunner)
+        public static ILLMService CreateService(LLMSettings config, MonoBehaviour coroutineRunner)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
@@ -23,31 +23,13 @@ namespace LanguageTutor.Services.LLM
             if (coroutineRunner == null)
                 throw new ArgumentNullException(nameof(coroutineRunner));
 
-            switch (config.provider)
+            if (config.provider != LLMProvider.HuggingFace)
             {
-                case LLMProvider.Ollama:
-                    Debug.Log("[LLMServiceFactory] Creating Ollama service");
-                    return new OllamaService(config, coroutineRunner);
-
-                case LLMProvider.Gemini:
-                    Debug.Log("[LLMServiceFactory] Creating Gemini service");
-                    return new GeminiService(config, coroutineRunner);
-
-                case LLMProvider.OpenAI:
-                    Debug.LogWarning("[LLMServiceFactory] OpenAI provider not yet implemented. Falling back to Ollama.");
-                    return new OllamaService(config, coroutineRunner);
-
-                case LLMProvider.Azure:
-                    Debug.LogWarning("[LLMServiceFactory] Azure provider not yet implemented. Falling back to Ollama.");
-                    return new OllamaService(config, coroutineRunner);
-
-                case LLMProvider.HuggingFace:
-                    Debug.Log("[LLMServiceFactory] Creating HuggingFace service");
-                    return new HuggingFaceService(config, coroutineRunner);
-
-                default:
-                    throw new NotSupportedException($"LLM provider '{config.provider}' is not supported");
+                Debug.LogWarning($"[LLMServiceFactory] Provider '{config.provider}' is not supported. Using HuggingFace only.");
             }
+
+            Debug.Log("[LLMServiceFactory] Creating HuggingFace service");
+            return new HuggingFaceService(config, coroutineRunner);
         }
     }
 }

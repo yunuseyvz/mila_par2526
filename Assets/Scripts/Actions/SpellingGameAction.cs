@@ -22,12 +22,15 @@ private const float GAME_HEIGHT = 1.0f;
 private const float SLOT_DISTANCE = 0.7f;
 private const float BLOCK_DISTANCE = 0.4f;
 
+// Horizontal offset to keep blocks away from UI (left of camera)
+private const float LEFT_OFFSET = 0.4f;
+
 // Number of extra "wrong" letters
 private const int EXTRA_LETTERS_COUNT = 3;
 
-// SCALE: Set back to small/handy size (15cm)
-private const float BLOCK_SCALE = 0.15f;
-private Vector3 SLOT_SCALE = new Vector3(0.18f, 0.02f, 0.18f);
+// SCALE: Slightly smaller to reduce overlap with UI
+private const float BLOCK_SCALE = 0.12f;
+private Vector3 SLOT_SCALE = new Vector3(0.14f, 0.02f, 0.14f);
 
 // --- STATE ---
 private string targetWord = "CAT";
@@ -54,10 +57,10 @@ public async Task<LLMActionResult> ExecuteAsync(ILLMService llmService, LLMActio
     Vector3 flatForward = new Vector3(cam.forward.x, 0, cam.forward.z).normalized;
     Vector3 flatRight = new Vector3(cam.right.x, 0, cam.right.z).normalized;
 
-    Vector3 slotCenter = cam.position + (flatForward * SLOT_DISTANCE);
+    Vector3 slotCenter = cam.position + (flatForward * SLOT_DISTANCE) - (flatRight * LEFT_OFFSET);
     slotCenter.y = GAME_HEIGHT;
 
-    Vector3 blockCenter = cam.position + (flatForward * BLOCK_DISTANCE);
+    Vector3 blockCenter = cam.position + (flatForward * BLOCK_DISTANCE) - (flatRight * LEFT_OFFSET);
     blockCenter.y = GAME_HEIGHT;
 
     // Rotation: Strictly forward (no tilting)

@@ -18,7 +18,7 @@ namespace LanguageTutor.Services.STT
         /// <param name="coroutineRunner">MonoBehaviour to run coroutines (required for API-based providers)</param>
         /// <param name="whisperManager">WhisperManager for local Whisper (optional, only needed for local Whisper provider)</param>
         /// <returns>An ISTTService implementation</returns>
-        public static ISTTService CreateService(STTConfig config, MonoBehaviour coroutineRunner, WhisperManager whisperManager = null)
+        public static ISTTService CreateService(STTSettings config, MonoBehaviour coroutineRunner, WhisperManager whisperManager = null)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
@@ -26,37 +26,13 @@ namespace LanguageTutor.Services.STT
             if (coroutineRunner == null)
                 throw new ArgumentNullException(nameof(coroutineRunner));
 
-            switch (config.provider)
+            if (config.provider != STTProvider.HuggingFace)
             {
-                case STTProvider.WhisperLocal:
-                    if (whisperManager == null)
-                    {
-                        Debug.LogError("[STTServiceFactory] WhisperManager is required for local Whisper provider!");
-                        throw new ArgumentNullException(nameof(whisperManager), 
-                            "WhisperManager is required for WhisperLocal provider. Assign it in the Inspector or switch to HuggingFace provider.");
-                    }
-                    Debug.Log("[STTServiceFactory] Creating local Whisper service");
-                    return new WhisperService(config, whisperManager);
-
-                case STTProvider.HuggingFace:
-                    Debug.Log("[STTServiceFactory] Creating HuggingFace STT service");
-                    return new HuggingFaceSTTService(config, coroutineRunner);
-
-                case STTProvider.Azure:
-                    Debug.LogWarning("[STTServiceFactory] Azure STT provider not yet implemented. Falling back to HuggingFace.");
-                    return new HuggingFaceSTTService(config, coroutineRunner);
-
-                case STTProvider.Google:
-                    Debug.LogWarning("[STTServiceFactory] Google STT provider not yet implemented. Falling back to HuggingFace.");
-                    return new HuggingFaceSTTService(config, coroutineRunner);
-
-                case STTProvider.AWS:
-                    Debug.LogWarning("[STTServiceFactory] AWS STT provider not yet implemented. Falling back to HuggingFace.");
-                    return new HuggingFaceSTTService(config, coroutineRunner);
-
-                default:
-                    throw new NotSupportedException($"STT provider '{config.provider}' is not supported");
+                Debug.LogWarning($"[STTServiceFactory] Provider '{config.provider}' is not supported. Using HuggingFace only.");
             }
+
+            Debug.Log("[STTServiceFactory] Creating HuggingFace STT service");
+            return new HuggingFaceSTTService(config, coroutineRunner);
         }
 
         /// <summary>
@@ -64,7 +40,7 @@ namespace LanguageTutor.Services.STT
         /// </summary>
         public static bool RequiresWhisperManager(STTProvider provider)
         {
-            return provider == STTProvider.WhisperLocal;
+            return false;
         }
 
         /// <summary>
@@ -72,10 +48,7 @@ namespace LanguageTutor.Services.STT
         /// </summary>
         public static bool RequiresApiKey(STTProvider provider)
         {
-            return provider == STTProvider.HuggingFace ||
-                   provider == STTProvider.Azure ||
-                   provider == STTProvider.Google ||
-                   provider == STTProvider.AWS;
+            return true;
         }
     }
 }

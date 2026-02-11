@@ -7,10 +7,6 @@ namespace LanguageTutor.Data
     /// </summary>
     public enum LLMProvider
     {
-        Ollama,
-        Gemini,
-        OpenAI,
-        Azure,
         HuggingFace
     }
 
@@ -22,21 +18,21 @@ namespace LanguageTutor.Data
     public class LLMConfig : ScriptableObject
     {
         [Header("Provider Selection")]
-        [Tooltip("Choose the LLM provider to use")]
-        public LLMProvider provider = LLMProvider.Ollama;
+        [Tooltip("Choose the LLM provider to use (HuggingFace only)")]
+        public LLMProvider provider = LLMProvider.HuggingFace;
 
         [Header("Service Configuration")]
-        [Tooltip("Base URL for the LLM service (e.g., http://127.0.0.1:11434 for Ollama)")]
+        [Tooltip("Base URL for legacy services (unused for HuggingFace router)")]
         public string serviceUrl = "http://127.0.0.1:11434";
 
-        [Tooltip("API endpoint path (e.g., /api/generate for Ollama)")]
+        [Tooltip("Endpoint path for legacy services (unused for HuggingFace router)")]
         public string endpointPath = "/api/generate";
 
-        [Tooltip("Model name to use (e.g., llama3, gpt-4, gemini-pro, etc.)")]
-        public string modelName = "llama3";
+        [Tooltip("Model name to use (e.g., google/gemma-3-27b-it)")]
+        public string modelName = "google/gemma-3-27b-it";
 
         [Header("Authentication")]
-        [Tooltip("API Key for cloud providers (Gemini, OpenAI, Azure). Leave empty for local Ollama.")]
+        [Tooltip("API Key for HuggingFace (HF_TOKEN)")]
         [TextArea(1, 3)]
         public string apiKey = "";
 

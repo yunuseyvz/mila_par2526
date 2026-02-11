@@ -1,6 +1,7 @@
 using UnityEngine;
 using LanguageTutor.Core;
 using UnityEngine.UI;
+using LanguageTutor.Data;
 
 namespace LanguageTutor.UI
 {
@@ -10,8 +11,16 @@ namespace LanguageTutor.UI
     /// </summary>
     public class GameModeSelector : MonoBehaviour
     {
-        [Tooltip("The specific action mode this UI element should activate.")]
-        public ActionMode targetMode;
+        [Tooltip("The specific game mode this UI element should activate.")]
+        public ConversationGameMode targetMode;
+
+        /// <summary>
+        /// Activates the selected mode from a Button OnClick event.
+        /// </summary>
+        public void ActivateMode()
+        {
+            ActivateMode(true);
+        }
 
         /// <summary>
         /// Activates the selected mode if the toggle state is true.
@@ -28,7 +37,7 @@ namespace LanguageTutor.UI
             if (controller != null)
             {
                 Debug.Log($"[UI] Toggle active. Switching NPCController mode to: {targetMode}");
-                controller.SetActionMode(targetMode);
+                controller.SetGameMode(targetMode);
             }
             else
             {

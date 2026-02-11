@@ -15,18 +15,18 @@ namespace LanguageTutor.Services.LLM
     /// </summary>
     public class HuggingFaceService : ILLMService
     {
-        private readonly LLMConfig _config;
+        private readonly LLMSettings _config;
         private MonoBehaviour _coroutineRunner;
         private const string HUGGINGFACE_API_BASE = "https://router.huggingface.co/v1/chat/completions";
 
-        public HuggingFaceService(LLMConfig config, MonoBehaviour coroutineRunner)
+        public HuggingFaceService(LLMSettings config, MonoBehaviour coroutineRunner)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _coroutineRunner = coroutineRunner ?? throw new ArgumentNullException(nameof(coroutineRunner));
 
             if (string.IsNullOrWhiteSpace(_config.apiKey))
             {
-                Debug.LogWarning("[HuggingFaceService] API key (HF_TOKEN) is not set. Please add your HuggingFace token in the LLMConfig.");
+                Debug.LogWarning("[HuggingFaceService] API key (HF_TOKEN) is not set. Please add your HuggingFace token in the LanguageTutorConfig.");
             }
         }
 
@@ -43,11 +43,26 @@ namespace LanguageTutor.Services.LLM
                 throw new ArgumentException("Prompt cannot be empty", nameof(prompt));
 
             if (string.IsNullOrWhiteSpace(_config.apiKey))
-                throw new InvalidOperationException("API key (HF_TOKEN) is required for HuggingFace service. Please set it in the LLMConfig.");
+                throw new InvalidOperationException("API key (HF_TOKEN) is required for HuggingFace service. Please set it in the LanguageTutorConfig.");
 
             var tcs = new TaskCompletionSource<string>();
 
             _coroutineRunner.StartCoroutine(SendRequestCoroutine(prompt, systemPrompt, conversationHistory, tcs));
+
+            return await tcs.Task;
+        }
+
+        public async Task<string> GenerateResponseAsync(List<LLMContentPart> contentParts, string systemPrompt, List<ConversationMessage> conversationHistory = null)
+        {
+            if (contentParts == null || contentParts.Count == 0)
+                throw new ArgumentException("Content parts cannot be empty", nameof(contentParts));
+
+            if (string.IsNullOrWhiteSpace(_config.apiKey))
+                throw new InvalidOperationException("API key (HF_TOKEN) is required for HuggingFace service. Please set it in the LanguageTutorConfig.");
+
+            var tcs = new TaskCompletionSource<string>();
+
+            _coroutineRunner.StartCoroutine(SendRequestWithPartsCoroutine(contentParts, systemPrompt, conversationHistory, tcs));
 
             return await tcs.Task;
         }
@@ -77,16 +92,36 @@ namespace LanguageTutor.Services.LLM
         {
             // Build messages array with system prompt and conversation history
             var messages = BuildMessages(prompt, systemPrompt, conversationHistory);
-            
+            yield return SendRequestCoroutine(messages, $"Prompt length: {prompt.Length} chars", tcs);
+        }
+
+        private System.Collections.IEnumerator SendRequestWithPartsCoroutine(
+            List<LLMContentPart> contentParts,
+            string systemPrompt,
+            List<ConversationMessage> conversationHistory,
+            TaskCompletionSource<string> tcs)
+        {
+            var messages = BuildMessages(contentParts, systemPrompt, conversationHistory);
+            yield return SendRequestCoroutine(messages, "Structured content parts", tcs);
+        }
+
+        private System.Collections.IEnumerator SendRequestCoroutine(
+            List<HuggingFaceMessage> messages,
+            string requestInfo,
+            TaskCompletionSource<string> tcs)
+        {
             string modelName = string.IsNullOrEmpty(_config.modelName) ? "google/gemma-3-27b-it" : _config.modelName;
 
-            // Build JSON manually to match HuggingFace API structure with content arrays
             string json = BuildRequestJson(modelName, messages, _config.temperature, _config.maxTokens);
             byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
 
-            Debug.Log($"[HuggingFaceService] Sending request to HuggingFace API");
+            Debug.Log("[HuggingFaceService] Sending request to HuggingFace API");
             Debug.Log($"[HuggingFaceService] Model: {modelName}");
-            Debug.Log($"[HuggingFaceService] Prompt length: {prompt.Length} chars");
+            if (!string.IsNullOrWhiteSpace(requestInfo))
+            {
+                Debug.Log($"[HuggingFaceService] {requestInfo}");
+            }
+            LogMessages(messages);
 
             using (UnityWebRequest webRequest = new UnityWebRequest(HUGGINGFACE_API_BASE, "POST"))
             {
@@ -167,120 +202,103 @@ namespace LanguageTutor.Services.LLM
             }
         }
 
-        private HuggingFaceMessage[] BuildMessages(string prompt, string systemPrompt, List<ConversationMessage> conversationHistory)
+        private List<HuggingFaceMessage> BuildMessages(string prompt, string systemPrompt, List<ConversationMessage> conversationHistory)
         {
             var messagesList = new List<HuggingFaceMessage>();
 
-            // Build a list of raw messages first (user/assistant only, no system role)
-            // Many HuggingFace models require strict alternating user/assistant/user/assistant...
-            
-            // Collect all user/assistant messages from history
+            if (!string.IsNullOrWhiteSpace(systemPrompt))
+            {
+                messagesList.Add(new HuggingFaceMessage
+                {
+                    role = "system",
+                    contentParts = new List<LLMContentPart> { LLMContentPart.TextPart(systemPrompt) }
+                });
+            }
+
             if (conversationHistory != null)
             {
                 foreach (var message in conversationHistory)
                 {
-                    if (message.Role == MessageRole.System)
-                        continue; // Skip system messages, we'll merge system prompt into first user message
+                    if (message == null)
+                        continue;
 
-                    string role = message.Role == MessageRole.User ? "user" : "assistant";
+                    if (!string.IsNullOrWhiteSpace(systemPrompt) && message.Role == MessageRole.System)
+                        continue;
+
+                    var parts = BuildContentParts(message);
+                    if (parts.Count == 0)
+                        continue;
+
                     messagesList.Add(new HuggingFaceMessage
                     {
-                        role = role,
-                        content = message.Content
+                        role = MapRole(message.Role),
+                        contentParts = parts
                     });
                 }
             }
 
-            // Add current prompt as user message
             messagesList.Add(new HuggingFaceMessage
             {
                 role = "user",
-                content = prompt
+                contentParts = new List<LLMContentPart> { LLMContentPart.TextPart(prompt) }
             });
 
-            // Merge consecutive messages with the same role to ensure alternation
-            messagesList = MergeConsecutiveSameRoleMessages(messagesList);
+            return messagesList;
+        }
 
-            // Ensure conversation starts with user (required by most HuggingFace models)
-            // If first message is assistant, prepend an empty user message
-            if (messagesList.Count > 0 && messagesList[0].role == "assistant")
+        private List<HuggingFaceMessage> BuildMessages(List<LLMContentPart> contentParts, string systemPrompt, List<ConversationMessage> conversationHistory)
+        {
+            var messagesList = new List<HuggingFaceMessage>();
+
+            if (!string.IsNullOrWhiteSpace(systemPrompt))
             {
-                messagesList.Insert(0, new HuggingFaceMessage
+                messagesList.Add(new HuggingFaceMessage
                 {
-                    role = "user",
-                    content = "[Starting conversation]"
+                    role = "system",
+                    contentParts = new List<LLMContentPart> { LLMContentPart.TextPart(systemPrompt) }
                 });
             }
 
-            // Prepend system prompt to the first user message (since system role is not supported)
-            if (!string.IsNullOrEmpty(systemPrompt) && messagesList.Count > 0)
+            if (conversationHistory != null)
             {
-                for (int i = 0; i < messagesList.Count; i++)
+                foreach (var message in conversationHistory)
                 {
-                    if (messagesList[i].role == "user")
+                    if (message == null)
+                        continue;
+
+                    if (!string.IsNullOrWhiteSpace(systemPrompt) && message.Role == MessageRole.System)
+                        continue;
+
+                    var parts = BuildContentParts(message);
+                    if (parts.Count == 0)
+                        continue;
+
+                    messagesList.Add(new HuggingFaceMessage
                     {
-                        messagesList[i].content = $"[Instructions: {systemPrompt}]\n\n{messagesList[i].content}";
-                        break;
-                    }
+                        role = MapRole(message.Role),
+                        contentParts = parts
+                    });
                 }
             }
 
-            return messagesList.ToArray();
-        }
+            var sanitizedParts = SanitizeContentParts(contentParts);
+            if (sanitizedParts.Count == 0)
+                throw new ArgumentException("Content parts cannot be empty", nameof(contentParts));
 
-        /// <summary>
-        /// Merges consecutive messages with the same role to ensure proper alternation.
-        /// HuggingFace models require strict user/assistant/user/assistant pattern.
-        /// </summary>
-        private List<HuggingFaceMessage> MergeConsecutiveSameRoleMessages(List<HuggingFaceMessage> messages)
-        {
-            if (messages == null || messages.Count <= 1)
-                return messages;
-
-            var merged = new List<HuggingFaceMessage>();
-            HuggingFaceMessage current = null;
-
-            foreach (var message in messages)
+            messagesList.Add(new HuggingFaceMessage
             {
-                if (current == null)
-                {
-                    current = new HuggingFaceMessage
-                    {
-                        role = message.role,
-                        content = message.content
-                    };
-                }
-                else if (current.role == message.role)
-                {
-                    // Same role - merge content
-                    current.content += "\n\n" + message.content;
-                }
-                else
-                {
-                    // Different role - save current and start new
-                    merged.Add(current);
-                    current = new HuggingFaceMessage
-                    {
-                        role = message.role,
-                        content = message.content
-                    };
-                }
-            }
+                role = "user",
+                contentParts = sanitizedParts
+            });
 
-            // Don't forget the last message
-            if (current != null)
-            {
-                merged.Add(current);
-            }
-
-            return merged;
+            return messagesList;
         }
 
         /// <summary>
         /// Builds the JSON request string manually to match HuggingFace API format.
         /// Content is formatted as an array of content objects with "type" and "text" fields.
         /// </summary>
-        private string BuildRequestJson(string model, HuggingFaceMessage[] messages, float temperature, int maxTokens)
+        private string BuildRequestJson(string model, List<HuggingFaceMessage> messages, float temperature, int maxTokens)
         {
             var sb = new StringBuilder();
             sb.Append("{");
@@ -290,7 +308,7 @@ namespace LanguageTutor.Services.LLM
             
             // Messages array
             sb.Append("\"messages\":[");
-            for (int i = 0; i < messages.Length; i++)
+            for (int i = 0; i < messages.Count; i++)
             {
                 var msg = messages[i];
                 sb.Append("{");
@@ -298,14 +316,47 @@ namespace LanguageTutor.Services.LLM
                 
                 // Content as array of content objects (HuggingFace API format)
                 sb.Append("\"content\":[");
-                sb.Append("{");
-                sb.Append("\"type\":\"text\",");
-                sb.Append($"\"text\":\"{EscapeJsonString(msg.content)}\"");
-                sb.Append("}");
+                bool appendedPart = false;
+                foreach (var part in msg.contentParts)
+                {
+                    if (part == null)
+                        continue;
+
+                    if (part.Type == LLMContentPartType.Text)
+                    {
+                        if (string.IsNullOrWhiteSpace(part.Text))
+                            continue;
+
+                        if (appendedPart)
+                            sb.Append(",");
+
+                        sb.Append("{");
+                        sb.Append("\"type\":\"text\",");
+                        sb.Append($"\"text\":\"{EscapeJsonString(part.Text)}\"");
+                        sb.Append("}");
+                        appendedPart = true;
+                    }
+                    else if (part.Type == LLMContentPartType.ImageUrl)
+                    {
+                        if (string.IsNullOrWhiteSpace(part.ImageUrl))
+                            continue;
+
+                        if (appendedPart)
+                            sb.Append(",");
+
+                        sb.Append("{");
+                        sb.Append("\"type\":\"image_url\",");
+                        sb.Append("\"image_url\":{");
+                        sb.Append($"\"url\":\"{EscapeJsonString(part.ImageUrl)}\"");
+                        sb.Append("}");
+                        sb.Append("}");
+                        appendedPart = true;
+                    }
+                }
                 sb.Append("]");
                 
                 sb.Append("}");
-                if (i < messages.Length - 1)
+                if (i < messages.Count - 1)
                     sb.Append(",");
             }
             sb.Append("],");
@@ -353,6 +404,126 @@ namespace LanguageTutor.Services.LLM
             }
             return sb.ToString();
         }
+
+        private string MapRole(MessageRole role)
+        {
+            switch (role)
+            {
+                case MessageRole.System:
+                    return "system";
+                case MessageRole.Assistant:
+                    return "assistant";
+                default:
+                    return "user";
+            }
+        }
+
+        private List<LLMContentPart> BuildContentParts(ConversationMessage message)
+        {
+            var parts = new List<LLMContentPart>();
+
+            if (message.ContentParts != null && message.ContentParts.Count > 0)
+            {
+                foreach (var part in message.ContentParts)
+                {
+                    if (part == null)
+                        continue;
+
+                    if (part.Type == LLMContentPartType.Text)
+                    {
+                        if (!string.IsNullOrWhiteSpace(part.Text))
+                            parts.Add(LLMContentPart.TextPart(part.Text));
+                    }
+                    else if (part.Type == LLMContentPartType.ImageUrl)
+                    {
+                        if (!string.IsNullOrWhiteSpace(part.ImageUrl))
+                            parts.Add(LLMContentPart.ImageUrlPart(part.ImageUrl));
+                    }
+                }
+            }
+
+            if (parts.Count == 0 && !string.IsNullOrWhiteSpace(message.Content))
+            {
+                parts.Add(LLMContentPart.TextPart(message.Content));
+            }
+
+            return parts;
+        }
+
+        private List<LLMContentPart> SanitizeContentParts(List<LLMContentPart> parts)
+        {
+            var sanitized = new List<LLMContentPart>();
+            if (parts == null)
+                return sanitized;
+
+            foreach (var part in parts)
+            {
+                if (part == null)
+                    continue;
+
+                if (part.Type == LLMContentPartType.Text)
+                {
+                    if (!string.IsNullOrWhiteSpace(part.Text))
+                        sanitized.Add(LLMContentPart.TextPart(part.Text));
+                }
+                else if (part.Type == LLMContentPartType.ImageUrl)
+                {
+                    if (!string.IsNullOrWhiteSpace(part.ImageUrl))
+                        sanitized.Add(LLMContentPart.ImageUrlPart(part.ImageUrl));
+                }
+            }
+
+            return sanitized;
+        }
+
+        private void LogMessages(List<HuggingFaceMessage> messages)
+        {
+            if (messages == null || messages.Count == 0)
+                return;
+
+            for (int i = 0; i < messages.Count; i++)
+            {
+                var msg = messages[i];
+                string preview = BuildContentPreview(msg.contentParts);
+                Debug.Log($"[HuggingFaceService] Message[{i}] role={msg.role}, content={preview}");
+            }
+        }
+
+        private string BuildContentPreview(List<LLMContentPart> parts)
+        {
+            if (parts == null || parts.Count == 0)
+                return "(empty)";
+
+            var sb = new StringBuilder();
+            foreach (var part in parts)
+            {
+                if (part == null)
+                    continue;
+
+                if (part.Type == LLMContentPartType.Text && !string.IsNullOrWhiteSpace(part.Text))
+                {
+                    if (sb.Length > 0)
+                        sb.Append(" | ");
+                    sb.Append(TrimLog(part.Text, 200));
+                }
+                else if (part.Type == LLMContentPartType.ImageUrl && !string.IsNullOrWhiteSpace(part.ImageUrl))
+                {
+                    if (sb.Length > 0)
+                        sb.Append(" | ");
+                    sb.Append("[image_url: ").Append(TrimLog(part.ImageUrl, 120)).Append("]");
+                }
+            }
+
+            return sb.Length == 0 ? "(empty)" : sb.ToString();
+        }
+
+        private string TrimLog(string value, int maxLen)
+        {
+            if (string.IsNullOrEmpty(value) || value.Length <= maxLen)
+                return value;
+
+            return value.Substring(0, maxLen) + "...";
+        }
     }
 
     /// <summary>
@@ -361,7 +532,7 @@ namespace LanguageTutor.Services.LLM
     internal class HuggingFaceMessage
     {
         public string role;
-        public string content;
+        public List<LLMContentPart> contentParts;
     }
 
     #region HuggingFace API Data Structures (OpenAI-compatible format)

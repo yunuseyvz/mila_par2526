@@ -6,20 +6,11 @@ using LanguageTutor.Services.TTS;
 using LanguageTutor.Actions;
 using LanguageTutor.Data;
 using LanguageTutor.UI;
+using LanguageTutor.Games.Spelling;
 using System.Threading.Tasks;
 
 namespace LanguageTutor.Core
 {
-// Enum ganz oben definiert für Sichtbarkeit
-public enum ActionMode
-{
-Chat,
-GrammarCheck,
-VocabularyTeach,
-ConversationPractice,
-SpellingGame
-}
-
 /// <summary>
 /// Main controller for the NPC conversation system.
 /// Orchestrates AudioInput, ConversationPipeline, and NPCView.
@@ -27,18 +18,13 @@ SpellingGame
 public class NPCController : MonoBehaviour
 {
 [Header("Configuration")]
-[SerializeField] private LLMConfig llmConfig;
-[SerializeField] private TTSConfig ttsConfig;
-[SerializeField] private STTConfig sttConfig;
-[SerializeField] private ConversationConfig conversationConfig;
+[SerializeField] private LanguageTutorConfig config;
 
 [Header("Components")]
 [SerializeField] private WhisperManager whisperManager;
 [SerializeField] private NPCView npcView;
 [SerializeField] private AvatarAnimationController avatarAnimationController;
-
-[Header("Action Mode")]
-[SerializeField] private ActionMode defaultActionMode = ActionMode.Chat;
+[SerializeField] private PassthroughFrameCapture passthroughFrameCapture;
 
 // Services
 private ILLMService _llmService;
@@ -54,6 +40,10 @@ private ConversationHistory _conversationHistory;
 private ILLMAction _currentAction;
 private AudioClip _lastTTSClip;
 private bool _isProcessing;
+private ConversationGameMode _currentGameMode = ConversationGameMode.FreeTalk;
+
+private const bool DefaultShowSubtitles = true;
+private const bool DefaultAutoPlayTts = true;
 
 private void Start()
 {
@@ -64,7 +54,6 @@ private void Start()
 
     if (npcView != null) npcView.SetIdleState();
 
-    // Begrüßung (Original-Funktion)
     if (avatarAnimationController != null)
         avatarAnimationController.PlayGreeting();
 
@@ -87,18 +76,14 @@ public async void Speak(string text)
 {
     Debug.Log($"[NPCController] Tutor says: {text}");
 
-    // 1. Animation starten
     if (avatarAnimationController != null)
         avatarAnimationController.SetTalking();
 
-    // 2. Untertitel anzeigen
     if (npcView != null)
         npcView.ShowNPCMessage(text);
 
-    // 3. Audio generieren (KORRIGIERT: Nutzt jetzt SynthesizeSpeechAsync)
     if (_ttsService != null)
     {
-        // Hier war der Fehler: Wir rufen jetzt die Methode auf, die in deinem Interface steht!
         var audioClip = await _ttsService.SynthesizeSpeechAsync(text);
 
         if (audioClip != null && npcView != null)
@@ -125,38 +110,23 @@ public void PlaySuccessAnimation()
 // SECTION: Core Controller Logic
 // -------------------------------------------------------------------------
 
-public void SetActionMode(ActionMode mode)
+public void SetGameMode(ConversationGameMode mode)
 {
-    defaultActionMode = mode;
+    if (config == null)
+        return;
 
-    switch (mode)
+    if (_currentGameMode == ConversationGameMode.WordClouds && mode != ConversationGameMode.WordClouds)
     {
-        case ActionMode.Chat:
-            _currentAction = new ChatAction(llmConfig.defaultSystemPrompt);
-            break;
-        case ActionMode.GrammarCheck:
-            _currentAction = new GrammarCheckAction(conversationConfig.targetLanguage, llmConfig.grammarCorrectionPrompt);
-            break;
-        case ActionMode.VocabularyTeach:
-            _currentAction = new VocabularyTeachAction(conversationConfig.targetLanguage, llmConfig.vocabularyTeachingPrompt);
-            break;
-        case ActionMode.ConversationPractice:
-            _currentAction = new ConversationPracticeAction("casual conversation", llmConfig.conversationPracticePrompt);
-            break;
-
-        // SPIEL LOGIK: Sofort-Start
-        case ActionMode.SpellingGame:
-            var gameAction = new SpellingGameAction();
-            _currentAction = gameAction;
-
-            Debug.Log("[NPCController] Spelling Game selected. Auto-starting...");
-
-            // Spiel sofort starten (Fire-and-Forget)
-            _ = gameAction.ExecuteAsync(null, null);
-            break;
+        ClearWordCloudsLetterBoxes();
     }
 
-    Debug.Log($"[NPCController] Action mode set to: {mode}");
+    config.conversation.gameMode = mode;
+    _currentAction = CreateActionForGameMode(mode);
+    UpdateModeLabel(mode);
+    Debug.Log($"[NPCController] Game mode set to: {mode}");
+    LogGameModePrompt(mode);
+    StartModeSideEffects(mode);
+    _currentGameMode = mode;
 }
 
 public void ResetConversation()
@@ -196,31 +166,34 @@ public void ReplayLastMessage()
 
 private void InitializeServices()
 {
-    if (llmConfig == null || ttsConfig == null || sttConfig == null || conversationConfig == null)
+    if (config == null)
     {
         Debug.LogError("[NPCController] Configuration missing!");
         enabled = false;
         return;
     }
 
-    if (STTServiceFactory.RequiresWhisperManager(sttConfig.provider) && whisperManager == null)
+    if (STTServiceFactory.RequiresWhisperManager(config.stt.provider) && whisperManager == null)
     {
         Debug.LogError("[NPCController] WhisperManager missing.");
         enabled = false;
         return;
     }
 
-    _llmService = LLMServiceFactory.CreateService(llmConfig, this);
-    _ttsService = TTSServiceFactory.CreateService(ttsConfig, this);
-    _sttService = STTServiceFactory.CreateService(sttConfig, this, whisperManager);
+    _llmService = LLMServiceFactory.CreateService(config.llm, this);
+    _ttsService = TTSServiceFactory.CreateService(config.tts, this);
+    _sttService = STTServiceFactory.CreateService(config.stt, this, whisperManager);
 }
 
 private void InitializeSystems()
 {
-    _conversationHistory = new ConversationHistory(conversationConfig.maxHistoryLength, conversationConfig.autoSummarizeHistory);
-    _actionExecutor = new LLMActionExecutor(_llmService, llmConfig.maxRetries, llmConfig.retryDelaySeconds);
+    _conversationHistory = new ConversationHistory();
+    _actionExecutor = new LLMActionExecutor(_llmService, config.llm.maxRetries, config.llm.retryDelaySeconds);
     _conversationPipeline = new ConversationPipeline(_sttService, _ttsService, _actionExecutor, _conversationHistory);
-    _audioInput = new AudioInputController(sttConfig.maxRecordingDuration, sttConfig.sampleRate, sttConfig.silenceThreshold);
+    _audioInput = new AudioInputController(config.stt.maxRecordingDuration, config.stt.sampleRate, config.stt.silenceThreshold);
+
+    if (passthroughFrameCapture == null)
+        passthroughFrameCapture = FindObjectOfType<PassthroughFrameCapture>(true);
 }
 
 private void SetupEventListeners()
@@ -269,7 +242,8 @@ private void CleanupEventListeners()
 
 private void SetDefaultAction()
 {
-    SetActionMode(defaultActionMode);
+    if (config != null)
+        SetGameMode(config.conversation.gameMode);
 }
 
 private void OnTalkButtonPressed()
@@ -292,10 +266,9 @@ private async void HandleRecordingCompleted(AudioClip audioClip)
     if (audioClip == null) return;
     _isProcessing = true;
 
-    // Standard Pipeline für Antworten auf den Spieler
     var result = await _conversationPipeline.ExecuteAsync(audioClip, _currentAction);
 
-    if (result.Success && result.TTSAudioClip != null && conversationConfig.autoPlayTTS)
+    if (result.Success && result.TTSAudioClip != null && DefaultAutoPlayTts)
     {
         _lastTTSClip = result.TTSAudioClip;
         if (npcView != null)
@@ -346,8 +319,8 @@ private void HandlePipelineStageChanged(PipelineStage stage)
     }
 }
 
-private void HandleTranscriptionCompleted(string text) { if (conversationConfig.showSubtitles && npcView != null) npcView.ShowUserMessage(text); }
-private void HandleLLMResponseReceived(string response) { if (conversationConfig.showSubtitles && npcView != null) npcView.ShowNPCMessage(response); }
+private void HandleTranscriptionCompleted(string text) { if (DefaultShowSubtitles && npcView != null) npcView.ShowUserMessage(text); }
+private void HandleLLMResponseReceived(string response) { if (DefaultShowSubtitles && npcView != null) npcView.ShowNPCMessage(response); }
 private void HandleTTSAudioGenerated(AudioClip audio) { }
 private void HandlePipelineError(string error) { if (npcView != null) npcView.ShowErrorMessage(error); }
 
@@ -360,6 +333,159 @@ private void Update()
         {
             avatarAnimationController.SetIdle();
         }
+    }
+}
+
+private ILLMAction CreateActionForGameMode(ConversationGameMode mode)
+{
+    string languageName = GetLanguageName(config.conversation.language);
+    string systemPrompt = BuildGameModeSystemPrompt(mode, languageName);
+
+    if (mode == ConversationGameMode.FreeTalk)
+    {
+        if (passthroughFrameCapture == null)
+        {
+            Debug.LogWarning("[NPCController] PassthroughFrameCapture not found. FreeTalk will run in text-only mode.");
+            return new ChatAction(systemPrompt);
+        }
+
+        return new FreeTalkVisionAction(systemPrompt, passthroughFrameCapture);
+    }
+
+    return new ChatAction(systemPrompt);
+}
+
+private void LogGameModePrompt(ConversationGameMode mode)
+{
+    if (config == null)
+        return;
+
+    string languageName = GetLanguageName(config.conversation.language);
+    string systemPrompt = BuildGameModeSystemPrompt(mode, languageName);
+    Debug.Log($"[NPCController] LLM context updated for {mode} ({languageName}):\n{systemPrompt}");
+}
+
+private string BuildGameModeSystemPrompt(ConversationGameMode mode, string languageName)
+{
+    string context;
+    string prompt;
+
+    switch (mode)
+    {
+        case ConversationGameMode.WordClouds:
+            context = config.llm.wordCloudsContext;
+            prompt = config.llm.wordCloudsSystemPrompt;
+            break;
+        case ConversationGameMode.ObjectTagging:
+            context = config.llm.objectTaggingContext;
+            prompt = config.llm.objectTaggingSystemPrompt;
+            break;
+        case ConversationGameMode.RolePlay:
+            context = config.llm.rolePlayContext;
+            prompt = config.llm.rolePlaySystemPrompt;
+            break;
+        case ConversationGameMode.FreeTalk:
+        default:
+            context = config.llm.freeTalkContext;
+            prompt = config.llm.freeTalkSystemPrompt;
+            break;
+    }
+
+    context = ReplaceLanguageToken(context, languageName);
+    prompt = ReplaceLanguageToken(prompt, languageName);
+
+    if (string.IsNullOrWhiteSpace(context))
+        return prompt;
+
+    if (string.IsNullOrWhiteSpace(prompt))
+        return context;
+
+    return $"{context}\n\n{prompt}";
+}
+
+private string ReplaceLanguageToken(string value, string languageName)
+{
+    return string.IsNullOrEmpty(value) ? value : value.Replace("{language}", languageName);
+}
+
+private string GetLanguageName(ConversationLanguage language)
+{
+    switch (language)
+    {
+        case ConversationLanguage.German:
+            return "German";
+        default:
+            return "English";
+    }
+}
+
+private void UpdateModeLabel(ConversationGameMode mode)
+{
+    if (npcView == null)
+        return;
+
+    npcView.SetModeLabel($"Mode: {GetGameModeDisplayName(mode)}");
+}
+
+private string GetGameModeDisplayName(ConversationGameMode mode)
+{
+    switch (mode)
+    {
+        case ConversationGameMode.WordClouds:
+            return "Word Clouds";
+        case ConversationGameMode.ObjectTagging:
+            return "Object Tagging";
+        case ConversationGameMode.RolePlay:
+            return "Role Play";
+        case ConversationGameMode.FreeTalk:
+        default:
+            return "Free Talk";
+    }
+}
+
+private void StartModeSideEffects(ConversationGameMode mode)
+{
+    if (mode == ConversationGameMode.WordClouds)
+    {
+        ClearWordCloudsLetterBoxes();
+        StartWordCloudsLetterBoxes();
+    }
+}
+
+private void StartWordCloudsLetterBoxes()
+{
+    Debug.Log("[NPCController] Starting Word Clouds letterboxes...");
+    var gameAction = new SpellingGameAction();
+    _ = gameAction.ExecuteAsync(_llmService, new LLMActionContext());
+}
+
+private void ClearWordCloudsLetterBoxes()
+{
+    var slots = FindObjectsOfType<LetterSlot>(true);
+    var blocks = FindObjectsOfType<LetterBlock>(true);
+
+    int destroyed = 0;
+    foreach (var slot in slots)
+    {
+        if (slot != null)
+        {
+            Destroy(slot.gameObject);
+            destroyed++;
+        }
+    }
+
+    foreach (var block in blocks)
+    {
+        if (block != null)
+        {
+            Destroy(block.gameObject);
+            destroyed++;
+        }
+    }
+
+    if (destroyed > 0)
+    {
+        Debug.Log($"[NPCController] Cleared Word Clouds letterboxes: {destroyed} objects destroyed.");
     }
 }
 }

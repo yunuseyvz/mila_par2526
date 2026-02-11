@@ -28,6 +28,15 @@ namespace LanguageTutor.Services.LLM
         Task<string> GenerateResponseAsync(string prompt, string systemPrompt, List<ConversationMessage> conversationHistory = null);
 
         /// <summary>
+        /// Send structured content parts (text + images) to the LLM.
+        /// </summary>
+        /// <param name="contentParts">Ordered content parts for the user message</param>
+        /// <param name="systemPrompt">Custom system prompt for this specific request</param>
+        /// <param name="conversationHistory">Optional conversation context</param>
+        /// <returns>Task containing the LLM response text</returns>
+        Task<string> GenerateResponseAsync(List<LLMContentPart> contentParts, string systemPrompt, List<ConversationMessage> conversationHistory = null);
+
+        /// <summary>
         /// Check if the LLM service is available and responding.
         /// </summary>
         /// <returns>True if service is healthy, false otherwise</returns>
@@ -47,6 +56,7 @@ namespace LanguageTutor.Services.LLM
     {
         public MessageRole Role;
         public string Content;
+        public List<LLMContentPart> ContentParts;
         public DateTime Timestamp;
 
         public ConversationMessage(MessageRole role, string content)
@@ -55,6 +65,69 @@ namespace LanguageTutor.Services.LLM
             Content = content;
             Timestamp = DateTime.Now;
         }
+
+        public ConversationMessage(MessageRole role, List<LLMContentPart> contentParts)
+        {
+            Role = role;
+            ContentParts = contentParts;
+            Content = ExtractText(contentParts);
+            Timestamp = DateTime.Now;
+        }
+
+        private static string ExtractText(List<LLMContentPart> contentParts)
+        {
+            if (contentParts == null || contentParts.Count == 0)
+                return string.Empty;
+
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < contentParts.Count; i++)
+            {
+                var part = contentParts[i];
+                if (part != null && part.Type == LLMContentPartType.Text && !string.IsNullOrWhiteSpace(part.Text))
+                {
+                    if (sb.Length > 0)
+                        sb.Append("\n");
+                    sb.Append(part.Text);
+                }
+            }
+
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Structured content part for chat messages (text and image support).
+    /// </summary>
+    [Serializable]
+    public class LLMContentPart
+    {
+        public LLMContentPartType Type;
+        public string Text;
+        public string ImageUrl;
+
+        public static LLMContentPart TextPart(string text)
+        {
+            return new LLMContentPart
+            {
+                Type = LLMContentPartType.Text,
+                Text = text
+            };
+        }
+
+        public static LLMContentPart ImageUrlPart(string url)
+        {
+            return new LLMContentPart
+            {
+                Type = LLMContentPartType.ImageUrl,
+                ImageUrl = url
+            };
+        }
+    }
+
+    public enum LLMContentPartType
+    {
+        Text,
+        ImageUrl
     }
 
     /// <summary>

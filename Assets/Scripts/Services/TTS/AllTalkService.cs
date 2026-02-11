@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using LanguageTutor.Data;
 using LanguageTutor.Services.LLM;
+using LanguageTutor.Utilities;
 
 namespace LanguageTutor.Services.TTS
 {
@@ -14,13 +15,13 @@ namespace LanguageTutor.Services.TTS
     /// </summary>
     public class AllTalkService : ITTSService
     {
-        private readonly TTSConfig _config;
+        private readonly TTSSettings _config;
         private readonly MonoBehaviour _coroutineRunner;
         private readonly Dictionary<string, AudioClip> _audioCache;
         private UnityWebRequest _currentRequest;
         private float _currentSpeed = 1.0f;
 
-        public AllTalkService(TTSConfig config, MonoBehaviour coroutineRunner)
+        public AllTalkService(TTSSettings config, MonoBehaviour coroutineRunner)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _coroutineRunner = coroutineRunner ?? throw new ArgumentNullException(nameof(coroutineRunner));
@@ -50,7 +51,7 @@ namespace LanguageTutor.Services.TTS
         {
             // AllTalk typically has voices in a specific directory
             // This is a simplified implementation - extend based on AllTalk API
-            return await Task.FromResult(new[] { _config.defaultVoice });
+            return await Task.FromResult(new[] { _config.DefaultVoice });
         }
 
         public async Task<bool> IsAvailableAsync()
@@ -91,7 +92,7 @@ namespace LanguageTutor.Services.TTS
             TaskCompletionSource<AudioClip> tcs)
         {
             // Build request according to AllTalk API docs
-            string voice = voiceName ?? _config.defaultVoice;
+            string voice = voiceName ?? _config.DefaultVoice;
             string lang = language ?? _config.defaultLanguage;
             string outputFile = $"unitytts{System.Guid.NewGuid():N}"; // No extension or special chars
             
@@ -110,7 +111,7 @@ namespace LanguageTutor.Services.TTS
             form.AddField("autoplay_volume", "0.8");
             form.AddField("speed", _currentSpeed.ToString(System.Globalization.CultureInfo.InvariantCulture));
             
-            string generateUrl = _config.serviceUrl.TrimEnd('/') + "/api/tts-generate";
+            string generateUrl = _config.GetFullUrl();
             
             Debug.Log($"[AllTalkService] Generating TTS:");
             Debug.Log($"[AllTalkService]   URL: {generateUrl}");
@@ -151,7 +152,7 @@ namespace LanguageTutor.Services.TTS
             
             // Construct full URL from relative path
             // According to docs: output_file_url is like "/audio/filename.wav"
-            string audioUrl = _config.serviceUrl.TrimEnd('/') + response.output_file_url;
+            string audioUrl = _config.ServiceUrl.TrimEnd('/') + response.output_file_url;
             Debug.Log($"[AllTalkService] Full audio URL: {audioUrl}");
             
             // Wait a moment for file to be ready
@@ -202,7 +203,7 @@ namespace LanguageTutor.Services.TTS
 
         private string GetCacheKey(string text, string voice, string language)
         {
-            return $"{text}_{voice ?? _config.defaultVoice}_{language ?? _config.defaultLanguage}";
+            return $"{text}_{voice ?? _config.DefaultVoice}_{language ?? _config.defaultLanguage}";
         }
 
         private void CacheAudioClip(string key, AudioClip clip)

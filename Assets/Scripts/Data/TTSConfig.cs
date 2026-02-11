@@ -7,8 +7,7 @@ namespace LanguageTutor.Data
     /// </summary>
     public enum TTSProvider
     {
-        AllTalk,
-        HuggingFace
+        AllTalk
     }
 
     /// <summary>
@@ -19,7 +18,7 @@ namespace LanguageTutor.Data
     public class TTSConfig : ScriptableObject
     {
         [Header("Provider Selection")]
-        [Tooltip("Choose the TTS provider to use")]
+        [Tooltip("Choose the TTS provider to use (AllTalk only)")]
         public TTSProvider provider = TTSProvider.AllTalk;
 
         [Header("═══════════ LOCAL SERVICES (AllTalk) ═══════════")]
@@ -35,11 +34,11 @@ namespace LanguageTutor.Data
         [Header("═══════════ API SERVICES ═══════════")]
         [Space(10)]
         [Header("HuggingFace API")]
-        [Tooltip("HuggingFace TTS API URL (or router URL like https://router.huggingface.co/fal-ai/fal-ai/kokoro/american-english)")]
+        [Tooltip("HuggingFace TTS API URL (legacy, unused when AllTalk is selected)")]
         public string huggingFaceApiUrl = "https://router.huggingface.co/fal-ai/fal-ai/kokoro/american-english";
 
         [Header("Authentication")]
-        [Tooltip("API Key for HuggingFace API. Leave empty for local AllTalk.")]
+        [Tooltip("API Key for HuggingFace API (legacy)")]
         [TextArea(1, 3)]
         public string apiKey = "";
 
@@ -48,12 +47,7 @@ namespace LanguageTutor.Data
         {
             get
             {
-                return provider switch
-                {
-                    TTSProvider.AllTalk => allTalkServiceUrl,
-                    TTSProvider.HuggingFace => huggingFaceApiUrl,
-                    _ => allTalkServiceUrl
-                };
+                return allTalkServiceUrl;
             }
         }
 
@@ -61,7 +55,7 @@ namespace LanguageTutor.Data
         {
             get
             {
-                return provider == TTSProvider.AllTalk ? allTalkEndpointPath : "";
+                return allTalkEndpointPath;
             }
         }
 
@@ -69,7 +63,7 @@ namespace LanguageTutor.Data
         {
             get
             {
-                return provider == TTSProvider.AllTalk ? allTalkVoice : "default";
+                return allTalkVoice;
             }
         }
 

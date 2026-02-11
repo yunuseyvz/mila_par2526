@@ -37,6 +37,10 @@ namespace LanguageTutor.UI
         [Tooltip("Font size for subtitle text")]
         [SerializeField] private float fontSize = 24f;
 
+        [Header("Text Color Override")]
+        [SerializeField] private bool forceTextColor = true;
+        [SerializeField] private Color forcedTextColor = Color.white;
+
         private List<SubtitleEntry> _subtitleHistory = new List<SubtitleEntry>();
         
         private class SubtitleEntry
@@ -55,7 +59,29 @@ namespace LanguageTutor.UI
             else
             {
                 subtitleText.fontSize = fontSize;
+                ApplyForcedTextColor();
             }
+        }
+
+        private void OnEnable()
+        {
+            ApplyForcedTextColor();
+        }
+
+        private void LateUpdate()
+        {
+            if (forceTextColor)
+            {
+                ApplyForcedTextColor();
+            }
+        }
+
+        private void ApplyForcedTextColor()
+        {
+            if (!forceTextColor || subtitleText == null)
+                return;
+
+            subtitleText.color = forcedTextColor;
         }
 
         /// <summary>

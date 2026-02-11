@@ -10,11 +10,11 @@ namespace LanguageTutor.Data
     public class STTConfig : ScriptableObject
     {
         [Header("Provider Selection")]
-        [Tooltip("Speech-to-text provider. WhisperLocal runs on device, HuggingFace uses cloud API.")]
+        [Tooltip("Speech-to-text provider (HuggingFace only)")]
         public STTProvider provider = STTProvider.HuggingFace;
 
         [Header("Authentication (for Cloud Providers)")]
-        [Tooltip("API Key for cloud providers (HuggingFace, Azure, Google, AWS). Leave empty for local Whisper.")]
+        [Tooltip("API Key for HuggingFace STT (HF_TOKEN)")]
         [TextArea(1, 3)]
         public string apiKey = "";
 
@@ -71,24 +71,11 @@ namespace LanguageTutor.Data
 
     /// <summary>
     /// Available STT providers.
-    /// WhisperLocal: Runs Whisper on device (slow on Quest, fast on PC with GPU)
-    /// HuggingFace: Uses HuggingFace Inference API (requires API key, fast on any device)
+    /// HuggingFace: Uses HuggingFace Inference API (requires API key)
     /// </summary>
     public enum STTProvider
     {
-        [Tooltip("Local on-device Whisper using Whisper.Unity package")]
-        WhisperLocal,
-        
         [Tooltip("HuggingFace Inference API (Whisper models via cloud)")]
-        HuggingFace,
-        
-        [Tooltip("Azure Speech Services (not yet implemented)")]
-        Azure,
-        
-        [Tooltip("Google Cloud Speech-to-Text (not yet implemented)")]
-        Google,
-        
-        [Tooltip("AWS Transcribe (not yet implemented)")]
-        AWS
+        HuggingFace
     }
 }

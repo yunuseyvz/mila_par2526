@@ -15,7 +15,7 @@ namespace LanguageTutor.Services.TTS
         /// <param name="config">The TTS configuration</param>
         /// <param name="coroutineRunner">MonoBehaviour to run coroutines</param>
         /// <returns>An ITTSService implementation</returns>
-        public static ITTSService CreateService(TTSConfig config, MonoBehaviour coroutineRunner)
+        public static ITTSService CreateService(TTSSettings config, MonoBehaviour coroutineRunner)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
@@ -23,19 +23,13 @@ namespace LanguageTutor.Services.TTS
             if (coroutineRunner == null)
                 throw new ArgumentNullException(nameof(coroutineRunner));
 
-            switch (config.provider)
+            if (config.provider != TTSProvider.AllTalk)
             {
-                case TTSProvider.AllTalk:
-                    Debug.Log("[TTSServiceFactory] Creating AllTalk service");
-                    return new AllTalkService(config, coroutineRunner);
-
-                case TTSProvider.HuggingFace:
-                    Debug.Log("[TTSServiceFactory] Creating HuggingFace TTS service");
-                    return new HuggingFaceTTSService(config, coroutineRunner);
-
-                default:
-                    throw new NotSupportedException($"TTS provider '{config.provider}' is not supported");
+                Debug.LogWarning($"[TTSServiceFactory] Provider '{config.provider}' is not supported. Using AllTalk only.");
             }
+
+            Debug.Log("[TTSServiceFactory] Creating AllTalk service");
+            return new AllTalkService(config, coroutineRunner);
         }
     }
 }

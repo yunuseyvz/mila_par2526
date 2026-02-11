@@ -63,7 +63,6 @@ namespace LanguageTutor.Core
 
                 result.TranscribedText = transcribedText;
                 OnTranscriptionCompleted?.Invoke(transcribedText);
-                _conversationHistory.AddUserMessage(transcribedText);
                 
                 Debug.Log($"[ConversationPipeline] Transcribed: {transcribedText}");
 
@@ -71,9 +70,12 @@ namespace LanguageTutor.Core
                 OnStageChanged?.Invoke(PipelineStage.GeneratingResponse);
                 Debug.Log("[ConversationPipeline] Stage 2: Generating LLM response...");
 
+                var historyForContext = _conversationHistory.GetRecentMessages(10);
+                _conversationHistory.AddUserMessage(transcribedText);
+
                 var context = new LLMActionContext(transcribedText)
                 {
-                    ConversationHistory = _conversationHistory.GetRecentMessages(10)
+                    ConversationHistory = historyForContext
                 };
 
                 var actionResult = await _actionExecutor.ExecuteAsync(action, context);

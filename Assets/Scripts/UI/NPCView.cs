@@ -35,19 +35,31 @@ namespace LanguageTutor.UI
         [SerializeField] private bool showConversationHistory = true;
         [SerializeField] private bool showStatusInConversation = false;
 
+        [Header("Text Color")]
+        [SerializeField] private bool forceTextColor = true;
+        [SerializeField] private Color forcedTextColor = Color.white;
+
         private string _currentSubtitle;
         private string _conversationText;
         private List<string> _conversationHistory = new List<string>();
+        private string _modeLabel;
 
         private void Awake()
         {
             ValidateComponents();
         }
 
+        private void OnEnable()
+        {
+            ApplyForcedTextColors();
+        }
+
         private void ValidateComponents()
         {
             if (scrollingSubtitles == null && subtitleText == null)
                 Debug.LogWarning("[NPCView] Neither ScrollingSubtitles nor SubtitleText is assigned! Subtitle display will not work.");
+
+            ApplyForcedTextColors();
             
             if (eventLog == null)
                 Debug.LogWarning("[NPCView] EventLog is not assigned! Events will not be logged.");
@@ -57,6 +69,30 @@ namespace LanguageTutor.UI
             
             if (talkButton == null)
                 Debug.LogError("[NPCView] TalkButton is not assigned!");
+        }
+
+        private void LateUpdate()
+        {
+            if (forceTextColor)
+            {
+                ApplyForcedTextColors();
+            }
+        }
+
+        private void ApplyForcedTextColors()
+        {
+            if (!forceTextColor)
+                return;
+
+            if (subtitleText != null)
+            {
+                subtitleText.color = forcedTextColor;
+            }
+
+            if (statusText != null)
+            {
+                statusText.color = forcedTextColor;
+            }
         }
 
         /// <summary>
@@ -149,6 +185,18 @@ namespace LanguageTutor.UI
                 UpdateSubtitle();
             }
             // Otherwise, don't overwrite the conversation
+        }
+
+        /// <summary>
+        /// Set a persistent mode label for the action/status bar.
+        /// </summary>
+        public void SetModeLabel(string label)
+        {
+            _modeLabel = label;
+            if (statusText != null)
+            {
+                statusText.text = label;
+            }
         }
 
         /// <summary>
@@ -369,7 +417,7 @@ namespace LanguageTutor.UI
         public void SetIdleState()
         {
             // Don't log every time we return to idle - too verbose
-            ShowStatusMessage("Ready");
+            ShowStatusMessage(string.IsNullOrWhiteSpace(_modeLabel) ? "Ready" : _modeLabel);
             SetStatusColor(idleColor);
             SetButtonInteractable(true);
             SetButtonText("Talk");
