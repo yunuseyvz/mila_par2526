@@ -180,59 +180,47 @@ namespace LanguageTutor.Data
         public bool whisperTranslateToEnglish = false;
     }
 
+
     [Serializable]
     public class TTSSettings
     {
+
+        public enum TTSProvider
+        {
+            ElevenLabs
+        }
+
         [Header("Provider Selection")]
-        [Tooltip("Choose the TTS provider to use (AllTalk only)")]
-        public TTSProvider provider = TTSProvider.AllTalk;
+        [Tooltip("Choose the TTS provider to use (ElevenLabs)")]
+        public TTSProvider provider = TTSProvider.ElevenLabs;
 
-        [Header("Local Services (AllTalk)")]
-        [Tooltip("Base URL for local AllTalk service")]
-        public string allTalkServiceUrl = "http://127.0.0.1:7851";
+        [Header("ElevenLabs Settings")]
+        [Tooltip("Voice ID for ElevenLabs, Mila")]
+        public string elevenLabsVoiceId = "dCnu06FiOZma2KVNUoPZ";
 
-        [Tooltip("API endpoint path for AllTalk")]
-        public string allTalkEndpointPath = "/api/tts-generate";
+        [Tooltip("Audio output format (e.g., mp3_44100_128, mp3_44100_192, pcm_16000, pcm_22050, pcm_24000, pcm_44100)")]
+        public string outputFormat = "mp3_44100_128";
 
-        [Tooltip("Voice file for AllTalk (e.g., male_01.wav)")]
-        public string allTalkVoice = "male_01.wav";
-
-        [Header("API Services")]
-        [Tooltip("HuggingFace TTS API URL (legacy, unused when AllTalk is selected)")]
-        public string huggingFaceApiUrl = "https://router.huggingface.co/fal-ai/fal-ai/kokoro/american-english";
+        [Tooltip("Model ID for ElevenLabs (e.g., eleven_multilingual_v2, eleven_monolingual_v1, eleven_turbo_v2)")]
+        public string modelId = "eleven_multilingual_v2";
 
         [Header("Authentication")]
-        [Tooltip("API Key for HuggingFace API (legacy)")]
+        [Tooltip("API Key for ElevenLabs API")]
         [TextArea(1, 3)]
         public string apiKey = "";
-
-        [Header("Voice Settings")]
-        [Tooltip("Default language code (e.g., 'en', 'de', 'es', 'fr')")]
-        public string defaultLanguage = "en";
 
         [Tooltip("Speech rate/speed (0.5 = slow, 1.0 = normal, 2.0 = fast)")]
         [Range(0.5f, 2.0f)]
         public float speechRate = 1.0f;
 
-        [Tooltip("Voice pitch adjustment")]
-        [Range(0.5f, 2.0f)]
-        public float pitch = 1.0f;
-
-        [Header("Audio Quality")]
-        [Tooltip("Sample rate for generated audio (Hz)")]
-        public int sampleRate = 22050;
-
-        [Tooltip("Audio output format (wav, mp3, ogg)")]
-        public AudioFormat outputFormat = AudioFormat.WAV;
+        [Header("Voice Settings")]
+        [Tooltip("Default language code (e.g., 'en', 'de', 'es', 'fr')")]
+        public string defaultLanguage = "en";
 
         [Header("Performance")]
         [Tooltip("Request timeout in seconds")]
         [Range(5, 60)]
         public int timeoutSeconds = 20;
-
-        [Tooltip("Number of retry attempts on failure")]
-        [Range(0, 5)]
-        public int maxRetries = 2;
 
         [Tooltip("Cache generated audio clips to avoid re-generation")]
         public bool enableCaching = true;
@@ -241,19 +229,11 @@ namespace LanguageTutor.Data
         [Range(10, 100)]
         public int maxCacheSize = 50;
 
-        [Header("Advanced")]
-        [Tooltip("Split long texts into smaller chunks for faster generation")]
-        public bool enableTextChunking = true;
-
-        [Tooltip("Maximum characters per chunk")]
-        [Range(50, 500)]
-        public int maxChunkLength = 200;
-
         public string ServiceUrl
         {
             get
             {
-                return allTalkServiceUrl;
+                return "https://api.elevenlabs.io/v1";
             }
         }
 
@@ -261,7 +241,7 @@ namespace LanguageTutor.Data
         {
             get
             {
-                return allTalkEndpointPath;
+                return $"/text-to-speech/{elevenLabsVoiceId}";
             }
         }
 
@@ -269,7 +249,7 @@ namespace LanguageTutor.Data
         {
             get
             {
-                return allTalkVoice;
+                return elevenLabsVoiceId;
             }
         }
 

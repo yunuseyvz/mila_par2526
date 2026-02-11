@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using LanguageTutor.Data;
+using static LanguageTutor.Data.TTSSettings;
 
 namespace LanguageTutor.Services.TTS
 {
@@ -23,13 +24,13 @@ namespace LanguageTutor.Services.TTS
             if (coroutineRunner == null)
                 throw new ArgumentNullException(nameof(coroutineRunner));
 
-            if (config.provider != TTSProvider.AllTalk)
+            if (config.provider != TTSProvider.ElevenLabs)
             {
-                Debug.LogWarning($"[TTSServiceFactory] Provider '{config.provider}' is not supported. Using AllTalk only.");
+                Debug.LogWarning($"[TTSServiceFactory] Provider '{config.provider}' is not supported. Using ElevenLabs only.");
             }
 
-            Debug.Log("[TTSServiceFactory] Creating AllTalk service");
-            return new AllTalkService(config, coroutineRunner);
+            Debug.Log("[TTSServiceFactory] Creating ElevenLabs service");
+            return new ElevenLabsService(config, coroutineRunner);
         }
     }
 }

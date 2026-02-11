@@ -24,7 +24,7 @@ Before cloning the repository, ensure you have the following installed:
 2.  **Git LFS**: [Download Git LFS](https://git-lfs.com/)
 3.  **Unity Hub & Editor**: Install the version specified in `ProjectSettings/ProjectVersion.txt` (or the latest stable release if not specified).
 4.  **Ollama with Llama3**: [Download Ollama](https://ollama.ai/) and run `ollama pull llama3`
-5.  **AllTalk TTS**: [AllTalk TTS](https://github.com/erew123/alltalk_tts/tree/alltalkbeta)
+5.  **ElevenLabs API Key**: Sign up at [ElevenLabs](https://elevenlabs.io/) and get your API key
 
 ### Installation
 
@@ -52,7 +52,7 @@ Before cloning the repository, ensure you have the following installed:
 1. Create configuration assets: `Assets → Create → Language Tutor → [Config Type]`
 2. Start external services:
    - Ollama: `ollama run llama3`
-   - AllTalk TTS: Run server on port 7851
+   - Add your ElevenLabs API key to the TTS config
 3. Configure NPCController and NPCView in your scene
 4. Press Play and click "Talk" to begin conversation
    Project Architecture
