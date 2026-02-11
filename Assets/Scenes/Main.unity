@@ -95820,6 +95820,11 @@ MonoBehaviour:
   idleStateName: Idle
   thinkingStateName: Thinking
   talkingStateName: Talking
+  enableIdleScratch: 1
+  scratchTrigger: Scratch
+  scratchStateName: IdleScratch
+  scratchIntervalMinSeconds: 12
+  scratchIntervalMaxSeconds: 18
 --- !u!1 &1928544976
 GameObject:
   m_ObjectHideFlags: 0
@@ -97283,6 +97288,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Core.PassthroughFrameCapture
   targetSize: 512
+  cameraAccess: {fileID: 0}
 --- !u!4 &2002619817
 Transform:
   m_ObjectHideFlags: 0

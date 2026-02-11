@@ -22,7 +22,18 @@ namespace LanguageTutor.Core
         [SerializeField] private string thinkingStateName = "Thinking";
         [SerializeField] private string talkingStateName = "Talking";
 
+        [Header("Idle Scratch")]
+        [SerializeField] private bool enableIdleScratch = true;
+        [SerializeField] private string scratchTrigger = "Scratch";
+        [SerializeField] private string scratchStateName = "IdleScratch";
+        [SerializeField] private float scratchIntervalMinSeconds = 12f;
+        [SerializeField] private float scratchIntervalMaxSeconds = 18f;
+
         private AnimationState _currentState = AnimationState.Idle;
+        private bool _wasIdle;
+        private float _nextScratchTime;
+        private int _idleStateHash;
+        private int _scratchStateHash;
 
         private void Awake()
         {
@@ -35,6 +46,47 @@ namespace LanguageTutor.Core
             if (animator == null)
             {
                 Debug.LogError("[AvatarAnimationController] No Animator component found! Please assign an Animator.");
+            }
+
+            _idleStateHash = Animator.StringToHash(idleStateName);
+            _scratchStateHash = Animator.StringToHash(scratchStateName);
+            ScheduleNextScratch();
+        }
+
+        private void Update()
+        {
+            if (!enableIdleScratch || animator == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(scratchTrigger))
+            {
+                return;
+            }
+
+            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            bool isIdle = stateInfo.shortNameHash == _idleStateHash || stateInfo.IsName(idleStateName);
+            bool isScratch = !string.IsNullOrWhiteSpace(scratchStateName)
+                && (stateInfo.shortNameHash == _scratchStateHash || stateInfo.IsName(scratchStateName));
+
+            if (!isIdle || isScratch || animator.IsInTransition(0))
+            {
+                _wasIdle = false;
+                return;
+            }
+
+            if (!_wasIdle)
+            {
+                _wasIdle = true;
+                ScheduleNextScratch();
+                return;
+            }
+
+            if (Time.time >= _nextScratchTime)
+            {
+                animator.SetTrigger(scratchTrigger);
+                ScheduleNextScratch();
             }
         }
 
@@ -49,6 +101,7 @@ namespace LanguageTutor.Core
             {
                 animator.SetTrigger(idleTrigger);
                 _currentState = AnimationState.Idle;
+                ScheduleNextScratch();
                 Debug.Log("[AvatarAnimationController] Animation set to: Idle");
             }
         }
@@ -145,7 +198,15 @@ namespace LanguageTutor.Core
             if (animator != null)
             {
                 animator.SetTrigger(idleTrigger);
+                ScheduleNextScratch();
             }
+        }
+
+        private void ScheduleNextScratch()
+        {
+            float minInterval = Mathf.Max(0.1f, scratchIntervalMinSeconds);
+            float maxInterval = Mathf.Max(minInterval, scratchIntervalMaxSeconds);
+            _nextScratchTime = Time.time + Random.Range(minInterval, maxInterval);
         }
 
         #region Editor Helpers
