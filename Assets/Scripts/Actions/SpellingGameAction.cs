@@ -33,17 +33,32 @@ private const float BLOCK_SCALE = 0.12f;
 private Vector3 SLOT_SCALE = new Vector3(0.14f, 0.02f, 0.14f);
 
 // --- STATE ---
-private string targetWord = "CAT";
+    private string targetWord;
+    // Placeholder vocabulary list simulating object detection results
+    private List<string> activeVocabulary = new List<string> 
+    { 
+        "laptop", "lamp", "person", "mouse", "bottle", "screen" 
+    };
 private List<LetterSlot> activeSlots = new List<LetterSlot>();
 private bool isGameRunning = false;
 
 public string GetActionName() => "SpellingGame";
 public bool CanExecute(LLMActionContext context) => true;
 
-public async Task<LLMActionResult> ExecuteAsync(ILLMService llmService, LLMActionContext context)
-{
-    // Using standard FindObjectOfType to ensure compatibility
-    var controller = Object.FindObjectOfType<NPCController>();
+    public async Task<LLMActionResult> ExecuteAsync(ILLMService llmService, LLMActionContext context)
+    {
+        // Pick a random word from the placeholder list
+        if (activeVocabulary != null && activeVocabulary.Count > 0)
+        {
+            targetWord = activeVocabulary[Random.Range(0, activeVocabulary.Count)].ToUpper();
+        }
+        else
+        {
+            targetWord = "CAT"; // Fallback
+        }
+
+        // Using standard FindObjectOfType to ensure compatibility
+        var controller = Object.FindObjectOfType<NPCController>();
 
     if (controller != null)
     {
