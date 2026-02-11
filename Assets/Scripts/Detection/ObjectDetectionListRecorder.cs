@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
@@ -22,6 +23,9 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     [SerializeField] private bool logToFile = true;
     [SerializeField] private string logFileName = "detections.txt";
     [SerializeField] private float fileLogInterval = 1.0f;
+
+    // Public accessor for other components to get the registry
+    public DetectedObjectRegistry Registry => registry;
 
 #if MRUK_INSTALLED
     private ObjectDetectionAgent _agent;
@@ -79,6 +83,22 @@ public class ObjectDetectionListRecorder : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Control the visibility of the object detection visualizer (bounding boxes).
+    /// </summary>
+    public void SetVisualizerEnabled(bool enabled)
+    {
+        if (_visualizer != null)
+        {
+            _visualizer.enabled = enabled;
+            Debug.Log($"[ObjectDetectionListRecorder] Visualizer {(enabled ? "ENABLED" : "DISABLED")}");
+        }
+        else
+        {
+            Debug.LogWarning("[ObjectDetectionListRecorder] Cannot set visualizer state - visualizer is null");
+        }
+    }
+
     private void HandleBoxesUpdated(System.Collections.Generic.List<BoxData> batch)
     {
         if (batch == null)
@@ -131,11 +151,11 @@ public class ObjectDetectionListRecorder : MonoBehaviour
         if (logToFile && Time.time >= _nextFileLogTime)
         {
             _nextFileLogTime = Time.time + fileLogInterval;
-            TryAppendToFile(BuildLog());
+            TryWriteToFile(BuildLog());
         }
     }
 
-    private void TryAppendToFile(string content)
+    private void TryWriteToFile(string content)
     {
         if (string.IsNullOrWhiteSpace(_logFilePath) || string.IsNullOrWhiteSpace(content))
         {
@@ -144,7 +164,7 @@ public class ObjectDetectionListRecorder : MonoBehaviour
 
         try
         {
-            File.AppendAllText(_logFilePath, content + System.Environment.NewLine);
+            File.WriteAllText(_logFilePath, content + System.Environment.NewLine);
         }
         catch (Exception e)
         {
@@ -158,26 +178,30 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     private string BuildLog()
     {
         _logBuilder.Clear();
-        _logBuilder.Append("[ObjectDetectionListRecorder] Registry entries: ");
 
         var entries = registry.Entries;
-        _logBuilder.Append(entries.Count);
-        _logBuilder.Append('\n');
+        var labelCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         for (var i = 0; i < entries.Count; i++)
         {
-            var entry = entries[i];
-            _logBuilder.Append(i + 1);
-            _logBuilder.Append(") ");
-            _logBuilder.Append(entry.Label);
-            if (entry.Confidence >= 0f)
+            var label = entries[i].Label;
+            if (string.IsNullOrWhiteSpace(label))
             {
-                _logBuilder.Append(" (");
-                _logBuilder.Append(Mathf.RoundToInt(entry.Confidence * 100f));
-                _logBuilder.Append("%)");
+                continue;
             }
-            _logBuilder.Append(" @ ");
-            _logBuilder.Append(entry.Position.ToString("F2"));
+
+            if (!labelCounts.TryGetValue(label, out var count))
+            {
+                count = 0;
+            }
+
+            if (count >= 3)
+            {
+                continue;
+            }
+
+            labelCounts[label] = count + 1;
+            _logBuilder.Append(label.Trim());
             _logBuilder.Append('\n');
         }
 

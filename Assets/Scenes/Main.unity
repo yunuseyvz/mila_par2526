@@ -17693,9 +17693,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1797615766}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 20, y: -7}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 40, y: 14}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &200744690
@@ -23955,7 +23955,7 @@ MonoBehaviour:
   _category: Object Detection
   registry:
     handles:
-    - enabled: 0
+    - enabled: 1
       typeName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       inspectedMembers:
@@ -24548,7 +24548,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: _busy
         _editorSelectedGizmoIndex: 0
-    - enabled: 0
+    - enabled: 1
       typeName: Meta.XR.EnvironmentDepth.EnvironmentDepthManager, Meta.XR.EnvironmentDepth,
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       inspectedMembers:
@@ -26218,7 +26218,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: _frame
         _editorSelectedGizmoIndex: 0
-    - enabled: 0
+    - enabled: 1
       typeName: Meta.XR.BuildingBlocks.AIBlocks.DepthTextureAccess, Meta.XR.BuildingBlocks.AIBlocks,
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       inspectedMembers:
@@ -26732,7 +26732,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: EnvironmentDepthReprojId
         _editorSelectedGizmoIndex: 0
-    - enabled: 0
+    - enabled: 1
       typeName: Meta.XR.BuildingBlocks.BuildingBlock, Meta.XR.BuildingBlocks, Version=0.0.0.0,
         Culture=neutral, PublicKeyToken=null
       inspectedMembers:
@@ -26901,7 +26901,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: installationRoutineCheckpoint
         _editorSelectedGizmoIndex: 0
-    - enabled: 0
+    - enabled: 1
       typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       inspectedMembers:
@@ -27055,6 +27055,171 @@ MonoBehaviour:
           DisplayName: 
         memberName: fileLogInterval
         _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Awake
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Start
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: OnDisable
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _agent
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _visualizer
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _logBuilder
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _loggedMissingDeps
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _nextUiLogTime
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _nextFileLogTime
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _logFilePath
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Registry
+        _editorSelectedGizmoIndex: 0
 --- !u!114 &489634776
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27096,7 +27261,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boundingBoxPrefab: {fileID: 8066889808755201971, guid: 46d0b28dd34412b4c90c82205d36db4f, type: 3}
-  showBoundingBoxes: 1
+  showBoundingBoxes: 0
 --- !u!114 &489634779
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27109,8 +27274,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95c190a9246005a43a268bc4dc0564da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  providerAsset: {fileID: 11400000, guid: 397e1e9831160f649871464d0969d9f1, type: 2}
-  minConfidence: 0.5
+  providerAsset: {fileID: 11400000, guid: 789d9a41d7506374cb0a558ba68ce332, type: 2}
+  minConfidence: 0.79
   realtimeInference: 1
   onDetectionResponseReceived:
     m_PersistentCalls:
@@ -27168,15 +27333,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de04175396b6d844baa166c2a8c0bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectDetectionListRecorder
-  registry: {fileID: 11400000, guid: e0b04c0457d2c8e4d8567c883504c811, type: 2}
+  registry: {fileID: 11400000, guid: 92353d8e88954d3498b7f42897e00abc, type: 2}
   duplicateDistanceThreshold: 0.35
   logToConsole: 1
   logDiagnostics: 1
-  eventLog: {fileID: 0}
-  uiLogInterval: 0.5
+  eventLog: {fileID: 881716942}
+  uiLogInterval: 10
   logToFile: 1
   logFileName: detections.txt
-  fileLogInterval: 1
+  fileLogInterval: 10
 --- !u!1001 &493395676
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37104,9 +37269,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1797615766}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 360, y: 16.999994}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 3.6, y: 1.31}
 --- !u!114 &618605484
@@ -43639,9 +43804,9 @@ RectTransform:
   - {fileID: 502400662}
   m_Father: {fileID: 1577043864}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 162.95, y: -187.05}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 277.9, y: 254.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &881716944
@@ -63128,7 +63293,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1192257079
 Transform:
   m_ObjectHideFlags: 0
@@ -76322,7 +76487,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 135.6, y: -83.4}
-  m_SizeDelta: {x: 325.9, y: 338.1}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &1577043865
 MonoBehaviour:
@@ -85441,9 +85606,9 @@ RectTransform:
   - {fileID: 618605483}
   m_Father: {fileID: 1577043864}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 124, y: -36}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 200, y: 24}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1797615767
@@ -95790,7 +95955,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e999196bff1224f88a05863b63afff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Core.NPCController
-  config: {fileID: 11400000, guid: a6fafb04a0a46e4478f6f53f74afe06f, type: 2}
+  config: {fileID: 11400000, guid: fd492db30bc27074890d4469c780fe7c, type: 2}
   whisperManager: {fileID: 0}
   npcView: {fileID: 1924949633}
   avatarAnimationController: {fileID: 1924949637}
@@ -97283,6 +97448,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Core.PassthroughFrameCapture
   targetSize: 512
+  cameraAccess: {fileID: 0}
 --- !u!4 &2002619817
 Transform:
   m_ObjectHideFlags: 0

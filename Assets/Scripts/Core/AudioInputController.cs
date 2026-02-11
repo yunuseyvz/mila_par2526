@@ -38,6 +38,19 @@ namespace LanguageTutor.Core
         /// </summary>
         private void InitializeMicrophone()
         {
+            Debug.Log("[InitializeMicrophone] Checking for microphone permission...");
+
+            // Request microphone permission on Android
+#if UNITY_ANDROID
+            if (!UnityEngine.Android.Permission.HasUserAuthorizedPermission("android.permission.RECORD_AUDIO"))
+            {
+                Debug.Log("[InitializeMicrophone] Requesting RECORD_AUDIO permission...");
+                UnityEngine.Android.Permission.RequestUserPermission("android.permission.RECORD_AUDIO");
+            }
+#endif
+
+            Debug.Log("[InitializeMicrophone] Microphone.devices.Length = " + Microphone.devices.Length);
+
             if (Microphone.devices.Length > 0)
             {
                 _microphoneDevice = Microphone.devices[0];
@@ -46,6 +59,7 @@ namespace LanguageTutor.Core
             else
             {
                 Debug.LogError("[AudioInputController] No microphone devices found!");
+                Debug.LogError("[AudioInputController] This usually means RECORD_AUDIO permission is not granted");
             }
         }
 
@@ -54,29 +68,40 @@ namespace LanguageTutor.Core
         /// </summary>
         public void StartRecording()
         {
+            Debug.Log("[StartRecording] ENTRY");
+
             if (_isRecording)
             {
-                Debug.LogWarning("[AudioInputController] Already recording");
+                Debug.Log("[StartRecording] Already recording, returning");
                 return;
             }
+
+            Debug.Log("[StartRecording] Checking microphone device: '" + _microphoneDevice + "'");
 
             if (string.IsNullOrEmpty(_microphoneDevice))
             {
-                OnRecordingError?.Invoke("No microphone device available");
+                Debug.LogError("[StartRecording] Microphone device is null or empty!");
                 return;
             }
 
+            Debug.Log("[StartRecording] About to start microphone");
             try
             {
                 _recordingClip = Microphone.Start(_microphoneDevice, false, _maxRecordingDuration, _sampleRate);
+                Debug.Log("[StartRecording] Microphone started");
+
                 _isRecording = true;
+                Debug.Log("[StartRecording] _isRecording set to true");
+
                 OnRecordingStarted?.Invoke();
-                Debug.Log($"[AudioInputController] Recording started (max {_maxRecordingDuration}s)");
+                Debug.Log("[StartRecording] OnRecordingStarted invoked");
+
+                Debug.Log("[AudioInputController] Recording started (max " + _maxRecordingDuration + "s)");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                Debug.LogError($"[AudioInputController] Failed to start recording: {ex.Message}");
-                OnRecordingError?.Invoke($"Failed to start recording: {ex.Message}");
+                Debug.LogError("[StartRecording] EXCEPTION: " + ex.Message);
+                Debug.LogError("[StartRecording] StackTrace: " + ex.StackTrace);
             }
         }
 
@@ -107,7 +132,7 @@ namespace LanguageTutor.Core
 
                 // Trim the recording to actual length
                 AudioClip trimmedClip = TrimAudioClip(_recordingClip, position);
-                
+
                 Debug.Log($"[AudioInputController] Recording stopped. Duration: {trimmedClip.length:F2}s");
                 OnRecordingCompleted?.Invoke(trimmedClip);
             }
@@ -116,18 +141,30 @@ namespace LanguageTutor.Core
                 Debug.LogError($"[AudioInputController] Failed to stop recording: {ex.Message}");
                 OnRecordingError?.Invoke($"Failed to stop recording: {ex.Message}");
                 _isRecording = false;
-            } 
+            }
         }
 
-        /// <summary>
-        /// Toggle recording state (start if stopped, stop if recording).
-        /// </summary>
         public void ToggleRecording()
         {
-            if (_isRecording)
-                StopRecording();
-            else
-                StartRecording();
+            try
+            {
+                Debug.Log("[ToggleRecording] Called, _isRecording=" + _isRecording);
+
+                if (_isRecording)
+                {
+                    Debug.Log("[ToggleRecording] Stopping...");
+                    StopRecording();
+                }
+                else
+                {
+                    Debug.Log("[ToggleRecording] Starting...");
+                    StartRecording();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("[ToggleRecording] EXCEPTION: " + ex.Message + "\n" + ex.StackTrace);
+            }
         }
 
         /// <summary>
@@ -153,7 +190,7 @@ namespace LanguageTutor.Core
 
             var soundData = new float[samples * clip.channels];
             clip.GetData(soundData, 0);
-            
+
             var trimmedClip = AudioClip.Create(
                 $"{clip.name}_trimmed",
                 samples,
@@ -161,7 +198,7 @@ namespace LanguageTutor.Core
                 clip.frequency,
                 false
             );
-            
+
             trimmedClip.SetData(soundData, 0);
             return trimmedClip;
         }
