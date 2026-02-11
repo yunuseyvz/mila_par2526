@@ -8,7 +8,7 @@ This Unity project combines:
 - **Augmented Reality (Meta Quest)** for immersive learning environments
 - **Ollama/Llama3** for intelligent conversational AI
 - **Whisper** for accurate speech-to-text recognition
-- **AllTalk TTS** for natural text-to-speech synthesis
+- **LLM** for natural text-to-speech synthesis
 
 The application provides an interactive language tutor NPC that can engage in conversations, correct grammar, teach vocabulary, and provide pronunciation feedback.
 
