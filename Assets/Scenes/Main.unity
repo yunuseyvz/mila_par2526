@@ -95790,7 +95790,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e999196bff1224f88a05863b63afff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Core.NPCController
-  config: {fileID: 11400000, guid: a6fafb04a0a46e4478f6f53f74afe06f, type: 2}
+  config: {fileID: 11400000, guid: e2a45955429e12642929694df7337ae5, type: 2}
   whisperManager: {fileID: 0}
   npcView: {fileID: 1924949633}
   avatarAnimationController: {fileID: 1924949637}
