@@ -12,7 +12,7 @@ namespace LanguageTutor.Actions
     {
         private readonly string _targetLanguage;
         private readonly string _customSystemPrompt;
-        private const string DEFAULT_VOCAB_PROMPT = 
+        private const string DEFAULT_VOCAB_PROMPT =
             @"You are a vocabulary tutor teaching {0}. The user wants to learn about: '{1}'
 
 Provide:
@@ -40,8 +40,8 @@ Make it engaging and memorable. Keep your response concise but informative.";
         {
             try
             {
-                string language = !string.IsNullOrEmpty(context.TargetLanguage) 
-                    ? context.TargetLanguage 
+                string language = !string.IsNullOrEmpty(context.TargetLanguage)
+                    ? context.TargetLanguage
                     : _targetLanguage;
 
                 // Use custom prompt if provided, otherwise use default template
@@ -49,9 +49,15 @@ Make it engaging and memorable. Keep your response concise but informative.";
                     ? _customSystemPrompt
                     : string.Format(DEFAULT_VOCAB_PROMPT, language, context.UserInput);
 
+                // Append additional context (e.g., room awareness) if provided
+                if (!string.IsNullOrEmpty(context.SystemPrompt))
+                {
+                    prompt += "\n\n" + context.SystemPrompt;
+                }
+
                 string response = await llmService.GenerateResponseAsync(
-                    context.UserInput, 
-                    prompt, 
+                    context.UserInput,
+                    prompt,
                     context.ConversationHistory);
 
                 var result = LLMActionResult.CreateSuccess(response);

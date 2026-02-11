@@ -12,7 +12,7 @@ namespace LanguageTutor.Actions
     {
         private readonly string _scenario;
         private readonly string _customSystemPrompt;
-        private const string DEFAULT_CONVERSATION_PROMPT = 
+        private const string DEFAULT_CONVERSATION_PROMPT =
             @"You are a native speaker having a natural conversation in {0}. 
 Scenario: {1}
 
@@ -37,8 +37,8 @@ Be friendly and encouraging.";
         {
             try
             {
-                string language = !string.IsNullOrEmpty(context.TargetLanguage) 
-                    ? context.TargetLanguage 
+                string language = !string.IsNullOrEmpty(context.TargetLanguage)
+                    ? context.TargetLanguage
                     : "English";
 
                 string scenario = context.Parameters != null && context.Parameters.ContainsKey("scenario")
@@ -50,9 +50,15 @@ Be friendly and encouraging.";
                     ? _customSystemPrompt
                     : string.Format(DEFAULT_CONVERSATION_PROMPT, language, scenario);
 
+                // Append additional context (e.g., room awareness) if provided
+                if (!string.IsNullOrEmpty(context.SystemPrompt))
+                {
+                    systemPrompt += "\n\n" + context.SystemPrompt;
+                }
+
                 string response = await llmService.GenerateResponseAsync(
-                    context.UserInput, 
-                    systemPrompt, 
+                    context.UserInput,
+                    systemPrompt,
                     context.ConversationHistory);
 
                 var result = LLMActionResult.CreateSuccess(response);

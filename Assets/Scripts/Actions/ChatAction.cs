@@ -28,23 +28,30 @@ namespace LanguageTutor.Actions
         {
             try
             {
-                string systemPrompt = !string.IsNullOrEmpty(context.SystemPrompt) 
-                    ? context.SystemPrompt 
-                    : _systemPrompt;
+                // Combine base system prompt with additional context (e.g., room context)
+                string systemPrompt = _systemPrompt ?? string.Empty;
+
+                if (!string.IsNullOrEmpty(context.SystemPrompt))
+                {
+                    // Append context to base prompt instead of replacing
+                    systemPrompt = string.IsNullOrEmpty(systemPrompt)
+                        ? context.SystemPrompt
+                        : systemPrompt + "\n\n" + context.SystemPrompt;
+                }
 
                 string response;
-                
+
                 if (!string.IsNullOrEmpty(systemPrompt))
                 {
                     response = await llmService.GenerateResponseAsync(
-                        context.UserInput, 
-                        systemPrompt, 
+                        context.UserInput,
+                        systemPrompt,
                         context.ConversationHistory);
                 }
                 else
                 {
                     response = await llmService.GenerateResponseAsync(
-                        context.UserInput, 
+                        context.UserInput,
                         context.ConversationHistory);
                 }
 

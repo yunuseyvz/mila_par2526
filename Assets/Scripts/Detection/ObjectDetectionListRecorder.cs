@@ -13,6 +13,7 @@ using Meta.XR.BuildingBlocks.AIBlocks;
 #endif
 public class ObjectDetectionListRecorder : MonoBehaviour
 {
+    public event Action<System.Collections.Generic.IReadOnlyList<DetectedObjectRegistry.Entry>> OnDetectionsThisFrame;
     [SerializeField] private DetectedObjectRegistry registry;
     [SerializeField] private float duplicateDistanceThreshold = 0.35f;
     [SerializeField] private bool logToConsole = true;
@@ -23,6 +24,20 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     [SerializeField] private string logFileName = "detections.txt";
     [SerializeField] private float fileLogInterval = 1.0f;
 
+    // Public accessor for other components to get the registry
+    public DetectedObjectRegistry Registry => registry;
+
+    private void Awake()
+    {
+        Debug.LogError("====== ObjectDetectionListRecorder Awake - UNCONDITIONAL ======");
+#if MRUK_INSTALLED
+        Debug.LogError("====== MRUK_INSTALLED IS DEFINED ======");
+        AwakeMRUK();
+#else
+        Debug.LogError("====== MRUK_INSTALLED IS NOT DEFINED ======");
+#endif
+    }
+
 #if MRUK_INSTALLED
     private ObjectDetectionAgent _agent;
     private ObjectDetectionVisualizer _visualizer;
@@ -32,10 +47,11 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     private float _nextFileLogTime;
     private string _logFilePath;
 
-    private void Awake()
+    private void AwakeMRUK()
     {
         _agent = GetComponent<ObjectDetectionAgent>();
         _visualizer = GetComponent<ObjectDetectionVisualizer>();
+        Debug.LogError($"[ObjectDetectionListRecorder] Awake: _agent={(_agent == null ? "NULL" : "FOUND")}, _visualizer={(_visualizer == null ? "NULL" : "FOUND")}");
         if (eventLog == null)
         {
             eventLog = FindObjectOfType<LanguageTutor.UI.EventLog>(true);
@@ -61,13 +77,20 @@ public class ObjectDetectionListRecorder : MonoBehaviour
         {
             Debug.Log("[ObjectDetectionListRecorder] Ready. Awaiting detections...");
         }
+        Debug.LogError("[ObjectDetectionListRecorder] START CALLED - Agent: " + (_agent == null ? "NULL" : "SET") + ", Visualizer: " + (_visualizer == null ? "NULL" : "SET") + ", Registry: " + (registry == null ? "NULL" : "SET"));
     }
 
     private void OnEnable()
     {
+        Debug.LogError("[ObjectDetectionListRecorder] OnEnable called. _agent = " + (_agent == null ? "NULL" : "SET"));
         if (_agent != null)
         {
             _agent.OnBoxesUpdated += HandleBoxesUpdated;
+            Debug.LogError("[ObjectDetectionListRecorder] OnEnable: Subscribed to OnBoxesUpdated");
+        }
+        else
+        {
+            Debug.LogError("[ObjectDetectionListRecorder] OnEnable: _agent is NULL, cannot subscribe to OnBoxesUpdated. Detection will NOT work!");
         }
     }
 
@@ -76,11 +99,14 @@ public class ObjectDetectionListRecorder : MonoBehaviour
         if (_agent != null)
         {
             _agent.OnBoxesUpdated -= HandleBoxesUpdated;
+            Debug.LogError("[ObjectDetectionListRecorder] OnDisable: Unsubscribed from OnBoxesUpdated");
         }
     }
 
     private void HandleBoxesUpdated(System.Collections.Generic.List<BoxData> batch)
     {
+        Debug.LogError($"[ObjectDetectionListRecorder] HandleBoxesUpdated called with batch count: {(batch == null ? "NULL" : batch.Count.ToString())}");
+        
         if (batch == null)
         {
             return;
@@ -88,6 +114,7 @@ public class ObjectDetectionListRecorder : MonoBehaviour
 
         if (registry == null || _visualizer == null)
         {
+            Debug.LogError($"[ObjectDetectionListRecorder] Cannot process: Registry={registry != null}, Visualizer={_visualizer != null}");
             if (logDiagnostics && !_loggedMissingDeps)
             {
                 Debug.LogWarning($"[ObjectDetectionListRecorder] Missing refs. Registry set: {registry != null}, Visualizer set: {_visualizer != null}.");
@@ -96,6 +123,7 @@ public class ObjectDetectionListRecorder : MonoBehaviour
             return;
         }
 
+        var snapshot = new System.Collections.Generic.List<DetectedObjectRegistry.Entry>(batch.Count);
         foreach (var b in batch)
         {
             if (!TryParseLabel(b.label, out var label, out var confidence))
@@ -111,6 +139,18 @@ public class ObjectDetectionListRecorder : MonoBehaviour
             }
 
             registry.Upsert(label, confidence, worldPos, duplicateDistanceThreshold);
+
+            // Log each detection clearly to logcat
+            Debug.Log($"[DETECTED] '{label}' | Confidence: {(confidence >= 0 ? (confidence * 100f).ToString("F0") + "%" : "N/A")} | Position: {worldPos.ToString("F2")}");
+
+            // Add to per-batch snapshot so listeners can react immediately
+            snapshot.Add(new DetectedObjectRegistry.Entry
+            {
+                Label = label,
+                Confidence = confidence,
+                Position = worldPos,
+                LastSeenTime = Time.time
+            });
         }
 
         if (logToConsole)
@@ -122,6 +162,9 @@ public class ObjectDetectionListRecorder : MonoBehaviour
             Debug.Log($"[ObjectDetectionListRecorder] Updated registry. Entries: {registry.Entries.Count}");
         }
 
+        // Always log batch summary
+        Debug.Log($"[ObjectDetectionListRecorder] Batch processed: {snapshot.Count} detections, Total in registry: {registry.Entries.Count}");
+
         if (eventLog != null && Time.time >= _nextUiLogTime)
         {
             _nextUiLogTime = Time.time + uiLogInterval;
@@ -132,6 +175,19 @@ public class ObjectDetectionListRecorder : MonoBehaviour
         {
             _nextFileLogTime = Time.time + fileLogInterval;
             TryAppendToFile(BuildLog());
+        }
+
+        // Notify listeners with the snapshot for this batch
+        try
+        {
+            OnDetectionsThisFrame?.Invoke(snapshot);
+        }
+        catch (Exception e)
+        {
+            if (logDiagnostics)
+            {
+                Debug.LogWarning($"[ObjectDetectionListRecorder] Listener threw: {e.Message}");
+            }
         }
     }
 

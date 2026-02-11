@@ -23709,6 +23709,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1924949637}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1924949639}
     - targetCorrespondingSourceObject: {fileID: 8304175215116285622, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 188504765}
@@ -23899,7 +23902,7 @@ MonoBehaviour:
   _category: Object Detection
   registry:
     handles:
-    - enabled: 0
+    - enabled: 1
       typeName: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       inspectedMembers:
@@ -24492,7 +24495,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: _busy
         _editorSelectedGizmoIndex: 0
-    - enabled: 0
+    - enabled: 1
       typeName: Meta.XR.EnvironmentDepth.EnvironmentDepthManager, Meta.XR.EnvironmentDepth,
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       inspectedMembers:
@@ -26162,7 +26165,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: _frame
         _editorSelectedGizmoIndex: 0
-    - enabled: 0
+    - enabled: 1
       typeName: Meta.XR.BuildingBlocks.AIBlocks.DepthTextureAccess, Meta.XR.BuildingBlocks.AIBlocks,
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       inspectedMembers:
@@ -26676,7 +26679,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: EnvironmentDepthReprojId
         _editorSelectedGizmoIndex: 0
-    - enabled: 0
+    - enabled: 1
       typeName: Meta.XR.BuildingBlocks.BuildingBlock, Meta.XR.BuildingBlocks, Version=0.0.0.0,
         Culture=neutral, PublicKeyToken=null
       inspectedMembers:
@@ -26845,7 +26848,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: installationRoutineCheckpoint
         _editorSelectedGizmoIndex: 0
-    - enabled: 0
+    - enabled: 1
       typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       inspectedMembers:
@@ -26999,6 +27002,704 @@ MonoBehaviour:
           DisplayName: 
         memberName: fileLogInterval
         _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Awake
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Start
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: OnDisable
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _agent
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _visualizer
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _logBuilder
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _loggedMissingDeps
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _nextUiLogTime
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _nextFileLogTime
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _logFilePath
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: AwakeMRUK
+        _editorSelectedGizmoIndex: 0
+    - enabled: 1
+      typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      inspectedMembers:
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: OnEnable
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: registry
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: duplicateDistanceThreshold
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: logToConsole
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: logDiagnostics
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: eventLog
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: uiLogInterval
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: logToFile
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: logFileName
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: fileLogInterval
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Awake
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Start
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: OnDisable
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _agent
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _visualizer
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _logBuilder
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _loggedMissingDeps
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _nextUiLogTime
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _nextFileLogTime
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _logFilePath
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectDetectionListRecorder, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: AwakeMRUK
+        _editorSelectedGizmoIndex: 0
+    - enabled: 1
+      typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      inspectedMembers:
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Awake
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: Update
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: CallInference
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: OnDetectionResponseReceived
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: providerAsset
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: minConfidence
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: realtimeInference
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _batch
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _cam
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: onDetectionResponseReceived
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _detector
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _unityProvider
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _busy
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: Meta.XR.BuildingBlocks.AIBlocks.ObjectDetectionAgent, Meta.XR.BuildingBlocks.AIBlocks,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: _captureRT
+        _editorSelectedGizmoIndex: 0
 --- !u!114 &489634776
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27053,7 +27754,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95c190a9246005a43a268bc4dc0564da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  providerAsset: {fileID: 11400000, guid: 16ca496f8cb6b63479babdcbadaab20a, type: 2}
+  providerAsset: {fileID: 11400000, guid: 397e1e9831160f649871464d0969d9f1, type: 2}
   minConfidence: 0.5
   realtimeInference: 1
   onDetectionResponseReceived:
@@ -27112,11 +27813,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de04175396b6d844baa166c2a8c0bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectDetectionListRecorder
-  registry: {fileID: 11400000, guid: e0b04c0457d2c8e4d8567c883504c811, type: 2}
+  registry: {fileID: 11400000, guid: 92353d8e88954d3498b7f42897e00abc, type: 2}
   duplicateDistanceThreshold: 0.35
   logToConsole: 1
   logDiagnostics: 1
-  eventLog: {fileID: 0}
+  eventLog: {fileID: 881716942}
   uiLogInterval: 0.5
   logToFile: 1
   logFileName: detections.txt
@@ -54243,6 +54944,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131745677}
   m_CullTransparentMesh: 1
+--- !u!1 &1143940933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1143940935}
+  - component: {fileID: 1143940934}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1143940934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1143940933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee6ffc0ca3504354b9ae8ed31449873c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HealthCheck
+--- !u!4 &1143940935
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1143940933}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.38693, y: 0.95917, z: 0.163}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1145213689
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77616,12 +78361,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1680792119}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2067635582}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1681374806
 PrefabInstance:
@@ -94921,14 +95666,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e999196bff1224f88a05863b63afff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Core.NPCController
-  llmConfig: {fileID: 11400000, guid: da5da16df9d5c1b43a53ee24aab15c48, type: 2}
-  ttsConfig: {fileID: 11400000, guid: 969f0c65f94a485499460b1a28381ca1, type: 2}
-  sttConfig: {fileID: 11400000, guid: 66944d1858adc6b40a8cce152a6ba7c9, type: 2}
-  conversationConfig: {fileID: 11400000, guid: 056569cad107d884a9399416aa1f0678, type: 2}
+  llmConfig: {fileID: 11400000, guid: 195c2b0636490df4c986623fd25f401a, type: 2}
+  ttsConfig: {fileID: 11400000, guid: 46035002ef960d640bceb442bbabff7e, type: 2}
+  sttConfig: {fileID: 11400000, guid: 427acaec4bbde814ea577cfb37ca484d, type: 2}
+  conversationConfig: {fileID: 11400000, guid: 58e95ab4307e64c4dbff35738bf897ea, type: 2}
   whisperManager: {fileID: 0}
   npcView: {fileID: 1924949633}
   avatarAnimationController: {fileID: 1924949637}
-  defaultActionMode: 1
+  defaultActionMode: 0
 --- !u!95 &1924949635 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
@@ -94954,6 +95699,21 @@ MonoBehaviour:
   idleStateName: Idle
   thinkingStateName: Thinking
   talkingStateName: Talking
+--- !u!114 &1924949639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1924949629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96665ed9a7a4f894eb8a683832e6294d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorContextComponent
+  registry: {fileID: 0}
+  recorder: {fileID: 0}
+  enableDebugLogging: 1
 --- !u!1 &1928544976
 GameObject:
   m_ObjectHideFlags: 0
@@ -97939,7 +98699,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1680792122}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2071701215
@@ -98711,9 +99472,9 @@ SceneRoots:
   - {fileID: 649896854}
   - {fileID: 1015144973}
   - {fileID: 2067635582}
-  - {fileID: 1680792122}
   - {fileID: 489634781}
   - {fileID: 479831425}
   - {fileID: 1161523809}
   - {fileID: 1608634917}
   - {fileID: 1659518727}
+  - {fileID: 1143940935}

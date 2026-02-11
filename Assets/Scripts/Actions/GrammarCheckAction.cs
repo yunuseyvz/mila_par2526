@@ -12,7 +12,7 @@ namespace LanguageTutor.Actions
     {
         private readonly string _targetLanguage;
         private readonly string _customSystemPrompt;
-        private const string DEFAULT_GRAMMAR_PROMPT = 
+        private const string DEFAULT_GRAMMAR_PROMPT =
             @"You are a language tutor focused on grammar correction. The user is learning {0}.
 
 Analyze the following text for grammatical errors:
@@ -44,8 +44,8 @@ Keep your response concise and clear.";
         {
             try
             {
-                string language = !string.IsNullOrEmpty(context.TargetLanguage) 
-                    ? context.TargetLanguage 
+                string language = !string.IsNullOrEmpty(context.TargetLanguage)
+                    ? context.TargetLanguage
                     : _targetLanguage;
 
                 // Use custom prompt if provided, otherwise use default template
@@ -53,9 +53,15 @@ Keep your response concise and clear.";
                     ? _customSystemPrompt
                     : string.Format(DEFAULT_GRAMMAR_PROMPT, language, context.UserInput);
 
+                // Append additional context (e.g., room awareness) if provided
+                if (!string.IsNullOrEmpty(context.SystemPrompt))
+                {
+                    prompt += "\n\n" + context.SystemPrompt;
+                }
+
                 string response = await llmService.GenerateResponseAsync(
-                    context.UserInput, 
-                    prompt, 
+                    context.UserInput,
+                    prompt,
                     context.ConversationHistory);
 
                 var result = LLMActionResult.CreateSuccess(response);

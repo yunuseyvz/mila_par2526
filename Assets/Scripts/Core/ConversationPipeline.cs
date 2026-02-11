@@ -50,9 +50,9 @@ namespace LanguageTutor.Core
                 // Stage 1: Speech-to-Text
                 OnStageChanged?.Invoke(PipelineStage.Transcribing);
                 Debug.Log("[ConversationPipeline] Stage 1: Transcribing speech...");
-                
+
                 string transcribedText = await _sttService.TranscribeAsync(userAudio);
-                
+
                 if (string.IsNullOrWhiteSpace(transcribedText))
                 {
                     OnPipelineError?.Invoke("Transcription resulted in empty text");
@@ -64,7 +64,7 @@ namespace LanguageTutor.Core
                 result.TranscribedText = transcribedText;
                 OnTranscriptionCompleted?.Invoke(transcribedText);
                 _conversationHistory.AddUserMessage(transcribedText);
-                
+
                 Debug.Log($"[ConversationPipeline] Transcribed: {transcribedText}");
 
                 // Stage 2: LLM Processing
@@ -75,6 +75,26 @@ namespace LanguageTutor.Core
                 {
                     ConversationHistory = _conversationHistory.GetRecentMessages(10)
                 };
+
+                // INTEGRATION: Add room context to the LLM (detected objects in the room)
+                var roomContext = UnityEngine.Object.FindObjectOfType<TutorContextComponent>();
+                Debug.Log($"[ConversationPipeline] Checking room context... TutorContextComponent: {(roomContext != null ? "FOUND" : "NULL")}");
+
+                if (roomContext != null && roomContext.HasDetectedObjects())
+                {
+                    // Enrich the system prompt with room awareness
+                    string roomContextText = roomContext.BuildTutorSystemPromptContext();
+                    context.SystemPrompt = roomContextText;
+                    Debug.Log($"[ConversationPipeline] ✓ Room context ADDED. Detected {roomContext.GetTotalDetectedObjectCount()} objects.");
+                }
+                else if (roomContext == null)
+                {
+                    Debug.LogWarning("[ConversationPipeline] ✗ TutorContextComponent NOT FOUND in scene. Add it to your NPC GameObject!");
+                }
+                else
+                {
+                    Debug.LogWarning($"[ConversationPipeline] ✗ TutorContextComponent found but 0 objects detected. Registry has {roomContext.GetTotalDetectedObjectCount()} entries.");
+                }
 
                 var actionResult = await _actionExecutor.ExecuteAsync(action, context);
 
@@ -89,7 +109,7 @@ namespace LanguageTutor.Core
                 result.LLMResponse = actionResult.ResponseText;
                 OnLLMResponseReceived?.Invoke(actionResult.ResponseText);
                 _conversationHistory.AddAssistantMessage(actionResult.ResponseText);
-                
+
                 Debug.Log($"[ConversationPipeline] LLM Response: {actionResult.ResponseText}");
 
                 // Stage 3: Text-to-Speech
@@ -108,7 +128,7 @@ namespace LanguageTutor.Core
 
                 result.TTSAudioClip = ttsAudio;
                 OnTTSAudioGenerated?.Invoke(ttsAudio);
-                
+
                 Debug.Log($"[ConversationPipeline] TTS audio generated: {ttsAudio.length:F2}s");
 
                 // Success!
@@ -121,7 +141,7 @@ namespace LanguageTutor.Core
                 Debug.LogError($"[ConversationPipeline] Pipeline error: {ex.Message}");
                 OnPipelineError?.Invoke(ex.Message);
                 OnStageChanged?.Invoke(PipelineStage.Error);
-                
+
                 result.Success = false;
                 result.ErrorMessage = ex.Message;
                 return result;
