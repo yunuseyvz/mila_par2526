@@ -15,15 +15,16 @@ namespace LanguageTutor.Actions
         private const float SLOT_SPACING = 0.25f;
         private const float BLOCK_SPACING = 0.20f;
 
-        // Height: 1.0m (approx table height)
-        private const float GAME_HEIGHT = 1.0f;
+        // Height: Split for Slots and Blocks
+        private const float SLOT_HEIGHT = 1.5f;
+        private const float BLOCK_HEIGHT = 1.9f;
 
-        // Depth: Slots in back (0.7m), Blocks in front (0.4m)
-        private const float SLOT_DISTANCE = 0.7f;
-        private const float BLOCK_DISTANCE = 0.4f;
+        // Depth: Slots (0.6f), Blocks (0.8f - further away)
+        private const float SLOT_DISTANCE = 0.6f;
+        private const float BLOCK_DISTANCE = 0.8f;
 
-        // Horizontal offset to keep blocks away from UI (left of camera)
-        private const float LEFT_OFFSET = 0.4f;
+        // Horizontal Shift: 0.3f (Shifted to the right)
+        private const float HORIZONTAL_SHIFT = 0.3f;
 
         // Number of extra "wrong" letters
         private const int EXTRA_LETTERS_COUNT = 3;
@@ -35,6 +36,7 @@ namespace LanguageTutor.Actions
         // --- STATE ---
         private string targetWord = "CAT";
         private List<LetterSlot> activeSlots = new List<LetterSlot>();
+        private List<GameObject> activeBlocks = new List<GameObject>();
         private bool isGameRunning = false;
         private List<string> wordList = new();  // Word list for Word Building mode
 
@@ -79,11 +81,13 @@ namespace LanguageTutor.Actions
             Vector3 flatForward = new Vector3(cam.forward.x, 0, cam.forward.z).normalized;
             Vector3 flatRight = new Vector3(cam.right.x, 0, cam.right.z).normalized;
 
-            Vector3 slotCenter = cam.position + (flatForward * SLOT_DISTANCE) - (flatRight * LEFT_OFFSET);
-            slotCenter.y = GAME_HEIGHT;
+            // Slots: 0.6f depth, 1.5f height, shifted right
+            Vector3 slotCenter = cam.position + (flatForward * SLOT_DISTANCE) + (flatRight * HORIZONTAL_SHIFT);
+            slotCenter.y = SLOT_HEIGHT;
 
-            Vector3 blockCenter = cam.position + (flatForward * BLOCK_DISTANCE) - (flatRight * LEFT_OFFSET);
-            blockCenter.y = GAME_HEIGHT;
+            // Blocks: 0.8f depth, 1.9f height, shifted right
+            Vector3 blockCenter = cam.position + (flatForward * BLOCK_DISTANCE) + (flatRight * HORIZONTAL_SHIFT);
+            blockCenter.y = BLOCK_HEIGHT;
 
             // Rotation: Strictly forward (no tilting)
             Quaternion uprightRotation = Quaternion.LookRotation(flatForward, Vector3.up);
@@ -107,6 +111,22 @@ namespace LanguageTutor.Actions
                         controller.PlaySuccessAnimation();
                         controller.Speak($"Correct! {targetWord} is right!");
                     }
+
+                    // 4. Cleanup after 10 seconds
+                    await Task.Delay(10000);
+                    if (!Application.isPlaying) break;
+
+                    foreach (var slot in activeSlots)
+                    {
+                        if (slot != null && slot.gameObject != null) Object.Destroy(slot.gameObject);
+                    }
+                    activeSlots.Clear();
+
+                    foreach (var block in activeBlocks)
+                    {
+                        if (block != null) Object.Destroy(block);
+                    }
+                    activeBlocks.Clear();
                 }
             }
 
@@ -168,6 +188,7 @@ namespace LanguageTutor.Actions
 
                 GameObject block = Object.Instantiate(blockPrefab, pos, rotation);
                 block.transform.localScale = Vector3.one * BLOCK_SCALE;
+                activeBlocks.Add(block);
 
                 // --- GRAVITY FIX (Standard API) ---
                 var rb = block.GetComponent<Rigidbody>();
