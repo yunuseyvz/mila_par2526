@@ -23933,11 +23933,7 @@ GameObject:
   - component: {fileID: 489634776}
   - component: {fileID: 489634775}
   - component: {fileID: 489634782}
-  - component: {fileID: 489634784}
-  - component: {fileID: 489634785}
-  - component: {fileID: 489634787}
-  - component: {fileID: 489634786}
-  - component: {fileID: 489634788}
+  - component: {fileID: 489634783}
   m_Layer: 0
   m_Name: '[BuildingBlock] Object Detection'
   m_TagString: Untagged
@@ -27225,13 +27221,13 @@ MonoBehaviour:
           DisplayName: 
         memberName: Registry
         _editorSelectedGizmoIndex: 0
-    - enabled: 1
-      typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+    - enabled: 0
+      typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
       inspectedMembers:
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27245,8 +27241,8 @@ MonoBehaviour:
         memberName: Awake
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27257,11 +27253,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: SaveProgress
+        memberName: OnEnable
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27272,60 +27268,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: LoadProgress
+        memberName: OnDisable
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: progressFileName
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _progressFilePath
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _wordProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Learning.ObjectHighlighter, Assembly-CSharp, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectHighlighter, Assembly-CSharp, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27339,8 +27286,8 @@ MonoBehaviour:
         memberName: Update
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectHighlighter, Assembly-CSharp, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27351,11 +27298,86 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: ClearAllHighlights
+        memberName: ClearHighlight
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectHighlighter, Assembly-CSharp, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: AnimateHighlight
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: OnDestroy
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: IsHighlighting
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: CurrentTargetLabel
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
+        attribute:
+          GizmoType: 0
+          ShowGizmoByDefault: 0
+          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+          Tweakable: 1
+          Min: 0
+          Max: 1
+          Category: 
+          Description: 
+          DisplayName: 
+        memberName: highlightPrefab
+        _editorSelectedGizmoIndex: 0
+      - enabled: 0
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27369,8 +27391,8 @@ MonoBehaviour:
         memberName: highlightColor
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectHighlighter, Assembly-CSharp, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27381,11 +27403,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: highlightDuration
+        memberName: highlightScaleMultiplier
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectHighlighter, Assembly-CSharp, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27396,11 +27418,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: cubeScale
+        memberName: pulseSpeed
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectHighlighter, Assembly-CSharp, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27411,30 +27433,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: _activeHighlights
-        _editorSelectedGizmoIndex: 0
-    - enabled: 1
-      typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Start
+        memberName: pulseMinScale
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27445,11 +27448,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: Update
+        memberName: pulseMaxScale
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27460,11 +27463,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: LogProgress
+        memberName: rotateHighlight
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27475,11 +27478,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: recorder
+        memberName: rotationSpeed
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27490,30 +27493,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: _learningProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Awake
+        memberName: _currentHighlight
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27524,11 +27508,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: SaveProgress
+        memberName: _highlightMaterial
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27539,11 +27523,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: LoadProgress
+        memberName: _baseScale
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27554,11 +27538,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: progressFileName
+        memberName: _pulseTime
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27569,11 +27553,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: _progressFilePath
+        memberName: _currentTargetLabel
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27584,30 +27568,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: _wordProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Start
+        memberName: _currentTargetEntry
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27618,11 +27583,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: Update
+        memberName: _agent
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27633,11 +27598,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: LogProgress
+        memberName: _cam
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27648,11 +27613,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: recorder
+        memberName: _depth
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27663,30 +27628,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: _learningProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Awake
+        memberName: _eyeIdx
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27697,11 +27643,11 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: SaveProgress
+        memberName: _hasValidFrame
         _editorSelectedGizmoIndex: 0
       - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null
         attribute:
           GizmoType: 0
           ShowGizmoByDefault: 0
@@ -27712,496 +27658,7 @@ MonoBehaviour:
           Category: 
           Description: 
           DisplayName: 
-        memberName: LoadProgress
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: progressFileName
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _progressFilePath
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _wordProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Start
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Update
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: LogProgress
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: recorder
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _learningProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Awake
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: SaveProgress
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: LoadProgress
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: progressFileName
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _progressFilePath
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _wordProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Start
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Update
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: LogProgress
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: recorder
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _learningProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Learning.VocabularyProgressTest, Assembly-CSharp, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Learning.VocabularyProgressTest, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Awake
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Awake
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: SaveProgress
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: LoadProgress
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: progressFileName
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _progressFilePath
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Learning.ObjectLearningProgress, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _wordProgress
-        _editorSelectedGizmoIndex: 0
-    - enabled: 0
-      typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      inspectedMembers:
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Start
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: Update
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: LogProgress
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: recorder
-        _editorSelectedGizmoIndex: 0
-      - enabled: 0
-        typeName: LanguageTutor.Detection.ObjectLearningProgressDebug, Assembly-CSharp,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        attribute:
-          GizmoType: 0
-          ShowGizmoByDefault: 0
-          Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-          Tweakable: 1
-          Min: 0
-          Max: 1
-          Category: 
-          Description: 
-          DisplayName: 
-        memberName: _learningProgress
+        memberName: _frame
         _editorSelectedGizmoIndex: 0
 --- !u!114 &489634776
 MonoBehaviour:
@@ -28257,8 +27714,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95c190a9246005a43a268bc4dc0564da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  providerAsset: {fileID: 11400000, guid: 789d9a41d7506374cb0a558ba68ce332, type: 2}
-  minConfidence: 0.587
+  providerAsset: {fileID: 11400000, guid: 397e1e9831160f649871464d0969d9f1, type: 2}
+  minConfidence: 0.79
   realtimeInference: 1
   onDetectionResponseReceived:
     m_PersistentCalls:
@@ -28316,7 +27773,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de04175396b6d844baa166c2a8c0bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectDetectionListRecorder
-  registry: {fileID: 11400000, guid: 92353d8e88954d3498b7f42897e00abc, type: 2}
+  registry: {fileID: 11400000, guid: 3acb332373148f446ae25b35dd67ba58, type: 2}
   duplicateDistanceThreshold: 0.35
   logToConsole: 1
   logDiagnostics: 1
@@ -28325,7 +27782,7 @@ MonoBehaviour:
   logToFile: 1
   logFileName: detections.txt
   fileLogInterval: 10
---- !u!114 &489634784
+--- !u!114 &489634783
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -28334,61 +27791,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 489634774}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ce49b4382103174f9f1be424fdd5492, type: 3}
+  m_Script: {fileID: 11500000, guid: 07840bee02c786f48a5f98119706c425, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Learning.ObjectLearningProgress
-  progressFileName: vocabulary_progress.json
---- !u!114 &489634785
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 489634774}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79b362bf0daebd040811725c4dd630b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Detection.ObjectLearningProgressDebug
-  recorder: {fileID: 0}
---- !u!114 &489634786
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 489634774}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79b362bf0daebd040811725c4dd630b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Detection.ObjectLearningProgressDebug
-  recorder: {fileID: 0}
---- !u!114 &489634787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 489634774}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ce49b4382103174f9f1be424fdd5492, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Learning.ObjectLearningProgress
-  progressFileName: vocabulary_progress.json
---- !u!114 &489634788
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 489634774}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9446285d0bc26d3488cc1fc42a272c8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Learning.VocabularyProgressTest
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectQuizHighlighter
+  highlightPrefab: {fileID: 1139579850}
+  highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  highlightScaleMultiplier: {x: 1.2, y: 1.2, z: 1}
+  pulseSpeed: 2
+  pulseMinScale: 0.9
+  pulseMaxScale: 1.1
+  rotateHighlight: 1
+  rotationSpeed: 30
 --- !u!1001 &493395676
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -55586,6 +54999,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131745677}
   m_CullTransparentMesh: 1
+--- !u!1 &1139579850 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7396352229094920771, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+  m_PrefabInstance: {fileID: 1706989380}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1145213689
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -97002,7 +96420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e999196bff1224f88a05863b63afff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Core.NPCController
-  config: {fileID: 11400000, guid: fd492db30bc27074890d4469c780fe7c, type: 2}
+  config: {fileID: 11400000, guid: 5985bed0c7b15ee438ce813b7bfcd69c, type: 2}
   whisperManager: {fileID: 0}
   npcView: {fileID: 1924949633}
   avatarAnimationController: {fileID: 1924949637}

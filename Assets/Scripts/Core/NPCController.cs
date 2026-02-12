@@ -39,6 +39,7 @@ namespace LanguageTutor.Core
         private ConversationHistory _conversationHistory;
         private DetectedObjectManager _detectedObjectManager;  // For Word Building mode
         private ObjectLearningProgress _objectLearningProgress;  // For ObjectTagging vocabulary tracking
+        private ObjectQuizManager _objectQuizManager;           // For Object Quiz mode
 
         private ILLMAction _currentAction;
         private AudioClip _lastTTSClip;
@@ -240,6 +241,19 @@ namespace LanguageTutor.Core
             {
                 Debug.Log("[NPCController] Found existing ObjectLearningProgress");
             }
+
+            // Find or create ObjectQuizManager for Object Quiz mode
+            _objectQuizManager = FindObjectOfType<ObjectQuizManager>();
+            if (_objectQuizManager == null)
+            {
+                Debug.Log("[NPCController] Creating ObjectQuizManager...");
+                var quizGO = new GameObject("ObjectQuizManager");
+                _objectQuizManager = quizGO.AddComponent<ObjectQuizManager>();
+            }
+            else
+            {
+                Debug.Log("[NPCController] Found existing ObjectQuizManager");
+            }
         }
 
         private void SetupEventListeners()
@@ -340,6 +354,49 @@ namespace LanguageTutor.Core
         {
             if (audioClip == null) return;
             _isProcessing = true;
+
+            // Object Quiz mode: Check user's answer against the highlighted object
+            if (_currentGameMode == ConversationGameMode.ObjectTagging && _objectQuizManager != null && _objectQuizManager.IsQuizActive)
+            {
+                // First transcribe the user's answer
+                string userAnswer = await _sttService.TranscribeAsync(audioClip);
+
+                if (!string.IsNullOrWhiteSpace(userAnswer))
+                {
+                    bool isCorrect = _objectQuizManager.SubmitAnswer(userAnswer);
+
+                    string feedback;
+                    if (isCorrect)
+                    {
+                        feedback = $"Correct! It's a {_objectQuizManager.CurrentObjectLabel}. Well done!";
+                    }
+                    else
+                    {
+                        feedback = $"Not quite. This is a {_objectQuizManager.CurrentObjectLabel}. Let's practice more!";
+                    }
+
+                    _objectQuizManager.EndQuiz();
+
+                    // Make the tutor speak the feedback
+                    Speak(feedback);
+
+                    // Wait a bit before starting the next quiz
+                    await Task.Delay(3000);
+
+                    // Start next quiz
+                    if (_objectQuizManager.StartQuiz())
+                    {
+                        Speak($"What is this?");
+                    }
+                    else
+                    {
+                        Speak("No more objects to practice. Great job!");
+                    }
+                }
+
+                _isProcessing = false;
+                return;
+            }
 
             if (_currentGameMode == ConversationGameMode.ObjectTagging && config != null)
             {
@@ -567,6 +624,26 @@ namespace LanguageTutor.Core
                     Debug.Log($"[NPCController] Visualizer DISABLED - Mode is {mode} (only enabled for ObjectTagging)");
             }
 #endif
+
+            // Object Quiz mode: Start quiz when entering ObjectTagging mode
+            if (mode == ConversationGameMode.ObjectTagging && _objectQuizManager != null)
+            {
+                if (_objectQuizManager.StartQuiz())
+                {
+                    Debug.Log("[NPCController] Started Object Quiz");
+                    Speak("Let's practice identifying objects! What is this?");
+                }
+                else
+                {
+                    Debug.LogWarning("[NPCController] No objects detected for quiz. Please scan the room first.");
+                    Speak("I don't see any objects yet. Please look around so I can detect some objects.");
+                }
+            }
+            else if (_objectQuizManager != null && _objectQuizManager.IsQuizActive)
+            {
+                // Leaving ObjectTagging mode - end any active quiz
+                _objectQuizManager.EndQuiz();
+            }
 
             // Word Building mode specific setup
             if (mode == ConversationGameMode.WordClouds)

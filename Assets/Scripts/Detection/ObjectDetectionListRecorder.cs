@@ -195,7 +195,7 @@ public class ObjectDetectionListRecorder : MonoBehaviour
                 count = 0;
             }
 
-            if (count >= 3)
+            if (count >= 1)
             {
                 continue;
             }
