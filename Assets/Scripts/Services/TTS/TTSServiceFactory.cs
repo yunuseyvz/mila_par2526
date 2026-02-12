@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using LanguageTutor.Data;
+using TTSProvider = LanguageTutor.Data.TTSSettings.TTSProvider;
 
 namespace LanguageTutor.Services.TTS
 {
@@ -23,13 +24,20 @@ namespace LanguageTutor.Services.TTS
             if (coroutineRunner == null)
                 throw new ArgumentNullException(nameof(coroutineRunner));
 
-            if (config.provider != TTSProvider.AllTalk)
+            switch (config.provider)
             {
-                Debug.LogWarning($"[TTSServiceFactory] Provider '{config.provider}' is not supported. Using AllTalk only.");
-            }
+                case TTSProvider.AllTalk:
+                    Debug.Log("[TTSServiceFactory] Creating AllTalk service");
+                    return new AllTalkService(config, coroutineRunner);
 
-            Debug.Log("[TTSServiceFactory] Creating AllTalk service");
-            return new AllTalkService(config, coroutineRunner);
+                case TTSProvider.ElevenLabs:
+                    Debug.Log("[TTSServiceFactory] Creating ElevenLabs service");
+                    return new ElevenLabsService(config, coroutineRunner);
+
+                default:
+                    Debug.LogWarning($"[TTSServiceFactory] Unknown provider '{config.provider}'. Falling back to ElevenLabs.");
+                    return new ElevenLabsService(config, coroutineRunner);
+            }
         }
     }
 }
