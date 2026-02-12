@@ -16931,18 +16931,6 @@ MonoBehaviour:
   laughterThreshold: 0.5
   laughterMultiplier: 1.5
   smoothAmount: 70
---- !u!114 &188504766
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 188504762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b00633d10ffdd94c94b0f82af464a25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AutoMapVisemes
 --- !u!114 &188504770
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23750,7 +23738,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 9100000, guid: e0545d08669a48d4fb713861eb59c0ec, type: 2}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: -746952955074902906, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
+    - {fileID: -7379820825921340623, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
+    - {fileID: 695396651582372072, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
@@ -23768,9 +23759,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8304175215116285622, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 188504765}
-    - targetCorrespondingSourceObject: {fileID: 8304175215116285622, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 188504766}
     - targetCorrespondingSourceObject: {fileID: 8304175215116285622, guid: 09556ab02eeda9749ae1cf97223f9c9f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 188504771}

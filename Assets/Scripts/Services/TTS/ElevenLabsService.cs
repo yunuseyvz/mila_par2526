@@ -118,7 +118,11 @@ namespace LanguageTutor.Services.TTS
             var requestBody = new ElevenLabsRequest
             {
                 text = text,
-                model_id = _config.modelId
+                model_id = _config.modelId,
+                voice_settings = new ElevenLabsVoiceSettings
+                {
+                    speed = _currentSpeed
+                }
             };
 
             string jsonBody = JsonUtility.ToJson(requestBody);
@@ -235,7 +239,7 @@ namespace LanguageTutor.Services.TTS
 
         private string GetCacheKey(string text, string voice, string language)
         {
-            return $"{text}_{voice ?? _config.DefaultVoice}_{language ?? _config.defaultLanguage}";
+            return $"{text}_{voice ?? _config.DefaultVoice}_{language ?? _config.defaultLanguage}_{_currentSpeed:F2}";
         }
 
         private void CacheAudioClip(string key, AudioClip clip)
@@ -259,6 +263,13 @@ namespace LanguageTutor.Services.TTS
         {
             public string text;
             public string model_id;
+            public ElevenLabsVoiceSettings voice_settings;
+        }
+
+        [Serializable]
+        private class ElevenLabsVoiceSettings
+        {
+            public float speed;
         }
         
         [Serializable]
