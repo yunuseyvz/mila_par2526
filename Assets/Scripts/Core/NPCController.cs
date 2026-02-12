@@ -8,6 +8,7 @@ using LanguageTutor.Data;
 using LanguageTutor.UI;
 using LanguageTutor.Games.Spelling;
 using System.Threading.Tasks;
+using LanguageTutor.ObjectTagging;
 
 namespace LanguageTutor.Core
 {
@@ -37,6 +38,8 @@ namespace LanguageTutor.Core
         private LLMActionExecutor _actionExecutor;
         private ConversationHistory _conversationHistory;
         private DetectedObjectManager _detectedObjectManager;  // For Word Building mode
+        private ObjectTaggingSpacedRepetition _objectTaggingSpacedRepetition;
+        private string _currentObjectTagTarget;
 
         private ILLMAction _currentAction;
         private AudioClip _lastTTSClip;
@@ -218,6 +221,13 @@ namespace LanguageTutor.Core
             {
                 Debug.Log("[NPCController] Found existing DetectedObjectManager");
             }
+
+            _objectTaggingSpacedRepetition = FindObjectOfType<ObjectTaggingSpacedRepetition>();
+            if (_objectTaggingSpacedRepetition == null)
+            {
+                var repetitionGO = new GameObject("ObjectTaggingSpacedRepetition");
+                _objectTaggingSpacedRepetition = repetitionGO.AddComponent<ObjectTaggingSpacedRepetition>();
+            }
         }
 
         private void SetupEventListeners()
@@ -379,7 +389,17 @@ namespace LanguageTutor.Core
             }
         }
 
-        private void HandleTranscriptionCompleted(string text) { if (DefaultShowSubtitles && npcView != null) npcView.ShowUserMessage(text); }
+        private void HandleTranscriptionCompleted(string text)
+        {
+            if (DefaultShowSubtitles && npcView != null) npcView.ShowUserMessage(text);
+
+            if (_currentGameMode == ConversationGameMode.ObjectTagging
+                && _objectTaggingSpacedRepetition != null
+                && !string.IsNullOrWhiteSpace(_currentObjectTagTarget))
+            {
+                _objectTaggingSpacedRepetition.EvaluateAndRecord(text, _currentObjectTagTarget);
+            }
+        }
         private void HandleLLMResponseReceived(string response) { if (DefaultShowSubtitles && npcView != null) npcView.ShowNPCMessage(response); }
         private void HandleTTSAudioGenerated(AudioClip audio) { }
         private void HandlePipelineError(string error) { if (npcView != null) npcView.ShowErrorMessage(error); }
@@ -464,7 +484,24 @@ namespace LanguageTutor.Core
                     string objectContext = $"\n\nObjects detected in the room: {objectList}. You can see these objects and can describe them or answer questions about them.";
                     context = context + objectContext;
                     Debug.Log($"[NPCController] ObjectTagging context enriched with detected objects: {objectList}");
+
+                    if (_objectTaggingSpacedRepetition != null)
+                    {
+                        _currentObjectTagTarget = _objectTaggingSpacedRepetition.SelectNextTarget(detectedObjects);
+                        if (!string.IsNullOrWhiteSpace(_currentObjectTagTarget))
+                        {
+                            context += $"\n\nFocus item: {_currentObjectTagTarget}. Ask the user to say this word in {languageName} and keep the exchange brief.";
+                        }
+                    }
                 }
+                else
+                {
+                    _currentObjectTagTarget = null;
+                }
+            }
+            else
+            {
+                _currentObjectTagTarget = null;
             }
 
             if (string.IsNullOrWhiteSpace(context))
