@@ -10,6 +10,7 @@ namespace LanguageTutor.UI
         [SerializeField] private NPCController npcController;
         [SerializeField] private Toggle slowModeToggle;
         [SerializeField] private Button replayButton;
+        [SerializeField] private Button stopButton;
         
         [Header("Settings")]
         [SerializeField] private float slowModeSpeed = 0.75f;
@@ -20,6 +21,11 @@ namespace LanguageTutor.UI
             if (npcController == null)
             {
                 npcController = FindObjectOfType<NPCController>();
+            }
+
+            if (stopButton == null)
+            {
+                stopButton = FindButtonByName("StopButton") ?? FindButtonByName("SettingsButton");
             }
 
             if (slowModeToggle != null)
@@ -42,6 +48,15 @@ namespace LanguageTutor.UI
             {
                 Debug.LogWarning("[MainMenuController] Replay Button is not assigned!");
             }
+
+            if (stopButton != null)
+            {
+                stopButton.onClick.AddListener(OnStopClicked);
+            }
+            else
+            {
+                Debug.LogWarning("[MainMenuController] Stop Button is not assigned!");
+            }
         }
 
         private void OnDestroy()
@@ -54,6 +69,11 @@ namespace LanguageTutor.UI
             if (replayButton != null)
             {
                 replayButton.onClick.RemoveListener(OnReplayClicked);
+            }
+
+            if (stopButton != null)
+            {
+                stopButton.onClick.RemoveListener(OnStopClicked);
             }
         }
 
@@ -78,6 +98,26 @@ namespace LanguageTutor.UI
                 Debug.Log("[MainMenuController] Replay button clicked");
                 npcController.ReplayLastMessage();
             }
+        }
+
+        private void OnStopClicked()
+        {
+            if (npcController != null)
+            {
+                Debug.Log("[MainMenuController] Stop button clicked");
+                npcController.StopCurrentSpeech();
+            }
+        }
+
+        private static Button FindButtonByName(string objectName)
+        {
+            GameObject target = GameObject.Find(objectName);
+            if (target == null)
+            {
+                return null;
+            }
+
+            return target.GetComponent<Button>();
         }
     }
 }

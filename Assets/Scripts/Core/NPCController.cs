@@ -7,6 +7,7 @@ using LanguageTutor.Actions;
 using LanguageTutor.Data;
 using LanguageTutor.UI;
 using LanguageTutor.Games.Spelling;
+using System;
 using System.Threading.Tasks;
 
 namespace LanguageTutor.Core
@@ -17,6 +18,9 @@ namespace LanguageTutor.Core
     /// </summary>
     public class NPCController : MonoBehaviour
     {
+        public static event Action<ConversationGameMode> OnGameModeChanged;
+        public static event Action<bool> OnListeningStateChanged;
+
         [Header("Configuration")]
         [SerializeField] private LanguageTutorConfig config;
 
@@ -45,6 +49,8 @@ namespace LanguageTutor.Core
 
         private const bool DefaultShowSubtitles = true;
         private const bool DefaultAutoPlayTts = true;
+
+        public ConversationGameMode CurrentGameMode => _currentGameMode;
 
         private void Start()
         {
@@ -128,6 +134,7 @@ namespace LanguageTutor.Core
             LogGameModePrompt(mode);
             StartModeSideEffects(mode);
             _currentGameMode = mode;
+            OnGameModeChanged?.Invoke(mode);
         }
 
         public void ResetConversation()
@@ -159,6 +166,22 @@ namespace LanguageTutor.Core
                 npcView.SetSpeakingState();
                 if (avatarAnimationController != null) avatarAnimationController.SetTalking();
             }
+        }
+
+        public void StopCurrentSpeech()
+        {
+            if (npcView != null)
+            {
+                npcView.StopAudio();
+                npcView.SetIdleState();
+            }
+
+            if (avatarAnimationController != null)
+            {
+                avatarAnimationController.SetIdle();
+            }
+
+            Debug.Log("[NPCController] Speech stopped by user");
         }
 
         // -------------------------------------------------------------------------
@@ -311,11 +334,13 @@ namespace LanguageTutor.Core
 
         private void HandleRecordingStarted()
         {
+            OnListeningStateChanged?.Invoke(true);
             if (npcView != null) npcView.SetListeningState();
         }
 
         private async void HandleRecordingCompleted(AudioClip audioClip)
         {
+            OnListeningStateChanged?.Invoke(false);
             if (audioClip == null) return;
             _isProcessing = true;
 
@@ -349,6 +374,7 @@ namespace LanguageTutor.Core
 
         private void HandleRecordingError(string error)
         {
+            OnListeningStateChanged?.Invoke(false);
             if (npcView != null)
             {
                 npcView.ShowErrorMessage(error);
