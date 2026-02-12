@@ -12,6 +12,13 @@ public class DetectedObjectRegistry : ScriptableObject
         public float Confidence;
         public Vector3 Position;
         public float LastSeenTime;
+        
+        // Anki-style spaced repetition counters
+        public int DifficultyScore = 0;      // Higher = more difficult, needs more practice
+        public int TimesReviewed = 0;        // Total quiz attempts
+        public int CorrectAnswers = 0;       // Successful identifications
+        public int IncorrectAnswers = 0;     // Failed identifications
+        public float NextReviewTime = 0f;    // When to review next (for scheduling)
     }
 
     [SerializeField] private List<Entry> entries = new();
