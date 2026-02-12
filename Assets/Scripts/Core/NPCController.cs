@@ -40,6 +40,10 @@ namespace LanguageTutor.Core
         private DetectedObjectManager _detectedObjectManager;  // For Word Building mode
         private ObjectTaggingSpacedRepetition _objectTaggingSpacedRepetition;
         private string _currentObjectTagTarget;
+        private float _nextObjectTaggingPromptTime;
+
+        [Header("Object Tagging")]
+        [SerializeField] private float objectTaggingPromptInterval = 3f;
 
         private ILLMAction _currentAction;
         private AudioClip _lastTTSClip;
@@ -131,6 +135,13 @@ namespace LanguageTutor.Core
             LogGameModePrompt(mode);
             StartModeSideEffects(mode);
             _currentGameMode = mode;
+
+            if (mode == ConversationGameMode.ObjectTagging)
+            {
+                _currentObjectTagTarget = null;
+                _nextObjectTaggingPromptTime = Time.time;
+                TryPromptObjectTaggingTarget(true);
+            }
         }
 
         public void ResetConversation()
@@ -398,6 +409,8 @@ namespace LanguageTutor.Core
                 && !string.IsNullOrWhiteSpace(_currentObjectTagTarget))
             {
                 _objectTaggingSpacedRepetition.EvaluateAndRecord(text, _currentObjectTagTarget);
+                _currentObjectTagTarget = null;
+                _nextObjectTaggingPromptTime = Time.time + objectTaggingPromptInterval;
             }
         }
         private void HandleLLMResponseReceived(string response) { if (DefaultShowSubtitles && npcView != null) npcView.ShowNPCMessage(response); }
@@ -414,6 +427,46 @@ namespace LanguageTutor.Core
                     avatarAnimationController.SetIdle();
                 }
             }
+
+            if (_currentGameMode == ConversationGameMode.ObjectTagging
+                && !_isProcessing
+                && Time.time >= _nextObjectTaggingPromptTime
+                && string.IsNullOrWhiteSpace(_currentObjectTagTarget)
+                && (npcView == null || !npcView.IsAudioPlaying()))
+            {
+                TryPromptObjectTaggingTarget(false);
+            }
+        }
+
+        private void TryPromptObjectTaggingTarget(bool force)
+        {
+            if (_detectedObjectManager == null || _objectTaggingSpacedRepetition == null || config == null)
+            {
+                return;
+            }
+
+            var detectedObjects = _detectedObjectManager.GetObjectLabels();
+            if (detectedObjects == null || detectedObjects.Count == 0)
+            {
+                if (force)
+                {
+                    Debug.Log("[NPCController] No detected objects yet for ObjectTagging prompt.");
+                }
+                _nextObjectTaggingPromptTime = Time.time + objectTaggingPromptInterval;
+                return;
+            }
+
+            var target = _objectTaggingSpacedRepetition.SelectNextTarget(detectedObjects);
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                _nextObjectTaggingPromptTime = Time.time + objectTaggingPromptInterval;
+                return;
+            }
+
+            _currentObjectTagTarget = target;
+            var languageName = GetLanguageName(config.conversation.language);
+            Speak($"Say the word for {target} in {languageName}.");
+            _nextObjectTaggingPromptTime = Time.time + objectTaggingPromptInterval;
         }
 
         private ILLMAction CreateActionForGameMode(ConversationGameMode mode)
@@ -487,10 +540,16 @@ namespace LanguageTutor.Core
 
                     if (_objectTaggingSpacedRepetition != null)
                     {
+                        var scoreSummary = _objectTaggingSpacedRepetition.BuildScoreSummary(detectedObjects, 16);
+                        if (!string.IsNullOrWhiteSpace(scoreSummary))
+                        {
+                            context += $"\n\nTracked object scores from SQLite (lower score = needs more practice): {scoreSummary}. Prioritize lower-score items more often.";
+                        }
+
                         _currentObjectTagTarget = _objectTaggingSpacedRepetition.SelectNextTarget(detectedObjects);
                         if (!string.IsNullOrWhiteSpace(_currentObjectTagTarget))
                         {
-                            context += $"\n\nFocus item: {_currentObjectTagTarget}. Ask the user to say this word in {languageName} and keep the exchange brief.";
+                            context += $"\n\nFocus item for this turn: {_currentObjectTagTarget}. Ask the user to say this word in {languageName}. Keep it brief and acknowledge whether they got it right.";
                         }
                     }
                 }

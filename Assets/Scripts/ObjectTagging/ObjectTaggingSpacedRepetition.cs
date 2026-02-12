@@ -80,6 +80,45 @@ namespace LanguageTutor.ObjectTagging
             return selected;
         }
 
+        public string BuildScoreSummary(IReadOnlyList<string> labels, int maxItems = 12)
+        {
+            Initialize();
+
+            var normalized = NormalizeLabels(labels);
+            if (normalized.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var items = EnsureItems(normalized);
+            var ordered = normalized
+                .Select(label => items[label])
+                .OrderBy(item => item.Score)
+                .ThenBy(item => item.SeenCount)
+                .ThenBy(item => item.Label)
+                .Take(Mathf.Max(1, maxItems))
+                .ToList();
+
+            var sb = new StringBuilder();
+            for (var i = 0; i < ordered.Count; i++)
+            {
+                var item = ordered[i];
+                sb.Append(item.Label);
+                sb.Append(" (score=");
+                sb.Append(item.Score);
+                sb.Append(", seen=");
+                sb.Append(item.SeenCount);
+                sb.Append(')');
+
+                if (i < ordered.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public bool EvaluateAndRecord(string userInput, string targetLabel)
         {
             if (string.IsNullOrWhiteSpace(targetLabel))
