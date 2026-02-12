@@ -27274,7 +27274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95c190a9246005a43a268bc4dc0564da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  providerAsset: {fileID: 11400000, guid: 789d9a41d7506374cb0a558ba68ce332, type: 2}
+  providerAsset: {fileID: 11400000, guid: 397e1e9831160f649871464d0969d9f1, type: 2}
   minConfidence: 0.79
   realtimeInference: 1
   onDetectionResponseReceived:
@@ -27333,7 +27333,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de04175396b6d844baa166c2a8c0bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectDetectionListRecorder
-  registry: {fileID: 11400000, guid: 92353d8e88954d3498b7f42897e00abc, type: 2}
+  registry: {fileID: 11400000, guid: dd1a9dbc776080740a3ceecf72601ea2, type: 2}
   duplicateDistanceThreshold: 0.35
   logToConsole: 1
   logDiagnostics: 1
