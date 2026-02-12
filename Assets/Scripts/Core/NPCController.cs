@@ -7,6 +7,7 @@ using LanguageTutor.Actions;
 using LanguageTutor.Data;
 using LanguageTutor.UI;
 using LanguageTutor.Games.Spelling;
+using LanguageTutor.Learning;
 using System.Threading.Tasks;
 
 namespace LanguageTutor.Core
@@ -37,6 +38,7 @@ namespace LanguageTutor.Core
         private LLMActionExecutor _actionExecutor;
         private ConversationHistory _conversationHistory;
         private DetectedObjectManager _detectedObjectManager;  // For Word Building mode
+        private ObjectLearningProgress _objectLearningProgress;  // For ObjectTagging vocabulary tracking
 
         private ILLMAction _currentAction;
         private AudioClip _lastTTSClip;
@@ -217,6 +219,26 @@ namespace LanguageTutor.Core
             else
             {
                 Debug.Log("[NPCController] Found existing DetectedObjectManager");
+            }
+
+            // Find or create ObjectLearningProgress for ObjectTagging mode
+            _objectLearningProgress = FindObjectOfType<ObjectLearningProgress>();
+
+            if (_objectLearningProgress == null)
+            {
+                Debug.Log("[NPCController] Creating ObjectLearningProgress...");
+                var learningGO = GameObject.Find("Detection");
+                if (learningGO == null)
+                {
+                    learningGO = new GameObject("Detection");
+                }
+
+                _objectLearningProgress = learningGO.AddComponent<ObjectLearningProgress>();
+                Debug.Log("[NPCController] Created ObjectLearningProgress");
+            }
+            else
+            {
+                Debug.Log("[NPCController] Found existing ObjectLearningProgress");
             }
         }
 
@@ -410,6 +432,18 @@ namespace LanguageTutor.Core
                 }
 
                 return new FreeTalkVisionAction(systemPrompt, passthroughFrameCapture);
+            }
+
+            if (mode == ConversationGameMode.ObjectTagging)
+            {
+                if (_detectedObjectManager == null || _objectLearningProgress == null)
+                {
+                    Debug.LogWarning("[NPCController] ObjectTagging components not fully initialized. Falling back to ChatAction.");
+                    return new ChatAction(systemPrompt);
+                }
+
+                Debug.Log("[NPCController] Creating ObjectTaggingAction (simplified - JSON only)");
+                return new ObjectTaggingAction(systemPrompt, _detectedObjectManager, _objectLearningProgress);
             }
 
             return new ChatAction(systemPrompt);
