@@ -1,14 +1,20 @@
 # Mila AR - Your personal language tutor
 
+<img src="Assets/Resources/app_icon.png" alt="Mila AR App Icon" width="180" />
+
 **Course:** Praktikum Augmented Reality, LMU Munich, WS25/26
 
-<img src="Assets/Resources/app_icon.png" alt="Mila AR App Icon" width="180" />
+**Group Members:**
+- Entoni Jombi (@saitamaisreal)
+- Anna Maria Lödige (@annamaria-loe)
+- Kevin Kafexhi (@Kafexhi)
+- Yunus Emre Yavuz (@yunuseyvz)
 
 Mila AR is an augmented reality language learning app built in Unity. It provides spoken conversational practice with an AI tutor by combining speech recognition, LLM-based response generation, and natural speech synthesis.
 
 ## Tech Stack
 
-- **Engine:** Unity
+- **Engine:** Unity 6000.3.0f1
 - **STT:** Hugging Face Inference Providers with Whisper
 - **LLM:** Hugging Face Inference Providers with Gemma 27B
 - **TTS:** ElevenLabs or AllTalk
@@ -17,6 +23,7 @@ Mila AR is an augmented reality language learning app built in Unity. It provide
 
 - AR-first language tutoring experience
 - Interactive spoken dialogue for practice and feedback
+- Vision-aware tutoring using YOLOv12 and Gemma vision capabilities for room-context understanding
 - Modular pipeline for Speech-to-Text → LLM → Text-to-Speech
 
 ## Getting Started
