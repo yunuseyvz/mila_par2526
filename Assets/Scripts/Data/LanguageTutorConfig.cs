@@ -102,11 +102,11 @@ namespace LanguageTutor.Data
 
         [Tooltip("Role Play LLM context (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string rolePlayContext = "You are role-playing with the user in the context of helping him practice real world scenarios in a certain language.";
+        public string rolePlayContext = "You are role-playing with the user in the context of helping him practice real world scenarios in a certain language. Act as a person from a real world scenario. Example, as a waiter in a restaurant. Keep your responses short and interactive to encourage the user to speak more. Answer with maximum of 1-2 sentences.";
 
         [Tooltip("Role Play system prompt (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string rolePlaySystemPrompt = "Stay in character and drive a role-play conversation. Keep your answers short and interactive for the user.";
+        public string rolePlaySystemPrompt = "Stay in character and drive a role-play conversation. Keep your answers short and interactive for the user. Answer with maximum of 2-3 sentences. If the user is struggling, provide gentle hints to help them respond.";
 
         /// <summary>
         /// Get the full service URL (base + endpoint)
