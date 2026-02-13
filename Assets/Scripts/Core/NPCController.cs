@@ -70,6 +70,10 @@ namespace LanguageTutor.Core
         // SECTION: Game & External Hooks
         // -------------------------------------------------------------------------
 
+        // -------------------------------------------------------------------------
+        // SECTION: Game & External Hooks
+        // -------------------------------------------------------------------------
+
         /// <summary>
         /// Allows external systems (like the Spelling Game) to make the NPC speak immediately.
         /// </summary>
@@ -77,20 +81,16 @@ namespace LanguageTutor.Core
         {
             Debug.Log($"[NPCController] Tutor says: {text}");
 
-            if (avatarAnimationController != null)
-                avatarAnimationController.SetTalking();
-
+            // Show Text Bubble immediately
             if (npcView != null)
                 npcView.ShowNPCMessage(text);
 
             if (_ttsService != null)
             {
                 var audioClip = await _ttsService.SynthesizeSpeechAsync(text);
-
-                if (audioClip != null && npcView != null)
+                if (audioClip != null)
                 {
-                    npcView.PlayAudio(audioClip);
-                    npcView.SetSpeakingState();
+                    PlayAudioWithEarlyStop(audioClip);
                 }
             }
         }
@@ -153,12 +153,47 @@ namespace LanguageTutor.Core
 
         public void ReplayLastMessage()
         {
-            if (_lastTTSClip != null && npcView != null)
+            if (_lastTTSClip != null)
             {
-                npcView.PlayAudio(_lastTTSClip);
-                npcView.SetSpeakingState();
-                if (avatarAnimationController != null) avatarAnimationController.SetTalking();
+                PlayAudioWithEarlyStop(_lastTTSClip);
             }
+        }
+
+        private Coroutine _talkingRoutine;
+
+        private void PlayAudioWithEarlyStop(AudioClip clip)
+        {
+            if (clip == null) return;
+
+            // 1. Play Audio & UI
+            if (npcView != null)
+            {
+                npcView.PlayAudio(clip);
+                npcView.SetSpeakingState();
+            }
+
+            // 2. Start Animation & Coroutine
+            if (avatarAnimationController != null)
+            {
+                avatarAnimationController.SetTalking();
+
+                if (_talkingRoutine != null) StopCoroutine(_talkingRoutine);
+                
+                // Stop 0.5s early, but ensure at least 0.1s duration
+                float duration = Mathf.Max(0.1f, clip.length - 0.5f);
+                _talkingRoutine = StartCoroutine(StopTalkingAfterDelay(duration));
+            }
+        }
+
+        private System.Collections.IEnumerator StopTalkingAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            if (avatarAnimationController != null)
+            {
+                avatarAnimationController.SetIdle();
+            }
+            _talkingRoutine = null;
         }
 
         // -------------------------------------------------------------------------
@@ -331,12 +366,9 @@ namespace LanguageTutor.Core
             if (result.Success && result.TTSAudioClip != null && DefaultAutoPlayTts)
             {
                 _lastTTSClip = result.TTSAudioClip;
-                if (npcView != null)
-                {
-                    npcView.PlayAudio(result.TTSAudioClip);
-                    npcView.SetSpeakingState();
-                }
-                if (avatarAnimationController != null) avatarAnimationController.SetTalking();
+                
+                // Use helper to play audio with shortened animation
+                PlayAudioWithEarlyStop(result.TTSAudioClip);
             }
             _isProcessing = false;
 

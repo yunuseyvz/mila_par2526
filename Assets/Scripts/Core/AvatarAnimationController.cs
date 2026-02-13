@@ -47,6 +47,12 @@ namespace LanguageTutor.Core
             {
                 Debug.LogError("[AvatarAnimationController] No Animator component found! Please assign an Animator.");
             }
+            else
+            {
+                // CRITICAL FIX: Disable Root Motion to prevent avatar from snapping to floor/origin
+                // when forcing transitions. We want the avatar to stay in its placed position.
+                animator.applyRootMotion = false;
+            }
 
             _idleStateHash = Animator.StringToHash(idleStateName);
             _scratchStateHash = Animator.StringToHash(scratchStateName);
@@ -99,10 +105,13 @@ namespace LanguageTutor.Core
 
             if (animator != null)
             {
-                animator.SetTrigger(idleTrigger);
+                // Force IMMEDIATE snap to Idle using Play() instead of CrossFade or SetTrigger.
+                // This prevents "blending to floor" issues and ignores "Has Exit Time".
+                animator.Play(idleStateName); 
+                
                 _currentState = AnimationState.Idle;
                 ScheduleNextScratch();
-                Debug.Log("[AvatarAnimationController] Animation set to: Idle");
+                Debug.Log("[AvatarAnimationController] Animation force-set to: Idle");
             }
         }
 
@@ -116,9 +125,12 @@ namespace LanguageTutor.Core
 
             if (animator != null)
             {
-                animator.SetTrigger(thinkingTrigger);
+                // WORKAROUND: The "Thinking" animation clip is a kneeling/sitting pose which looks buggy.
+                // We use "Idle" (Standing) instead so the avatar stays upright while generating voice.
+                animator.Play(idleStateName); 
+                
                 _currentState = AnimationState.Thinking;
-                Debug.Log("[AvatarAnimationController] Animation set to: Thinking");
+                Debug.Log("[AvatarAnimationController] Animation force-set to: Thinking (Visual: Idle)");
             }
         }
 
@@ -132,9 +144,11 @@ namespace LanguageTutor.Core
 
             if (animator != null)
             {
-                animator.SetTrigger(talkingTrigger);
+                // Force IMMEDIATE transition to Talking
+                animator.Play(talkingStateName); 
+                
                 _currentState = AnimationState.Talking;
-                Debug.Log("[AvatarAnimationController] Animation set to: Talking");
+                Debug.Log("[AvatarAnimationController] Animation force-set to: Talking");
             }
         }
 
