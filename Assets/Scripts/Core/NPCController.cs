@@ -422,7 +422,8 @@ namespace LanguageTutor.Core
                 string lowerResponse = response.ToLowerInvariant();
                 if (lowerResponse.Contains("good") || 
                     lowerResponse.Contains("great") || 
-                    lowerResponse.Contains("perfect"))
+                    lowerResponse.Contains("perfect") ||
+                    lowerResponse.Contains("well done"))
                 {
                     if (avatarAnimationController != null)
                     {

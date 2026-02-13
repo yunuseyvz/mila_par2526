@@ -196,7 +196,11 @@ namespace LanguageTutor.Core
         private System.Collections.IEnumerator WaitAndStopClapping(float duration)
         {
             _isPriorityAnimationPlaying = true;
-            animator.SetTrigger(clappingTrigger);
+            // Use SetTrigger to allow for smooth transitions defined in Animator
+            if (animator != null)
+            {
+                 animator.SetTrigger(clappingTrigger); 
+            }
             Debug.Log($"[AvatarAnimationController] Playing Clapping animation for {duration} seconds");
 
             yield return new WaitForSeconds(duration);
@@ -208,20 +212,21 @@ namespace LanguageTutor.Core
         private void ReapplyCurrentState()
         {
             Debug.Log($"[AvatarAnimationController] Clapping finished. Resuming state: {_currentState}");
+            
+            if (animator == null) return;
+
             switch (_currentState)
             {
                 case AnimationState.Idle:
-                    if (animator != null) 
-                    {
-                        animator.SetTrigger(idleTrigger);
-                        ScheduleNextScratch();
-                    }
+                    animator.Play(idleStateName);
+                    ScheduleNextScratch();
                     break;
                 case AnimationState.Thinking:
-                    if (animator != null) animator.SetTrigger(thinkingTrigger);
+                    // Using idleStateName as per user workaround for Thinking state
+                    animator.Play(idleStateName);
                     break;
                 case AnimationState.Talking:
-                    if (animator != null) animator.SetTrigger(talkingTrigger);
+                    animator.Play(talkingStateName);
                     break;
             }
         }
