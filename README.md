@@ -15,6 +15,7 @@ Mila AR is an augmented reality language learning app built in Unity. It provide
 ## Tech Stack
 
 - **Engine:** Unity 6000.3.0f1
+- **XR/AR:** Meta XR Passthrough + Meta Depth API
 - **STT:** Hugging Face Inference Providers with Whisper
 - **LLM:** Hugging Face Inference Providers with Gemma 27B
 - **TTS:** ElevenLabs or AllTalk
@@ -22,6 +23,7 @@ Mila AR is an augmented reality language learning app built in Unity. It provide
 ## Project Focus
 
 - AR-first language tutoring experience
+- Real-world integration using Meta XR Passthrough and Depth API
 - Interactive spoken dialogue for practice and feedback
 - Vision-aware tutoring using YOLOv12 and Gemma vision capabilities for room-context understanding
 - Modular pipeline for Speech-to-Text → LLM → Text-to-Speech
