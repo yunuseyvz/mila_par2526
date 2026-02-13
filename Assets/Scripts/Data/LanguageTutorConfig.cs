@@ -78,11 +78,11 @@ namespace LanguageTutor.Data
         [Header("Game Mode Prompts")]
         [Tooltip("Free Talk LLM context (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string freeTalkContext = "You are a friendly language tutor. You can speak multiple languages.";
+        public string freeTalkContext = "You are a friendly language tutor. You can speak multiple languages. Keep your answers short.";
 
         [Tooltip("Free Talk system prompt (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string freeTalkSystemPrompt = "Have a natural, open conversation in any language the users ask you about. Keep responses concise and encouraging.";
+        public string freeTalkSystemPrompt = "Have a natural, open conversation in any language the users ask you about. Keep responses concise and encouraging. Keep your answers short.";
 
         [Tooltip("Word Clouds LLM context (use {language} for current language)")]
         [TextArea(3, 6)]
