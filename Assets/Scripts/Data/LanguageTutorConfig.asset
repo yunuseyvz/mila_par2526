@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da4213744d8878444a7f8153aebf2011, type: 3}
+  m_Name: LanguageTutorConfig
+  m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Data.LanguageTutorConfig
+  llm:
+    provider: 0
+    serviceUrl: https://router.huggingface.co/v1/chat/completions
+    endpointPath: /api/generate
+    modelName: google/gemma-3-27b-it
+    apiKey: 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
+    maxTokens: 512
+    temperature: 0.7
+    enableStreaming: 0
+    timeoutSeconds: 30
+    maxRetries: 2
+    retryDelaySeconds: 2
+    defaultSystemPrompt: You are a helpful language learning assistant. Provide clear,
+      concise responses that help the user practice the language. Keep responses
+      to 1-2 sentences unless asked for more detail.
+    freeTalkContext: 'You are a friendly language partner. Target language: {language}.'
+    freeTalkSystemPrompt: Have a natural, open conversation in {language}. Keep responses
+      concise and encouraging.
+    wordCloudsContext: 'You help generate word clusters for language learning. Target
+      language: {language}.'
+    wordCloudsSystemPrompt: Suggest short thematic word clusters in {language} and
+      ask a follow-up question to continue.
+    objectTaggingContext: 'You assist with object labeling for language learning.
+      Target language: {language}.'
+    objectTaggingSystemPrompt: Label objects in {language} with short, clear nouns.
+      For German, include the correct article.
+    rolePlayContext: 'You are role-playing with the user. Target language: {language}.'
+    rolePlaySystemPrompt: Stay in character and drive a role-play conversation in
+      {language}. Keep prompts short and interactive.
+  stt:
+    provider: 0
+    apiKey: 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
+    defaultLanguage: en
+    maxRecordingDuration: 30
+    sampleRate: 44100
+    silenceThreshold: 0.01
+    minAudioLength: 1000
+    enableVAD: 0
+    vadSilenceDuration: 1.5
+    enablePronunciationAssessment: 0
+    timeoutSeconds: 30
+    maxRetries: 2
+    whisperModelName: openai/whisper-large-v3-turbo
+    whisperModelSize: base
+    whisperTranslateToEnglish: 0
+  tts:
+    provider: 1
+    allTalkServerUrl: http://bh0wto9ow0kusnsf.myfritz.net:7851
+    allTalkEndpointPath: /api/tts-generate
+    allTalkVoiceName: female_01.wav
+    elevenLabsVoiceId: dCnu06FiOZma2KVNUoPZ
+    outputFormat: mp3_44100_128
+    modelId: eleven_multilingual_v2
+    apiKey: 
+    speechRate: 1
+    defaultLanguage: en
+    timeoutSeconds: 20
+    enableCaching: 1
+    maxCacheSize: 50
+  conversation:
+    language: 0
+    gameMode: 0

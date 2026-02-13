@@ -27209,7 +27209,7 @@ MonoBehaviour:
           DisplayName: 
         memberName: Registry
         _editorSelectedGizmoIndex: 0
-    - enabled: 1
+    - enabled: 0
       typeName: ObjectQuizHighlighter, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
         PublicKeyToken=null
       inspectedMembers:
@@ -27761,7 +27761,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de04175396b6d844baa166c2a8c0bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectDetectionListRecorder
-  registry: {fileID: 11400000, guid: e0b04c0457d2c8e4d8567c883504c811, type: 2}
+  registry: {fileID: 11400000, guid: 3acb332373148f446ae25b35dd67ba58, type: 2}
   duplicateDistanceThreshold: 0.35
   logToConsole: 1
   logDiagnostics: 1
@@ -27782,6 +27782,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07840bee02c786f48a5f98119706c425, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectQuizHighlighter
+  highlightPrefab: {fileID: 1139579850}
+  highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  highlightScaleMultiplier: {x: 1.2, y: 1.2, z: 1}
+  pulseSpeed: 2
+  pulseMinScale: 0.9
+  pulseMaxScale: 1.1
+  rotateHighlight: 1
+  rotationSpeed: 30
 --- !u!1001 &493395676
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -55575,6 +55583,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131745677}
   m_CullTransparentMesh: 1
+--- !u!1 &1139579850 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7396352229094920771, guid: 0a7d2469f24041c4284c66706f84c45e, type: 3}
+  m_PrefabInstance: {fileID: 1706989380}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1145213689
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -96434,7 +96447,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e999196bff1224f88a05863b63afff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LanguageTutor.Core.NPCController
-  config: {fileID: 11400000, guid: f7683a96dab73e8468385492db826a56, type: 2}
+  config: {fileID: 11400000, guid: 5985bed0c7b15ee438ce813b7bfcd69c, type: 2}
   whisperManager: {fileID: 0}
   npcView: {fileID: 1924949633}
   avatarAnimationController: {fileID: 1924949637}
