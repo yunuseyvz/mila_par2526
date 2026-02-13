@@ -437,39 +437,48 @@ namespace LanguageTutor.Core
 
                 if (!string.IsNullOrWhiteSpace(userAnswer))
                 {
+                    string targetLabel = _objectQuizManager.CurrentObjectLabel;
+                    string safeLabel = string.IsNullOrWhiteSpace(targetLabel) ? "object" : targetLabel.Trim();
                     bool isCorrect = _objectQuizManager.SubmitAnswer(userAnswer);
 
                     string feedback;
                     if (isCorrect)
                     {
-                        feedback = $"Correct! It's a {_objectQuizManager.CurrentObjectLabel}. Well done!";
+                        feedback = $"Correct! It's a {safeLabel}. Well done!";
 
                         if (avatarAnimationController != null)
                         {
                             avatarAnimationController.PlayClapping(3f);
                         }
+
+                        _objectQuizManager.EndQuiz();
+
+                        // Make the tutor speak the feedback
+                        Speak(feedback);
+
+                        // Wait until feedback speech is finished before next quiz
+                        await WaitForSpeechToFinishAsync();
+
+                        // Start next quiz
+                        if (_objectQuizManager.StartQuiz())
+                        {
+                            Speak("What is this?");
+                        }
+                        else
+                        {
+                            Speak("No more objects to practice. Great job!");
+                        }
                     }
                     else
                     {
-                        feedback = $"Not quite. This is a {_objectQuizManager.CurrentObjectLabel}. Let's practice more!";
-                    }
+                        feedback = $"This is not correct. This is a {safeLabel}.";
 
-                    _objectQuizManager.EndQuiz();
+                        // Keep current quiz active and same object highlighted until correct pronunciation
+                        Speak(feedback);
+                        await WaitForSpeechToFinishAsync();
 
-                    // Make the tutor speak the feedback
-                    Speak(feedback);
-
-                    // Wait until feedback speech is finished before next quiz
-                    await WaitForSpeechToFinishAsync();
-
-                    // Start next quiz
-                    if (_objectQuizManager.StartQuiz())
-                    {
-                        Speak($"What is this?");
-                    }
-                    else
-                    {
-                        Speak("No more objects to practice. Great job!");
+                        Speak($"Repeat after me: {safeLabel}.");
+                        await WaitForSpeechToFinishAsync();
                     }
                 }
 
