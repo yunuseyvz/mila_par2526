@@ -112,9 +112,8 @@ namespace LanguageTutor.Core
 
             if (animator != null)
             {
-                // Force IMMEDIATE snap to Idle using Play() instead of CrossFade or SetTrigger.
-                // This prevents "blending to floor" issues and ignores "Has Exit Time".
-                animator.Play(idleStateName); 
+                // Usage of CrossFadeInFixedTime for smoother transitions (0.4s)
+                animator.CrossFadeInFixedTime(idleStateName, 0.4f); 
                 
                 _currentState = AnimationState.Idle;
                 ScheduleNextScratch();
@@ -139,7 +138,7 @@ namespace LanguageTutor.Core
             {
                 // WORKAROUND: The "Thinking" animation clip is a kneeling/sitting pose which looks buggy.
                 // We use "Idle" (Standing) instead so the avatar stays upright while generating voice.
-                animator.Play(idleStateName); 
+                animator.CrossFadeInFixedTime(idleStateName, 0.4f); 
                 
                 _currentState = AnimationState.Thinking;
                 Debug.Log("[AvatarAnimationController] Animation force-set to: Thinking (Visual: Idle)");
@@ -162,7 +161,7 @@ namespace LanguageTutor.Core
             if (animator != null)
             {
                 // Force IMMEDIATE transition to Talking
-                animator.Play(talkingStateName); 
+                animator.CrossFadeInFixedTime(talkingStateName, 0.4f); 
                 
                 _currentState = AnimationState.Talking;
                 Debug.Log("[AvatarAnimationController] Animation force-set to: Talking");
@@ -218,15 +217,15 @@ namespace LanguageTutor.Core
             switch (_currentState)
             {
                 case AnimationState.Idle:
-                    animator.Play(idleStateName);
+                    animator.CrossFadeInFixedTime(idleStateName, 0.4f);
                     ScheduleNextScratch();
                     break;
                 case AnimationState.Thinking:
                     // Using idleStateName as per user workaround for Thinking state
-                    animator.Play(idleStateName);
+                    animator.CrossFadeInFixedTime(idleStateName, 0.4f);
                     break;
                 case AnimationState.Talking:
-                    animator.Play(talkingStateName);
+                    animator.CrossFadeInFixedTime(talkingStateName, 0.4f);
                     break;
             }
         }
