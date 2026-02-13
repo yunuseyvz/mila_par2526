@@ -92,6 +92,22 @@ namespace LanguageTutor.Core
             if (npcView != null)
                 npcView.ShowNPCMessage(text);
 
+            // Check for positive keywords to trigger clapping (Same logic as LLM response)
+            if (!string.IsNullOrEmpty(text))
+            {
+                string lowerText = text.ToLowerInvariant();
+                if (lowerText.Contains("good") || 
+                    lowerText.Contains("great") || 
+                    lowerText.Contains("perfect") ||
+                    lowerText.Contains("well done"))
+                {
+                    if (avatarAnimationController != null)
+                    {
+                        avatarAnimationController.PlayClapping();
+                    }
+                }
+            }
+
             if (_ttsService != null)
             {
                 var audioClip = await _ttsService.SynthesizeSpeechAsync(text);
