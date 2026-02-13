@@ -186,7 +186,7 @@ namespace LanguageTutor.Core
                 avatarAnimationController.SetTalking();
 
                 if (_talkingRoutine != null) StopCoroutine(_talkingRoutine);
-                
+
                 // Stop 0.5s early, but ensure at least 0.1s duration
                 float duration = Mathf.Max(0.1f, clip.length - 0.5f);
                 _talkingRoutine = StartCoroutine(StopTalkingAfterDelay(duration));
@@ -398,11 +398,11 @@ namespace LanguageTutor.Core
             {
                 // First transcribe the user's answer
                 string userAnswer = await _sttService.TranscribeAsync(audioClip);
-                
+
                 if (!string.IsNullOrWhiteSpace(userAnswer))
                 {
                     bool isCorrect = _objectQuizManager.SubmitAnswer(userAnswer);
-                    
+
                     string feedback;
                     if (isCorrect)
                     {
@@ -412,15 +412,15 @@ namespace LanguageTutor.Core
                     {
                         feedback = $"Not quite. This is a {_objectQuizManager.CurrentObjectLabel}. Let's practice more!";
                     }
-                    
+
                     _objectQuizManager.EndQuiz();
-                    
+
                     // Make the tutor speak the feedback
                     Speak(feedback);
-                    
+
                     // Wait a bit before starting the next quiz
                     await Task.Delay(3000);
-                    
+
                     // Start next quiz
                     if (_objectQuizManager.StartQuiz())
                     {
@@ -431,7 +431,7 @@ namespace LanguageTutor.Core
                         Speak("No more objects to practice. Great job!");
                     }
                 }
-                
+
                 _isProcessing = false;
                 return;
             }
@@ -448,7 +448,7 @@ namespace LanguageTutor.Core
             if (result.Success && result.TTSAudioClip != null && DefaultAutoPlayTts)
             {
                 _lastTTSClip = result.TTSAudioClip;
-                
+
                 // Use helper to play audio with shortened animation
                 PlayAudioWithEarlyStop(result.TTSAudioClip);
             }
