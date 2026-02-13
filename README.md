@@ -5,10 +5,10 @@
 **Course:** Praktikum Augmented Reality, LMU Munich, WS25/26
 
 **Group Members:**
+- Yunus Emre Yavuz (@yunuseyvz)
 - Entoni Jombi (@saitamaisreal)
 - Anna Maria Lödige (@annamaria-loe)
 - Kevin Kafexhi (@Kafexhi)
-- Yunus Emre Yavuz (@yunuseyvz)
 
 Mila AR is an augmented reality language learning app built in Unity. It provides spoken conversational practice with an AI tutor by combining speech recognition, LLM-based response generation, and natural speech synthesis.
 
