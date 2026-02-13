@@ -16,6 +16,7 @@ namespace LanguageTutor.Core
         [SerializeField] private string thinkingTrigger = "Thinking";
         [SerializeField] private string talkingTrigger = "Talking";
         [SerializeField] private string greetingTrigger = "Greeting";
+        [SerializeField] private string clappingTrigger = "Clapping";
 
         [Header("Animation State Names (Optional)")]
         [SerializeField] private string idleStateName = "Idle";
@@ -34,6 +35,7 @@ namespace LanguageTutor.Core
         private float _nextScratchTime;
         private int _idleStateHash;
         private int _scratchStateHash;
+        private bool _isPriorityAnimationPlaying;
 
         private void Awake()
         {
@@ -103,11 +105,15 @@ namespace LanguageTutor.Core
         {
             if (_currentState == AnimationState.Idle) return;
 
+            _currentState = AnimationState.Idle;
+            Debug.Log("[AvatarAnimationController] Animation state set to: Idle");
+
+            if (_isPriorityAnimationPlaying) return;
+
             if (animator != null)
             {
-                // Force IMMEDIATE snap to Idle using Play() instead of CrossFade or SetTrigger.
-                // This prevents "blending to floor" issues and ignores "Has Exit Time".
-                animator.Play(idleStateName); 
+                // Usage of CrossFadeInFixedTime for smoother transitions (0.4s)
+                animator.CrossFadeInFixedTime(idleStateName, 0.4f); 
                 
                 _currentState = AnimationState.Idle;
                 ScheduleNextScratch();
@@ -123,11 +129,16 @@ namespace LanguageTutor.Core
         {
             if (_currentState == AnimationState.Thinking) return;
 
+            _currentState = AnimationState.Thinking;
+            Debug.Log("[AvatarAnimationController] Animation state set to: Thinking");
+
+            if (_isPriorityAnimationPlaying) return;
+
             if (animator != null)
             {
                 // WORKAROUND: The "Thinking" animation clip is a kneeling/sitting pose which looks buggy.
                 // We use "Idle" (Standing) instead so the avatar stays upright while generating voice.
-                animator.Play(idleStateName); 
+                animator.CrossFadeInFixedTime(idleStateName, 0.4f); 
                 
                 _currentState = AnimationState.Thinking;
                 Debug.Log("[AvatarAnimationController] Animation force-set to: Thinking (Visual: Idle)");
@@ -142,10 +153,15 @@ namespace LanguageTutor.Core
         {
             if (_currentState == AnimationState.Talking) return;
 
+            _currentState = AnimationState.Talking;
+            Debug.Log("[AvatarAnimationController] Animation state set to: Talking");
+
+            if (_isPriorityAnimationPlaying) return;
+
             if (animator != null)
             {
                 // Force IMMEDIATE transition to Talking
-                animator.Play(talkingStateName); 
+                animator.CrossFadeInFixedTime(talkingStateName, 0.4f); 
                 
                 _currentState = AnimationState.Talking;
                 Debug.Log("[AvatarAnimationController] Animation force-set to: Talking");
@@ -162,6 +178,55 @@ namespace LanguageTutor.Core
             {
                 animator.SetTrigger(greetingTrigger);
                 Debug.Log("[AvatarAnimationController] Playing greeting animation");
+            }
+        }
+
+        /// <summary>
+        /// Plays Clapping animation for a specified duration, then returns to the current state.
+        /// </summary>
+        public void PlayClapping(float duration = 5f)
+        {
+            if (animator != null)
+            {
+                StartCoroutine(WaitAndStopClapping(duration));
+            }
+        }
+
+        private System.Collections.IEnumerator WaitAndStopClapping(float duration)
+        {
+            _isPriorityAnimationPlaying = true;
+            // Use SetTrigger to allow for smooth transitions defined in Animator
+            if (animator != null)
+            {
+                 animator.SetTrigger(clappingTrigger); 
+            }
+            Debug.Log($"[AvatarAnimationController] Playing Clapping animation for {duration} seconds");
+
+            yield return new WaitForSeconds(duration);
+
+            _isPriorityAnimationPlaying = false;
+            ReapplyCurrentState();
+        }
+
+        private void ReapplyCurrentState()
+        {
+            Debug.Log($"[AvatarAnimationController] Clapping finished. Resuming state: {_currentState}");
+            
+            if (animator == null) return;
+
+            switch (_currentState)
+            {
+                case AnimationState.Idle:
+                    animator.CrossFadeInFixedTime(idleStateName, 0.4f);
+                    ScheduleNextScratch();
+                    break;
+                case AnimationState.Thinking:
+                    // Using idleStateName as per user workaround for Thinking state
+                    animator.CrossFadeInFixedTime(idleStateName, 0.4f);
+                    break;
+                case AnimationState.Talking:
+                    animator.CrossFadeInFixedTime(talkingStateName, 0.4f);
+                    break;
             }
         }
 

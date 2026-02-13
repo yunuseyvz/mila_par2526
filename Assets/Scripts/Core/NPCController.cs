@@ -495,7 +495,26 @@ namespace LanguageTutor.Core
         }
 
         private void HandleTranscriptionCompleted(string text) { if (DefaultShowSubtitles && npcView != null) npcView.ShowUserMessage(text); }
-        private void HandleLLMResponseReceived(string response) { if (DefaultShowSubtitles && npcView != null) npcView.ShowNPCMessage(response); }
+        private void HandleLLMResponseReceived(string response) 
+        { 
+            if (DefaultShowSubtitles && npcView != null) npcView.ShowNPCMessage(response);
+            
+            // Check for positive keywords to trigger clapping
+            if (!string.IsNullOrEmpty(response))
+            {
+                string lowerResponse = response.ToLowerInvariant();
+                if (lowerResponse.Contains("good") || 
+                    lowerResponse.Contains("great") || 
+                    lowerResponse.Contains("perfect") ||
+                    lowerResponse.Contains("well done"))
+                {
+                    if (avatarAnimationController != null)
+                    {
+                        avatarAnimationController.PlayClapping();
+                    }
+                }
+            }
+        }
         private void HandleTTSAudioGenerated(AudioClip audio) { }
         private void HandlePipelineError(string error) { if (npcView != null) npcView.ShowErrorMessage(error); }
 
