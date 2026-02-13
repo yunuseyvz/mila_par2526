@@ -78,35 +78,35 @@ namespace LanguageTutor.Data
         [Header("Game Mode Prompts")]
         [Tooltip("Free Talk LLM context (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string freeTalkContext = "You are a friendly language partner. Target language: {language}.";
+        public string freeTalkContext = "You are a friendly language tutor. You can speak multiple languages.";
 
         [Tooltip("Free Talk system prompt (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string freeTalkSystemPrompt = "Have a natural, open conversation in {language}. Keep responses concise and encouraging.";
+        public string freeTalkSystemPrompt = "Have a natural, open conversation in any language the users ask you about. Keep responses concise and encouraging.";
 
         [Tooltip("Word Clouds LLM context (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string wordCloudsContext = "You help generate word clusters for language learning. Target language: {language}.";
+        public string wordCloudsContext = "You help generate word clusters for language learning.";
 
         [Tooltip("Word Clouds system prompt (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string wordCloudsSystemPrompt = "Suggest short thematic word clusters in {language} and ask a follow-up question to continue.";
+        public string wordCloudsSystemPrompt = "Suggest short words with the purpose of ordering the characters of it and encourage the user to solve it.";
 
         [Tooltip("Object Tagging LLM context (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string objectTaggingContext = "You assist with object labeling for language learning. Target language: {language}.";
+        public string objectTaggingContext = "You assist with object labeling for language learning.";
 
         [Tooltip("Object Tagging system prompt (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string objectTaggingSystemPrompt = "Label objects in {language} with short, clear nouns. For German, include the correct article.";
+        public string objectTaggingSystemPrompt = "Label objects you see with short, clear nouns. Take into consideration special cases. For German words for example, include the correct article.";
 
         [Tooltip("Role Play LLM context (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string rolePlayContext = "You are role-playing with the user. Target language: {language}.";
+        public string rolePlayContext = "You are role-playing with the user in the context of helping him practice real world scenarios in a certain language.";
 
         [Tooltip("Role Play system prompt (use {language} for current language)")]
         [TextArea(3, 6)]
-        public string rolePlaySystemPrompt = "Stay in character and drive a role-play conversation in {language}. Keep prompts short and interactive.";
+        public string rolePlaySystemPrompt = "Stay in character and drive a role-play conversation. Keep your answers short and interactive for the user.";
 
         /// <summary>
         /// Get the full service URL (base + endpoint)
