@@ -25,6 +25,9 @@ public class ObjectQuizHighlighter : MonoBehaviour
     [SerializeField] private float pulseMaxScale = 1.1f;
     [SerializeField] private bool rotateHighlight = true;
     [SerializeField] private float rotationSpeed = 30f;
+    [SerializeField] private Vector3 rotationOffsetEuler = new Vector3(0f, 0f, 90f);
+    [SerializeField] private bool forcePointDown = true;
+    [SerializeField] private Vector3 pointDownEuler = new Vector3(90f, 0f, 0f);
 
     private GameObject _currentHighlight;
     private Material _highlightMaterial;
@@ -132,7 +135,7 @@ public class ObjectQuizHighlighter : MonoBehaviour
 
         // Create or reuse highlight at the entry's stored position
         CreateOrUpdateHighlight(entry.Position, Quaternion.identity, Vector3.one * 0.3f);
-        
+
         Debug.Log($"[ObjectQuizHighlighter] Highlighting object: {entry.Label} at {entry.Position}");
         return true;
     }
@@ -162,10 +165,10 @@ public class ObjectQuizHighlighter : MonoBehaviour
         {
             _currentHighlight.SetActive(false);
         }
-        
+
         _currentTargetLabel = null;
         _currentTargetEntry = null;
-        
+
         Debug.Log("[ObjectQuizHighlighter] Highlight cleared.");
     }
 
@@ -275,27 +278,29 @@ public class ObjectQuizHighlighter : MonoBehaviour
                 // Create default cube if no prefab provided
                 _currentHighlight = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 _currentHighlight.name = "QuizHighlight";
-                
+
                 // Remove collider
                 Destroy(_currentHighlight.GetComponent<Collider>());
-                
+
                 // Create glowing material
                 _highlightMaterial = new Material(Shader.Find("Standard"));
                 _highlightMaterial.EnableKeyword("_EMISSION");
                 _highlightMaterial.SetColor("_EmissionColor", highlightColor * 2f);
                 _highlightMaterial.SetColor("_Color", new Color(highlightColor.r, highlightColor.g, highlightColor.b, 0.5f));
-                
+
                 var renderer = _currentHighlight.GetComponent<Renderer>();
                 if (renderer != null)
                     renderer.material = _highlightMaterial;
             }
-            
+
             _pulseTime = 0f;
         }
 
         _currentHighlight.SetActive(true);
         _currentHighlight.transform.position = position;
-        _currentHighlight.transform.rotation = rotation;
+        var runtimeRotation = rotation * Quaternion.Euler(rotationOffsetEuler);
+        var downRotation = Quaternion.Euler(pointDownEuler) * Quaternion.Euler(rotationOffsetEuler);
+        _currentHighlight.transform.rotation = forcePointDown ? downRotation : runtimeRotation;
         _currentHighlight.transform.localScale = scale;
         _baseScale = scale;
     }
@@ -334,7 +339,7 @@ public class ObjectQuizHighlighter : MonoBehaviour
         {
             Destroy(_currentHighlight);
         }
-        
+
         if (_highlightMaterial != null)
         {
             Destroy(_highlightMaterial);
