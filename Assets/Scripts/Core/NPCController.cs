@@ -96,8 +96,8 @@ namespace LanguageTutor.Core
             if (!string.IsNullOrEmpty(text))
             {
                 string lowerText = text.ToLowerInvariant();
-                if (lowerText.Contains("good") || 
-                    lowerText.Contains("great") || 
+                if (lowerText.Contains("good") ||
+                    lowerText.Contains("great") ||
                     lowerText.Contains("perfect") ||
                     lowerText.Contains("well done"))
                 {
@@ -218,6 +218,26 @@ namespace LanguageTutor.Core
                 avatarAnimationController.SetIdle();
             }
             _talkingRoutine = null;
+        }
+
+        private async Task WaitForSpeechToFinishAsync(int maxStartWaitMs = 5000, int maxTotalWaitMs = 20000)
+        {
+            if (npcView == null)
+                return;
+
+            int waitedToStartMs = 0;
+            while (!npcView.IsAudioPlaying() && waitedToStartMs < maxStartWaitMs)
+            {
+                await Task.Delay(100);
+                waitedToStartMs += 100;
+            }
+
+            int waitedTotalMs = 0;
+            while (npcView.IsAudioPlaying() && waitedTotalMs < maxTotalWaitMs)
+            {
+                await Task.Delay(100);
+                waitedTotalMs += 100;
+            }
         }
 
         public void StopCurrentSpeech()
@@ -423,6 +443,11 @@ namespace LanguageTutor.Core
                     if (isCorrect)
                     {
                         feedback = $"Correct! It's a {_objectQuizManager.CurrentObjectLabel}. Well done!";
+
+                        if (avatarAnimationController != null)
+                        {
+                            avatarAnimationController.PlayClapping(3f);
+                        }
                     }
                     else
                     {
@@ -434,8 +459,8 @@ namespace LanguageTutor.Core
                     // Make the tutor speak the feedback
                     Speak(feedback);
 
-                    // Wait a bit before starting the next quiz
-                    await Task.Delay(3000);
+                    // Wait until feedback speech is finished before next quiz
+                    await WaitForSpeechToFinishAsync();
 
                     // Start next quiz
                     if (_objectQuizManager.StartQuiz())
@@ -511,16 +536,16 @@ namespace LanguageTutor.Core
         }
 
         private void HandleTranscriptionCompleted(string text) { if (DefaultShowSubtitles && npcView != null) npcView.ShowUserMessage(text); }
-        private void HandleLLMResponseReceived(string response) 
-        { 
+        private void HandleLLMResponseReceived(string response)
+        {
             if (DefaultShowSubtitles && npcView != null) npcView.ShowNPCMessage(response);
-            
+
             // Check for positive keywords to trigger clapping
             if (!string.IsNullOrEmpty(response))
             {
                 string lowerResponse = response.ToLowerInvariant();
-                if (lowerResponse.Contains("good") || 
-                    lowerResponse.Contains("great") || 
+                if (lowerResponse.Contains("good") ||
+                    lowerResponse.Contains("great") ||
                     lowerResponse.Contains("perfect") ||
                     lowerResponse.Contains("well done"))
                 {
