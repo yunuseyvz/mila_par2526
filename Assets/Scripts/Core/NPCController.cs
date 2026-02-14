@@ -407,8 +407,15 @@ namespace LanguageTutor.Core
             var detectionRecorder = FindObjectOfType<ObjectDetectionListRecorder>();
             if (detectionRecorder != null)
             {
+                detectionRecorder.SetDetectionEnabled(false);
                 detectionRecorder.SetVisualizerEnabled(false);
-                Debug.Log("[NPCController] ObjectDetectionVisualizer disabled at startup");
+                Debug.Log("[NPCController] Object detection disabled at startup");
+            }
+
+            var objectQuizHighlighter = FindObjectOfType<ObjectQuizHighlighter>();
+            if (objectQuizHighlighter != null)
+            {
+                objectQuizHighlighter.SetDetectionEnabled(false);
             }
 #endif
 
@@ -843,15 +850,23 @@ namespace LanguageTutor.Core
             // Disabled for: FreeTalk, WordClouds (Word Building), RolePlay
 #if MRUK_INSTALLED
             var detectionRecorder = FindObjectOfType<ObjectDetectionListRecorder>();
+            var objectQuizHighlighter = FindObjectOfType<ObjectQuizHighlighter>();
+            bool shouldEnable = (mode == ConversationGameMode.ObjectTagging);
+
             if (detectionRecorder != null)
             {
-                bool shouldEnable = (mode == ConversationGameMode.ObjectTagging);
+                detectionRecorder.SetDetectionEnabled(shouldEnable);
                 detectionRecorder.SetVisualizerEnabled(shouldEnable);
                 
                 if (shouldEnable)
-                    Debug.Log($"[NPCController] Visualizer ENABLED for ObjectTagging mode");
+                    Debug.Log("[NPCController] Object detection ENABLED for ObjectTagging mode");
                 else
-                    Debug.Log($"[NPCController] Visualizer DISABLED - Mode is {mode} (only enabled for ObjectTagging)");
+                    Debug.Log($"[NPCController] Object detection DISABLED - Mode is {mode} (only enabled for ObjectTagging)");
+            }
+
+            if (objectQuizHighlighter != null)
+            {
+                objectQuizHighlighter.SetDetectionEnabled(shouldEnable);
             }
 #endif
 

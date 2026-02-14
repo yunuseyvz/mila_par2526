@@ -32,6 +32,8 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     private ObjectDetectionVisualizer _visualizer;
     private readonly StringBuilder _logBuilder = new();
     private bool _loggedMissingDeps;
+    private bool _detectionEnabled;
+    private bool _isSubscribed;
     private float _nextUiLogTime;
     private float _nextFileLogTime;
     private string _logFilePath;
@@ -40,6 +42,7 @@ public class ObjectDetectionListRecorder : MonoBehaviour
     {
         _agent = GetComponent<ObjectDetectionAgent>();
         _visualizer = GetComponent<ObjectDetectionVisualizer>();
+        _detectionEnabled = _agent != null && _agent.enabled;
         if (eventLog == null)
         {
             eventLog = FindObjectOfType<LanguageTutor.UI.EventLog>(true);
@@ -69,18 +72,21 @@ public class ObjectDetectionListRecorder : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_agent != null)
-        {
-            _agent.OnBoxesUpdated += HandleBoxesUpdated;
-        }
+        ApplyDetectionState();
     }
 
     private void OnDisable()
     {
-        if (_agent != null)
-        {
-            _agent.OnBoxesUpdated -= HandleBoxesUpdated;
-        }
+        SetSubscriptionState(false);
+    }
+
+    /// <summary>
+    /// Enable/disable object detection processing and callbacks.
+    /// </summary>
+    public void SetDetectionEnabled(bool enabled)
+    {
+        _detectionEnabled = enabled;
+        ApplyDetectionState();
     }
 
     /// <summary>
@@ -97,6 +103,38 @@ public class ObjectDetectionListRecorder : MonoBehaviour
         {
             Debug.LogWarning("[ObjectDetectionListRecorder] Cannot set visualizer state - visualizer is null");
         }
+    }
+
+    private void ApplyDetectionState()
+    {
+        if (_agent != null)
+        {
+            _agent.enabled = _detectionEnabled;
+        }
+
+        SetSubscriptionState(isActiveAndEnabled && _detectionEnabled);
+    }
+
+    private void SetSubscriptionState(bool shouldSubscribe)
+    {
+        if (_agent == null)
+            return;
+
+        if (shouldSubscribe)
+        {
+            if (_isSubscribed)
+                return;
+
+            _agent.OnBoxesUpdated += HandleBoxesUpdated;
+            _isSubscribed = true;
+            return;
+        }
+
+        if (!_isSubscribed)
+            return;
+
+        _agent.OnBoxesUpdated -= HandleBoxesUpdated;
+        _isSubscribed = false;
     }
 
     private void HandleBoxesUpdated(System.Collections.Generic.List<BoxData> batch)

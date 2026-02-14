@@ -54,6 +54,8 @@ public class ObjectQuizHighlighter : MonoBehaviour
     private PassthroughCameraAccess _cam;
     private DepthTextureAccess _depth;
     private int _eyeIdx;
+    private bool _detectionEnabled;
+    private bool _isSubscribed;
 
     private struct FrameData
     {
@@ -72,6 +74,7 @@ public class ObjectQuizHighlighter : MonoBehaviour
         _agent = GetComponent<ObjectDetectionAgent>();
         _cam = FindAnyObjectByType<PassthroughCameraAccess>();
         _depth = GetComponent<DepthTextureAccess>();
+        _detectionEnabled = _agent != null && _agent.enabled;
         if (_cam != null)
             _eyeIdx = _cam.CameraPosition == PassthroughCameraAccess.CameraPositionType.Left ? 0 : 1;
 #endif
@@ -80,18 +83,59 @@ public class ObjectQuizHighlighter : MonoBehaviour
 #if MRUK_INSTALLED
     private void OnEnable()
     {
-        _agent.OnBoxesUpdated += HandleBatch;
-        _depth.OnDepthTextureUpdateCPU += OnDepth;
+        ApplyDetectionState();
     }
 
     private void OnDisable()
     {
+        SetSubscriptionState(false);
+    }
+
+    public void SetDetectionEnabled(bool enabled)
+    {
+        _detectionEnabled = enabled;
+        ApplyDetectionState();
+    }
+
+    private void ApplyDetectionState()
+    {
+        if (_agent != null)
+        {
+            _agent.enabled = _detectionEnabled;
+        }
+
+        SetSubscriptionState(isActiveAndEnabled && _detectionEnabled);
+    }
+
+    private void SetSubscriptionState(bool shouldSubscribe)
+    {
+        if (_agent == null || _depth == null)
+            return;
+
+        if (shouldSubscribe)
+        {
+            if (_isSubscribed)
+                return;
+
+            _agent.OnBoxesUpdated += HandleBatch;
+            _depth.OnDepthTextureUpdateCPU += OnDepth;
+            _isSubscribed = true;
+            return;
+        }
+
+        if (!_isSubscribed)
+            return;
+
         _agent.OnBoxesUpdated -= HandleBatch;
         _depth.OnDepthTextureUpdateCPU -= OnDepth;
+        _isSubscribed = false;
     }
 
     private void OnDepth(DepthTextureAccess.DepthFrameData depthFrame)
     {
+        if (!_detectionEnabled || _cam == null)
+            return;
+
         _frame.Pose = _cam.GetCameraPose();
         _frame.CameraIntrinsics = _cam.Intrinsics;
         _frame.Depth = depthFrame.DepthTexturePixels.ToArray();
