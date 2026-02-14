@@ -11,6 +11,7 @@ namespace LanguageTutor.UI
         [SerializeField] private Toggle slowModeToggle;
         [SerializeField] private Button replayButton;
         [SerializeField] private Button stopButton;
+        [SerializeField] private Button resetButton;
         
         [Header("Settings")]
         [SerializeField] private float slowModeSpeed = 0.75f;
@@ -26,6 +27,11 @@ namespace LanguageTutor.UI
             if (stopButton == null)
             {
                 stopButton = FindButtonByName("StopButton") ?? FindButtonByName("SettingsButton");
+            }
+
+            if (resetButton == null)
+            {
+                resetButton = FindButtonByName("ResetButton") ?? FindButtonByName("Reset");
             }
 
             if (slowModeToggle != null)
@@ -57,6 +63,15 @@ namespace LanguageTutor.UI
             {
                 Debug.LogWarning("[MainMenuController] Stop Button is not assigned!");
             }
+
+            if (resetButton != null)
+            {
+                resetButton.onClick.AddListener(OnResetClicked);
+            }
+            else
+            {
+                Debug.LogWarning("[MainMenuController] Reset Button is not assigned!");
+            }
         }
 
         private void OnDestroy()
@@ -74,6 +89,11 @@ namespace LanguageTutor.UI
             if (stopButton != null)
             {
                 stopButton.onClick.RemoveListener(OnStopClicked);
+            }
+
+            if (resetButton != null)
+            {
+                resetButton.onClick.RemoveListener(OnResetClicked);
             }
         }
 
@@ -106,6 +126,15 @@ namespace LanguageTutor.UI
             {
                 Debug.Log("[MainMenuController] Stop button clicked");
                 npcController.StopCurrentSpeech();
+            }
+        }
+
+        private void OnResetClicked()
+        {
+            if (npcController != null)
+            {
+                Debug.Log("[MainMenuController] Reset button clicked");
+                npcController.ReinitializeConversationPipeline();
             }
         }
 

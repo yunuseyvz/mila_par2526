@@ -10,6 +10,7 @@ public class VRButtonInput : MonoBehaviour
 
     private const OVRInput.Button TalkInputButton = OVRInput.Button.One;
     private const OVRInput.Button StopInputButton = OVRInput.Button.Two;
+    private const OVRInput.Button ToggleTtsInputButton = OVRInput.Button.Three;
 
     private void Awake()
     {
@@ -43,6 +44,12 @@ public class VRButtonInput : MonoBehaviour
             {
                 npcController?.StopCurrentSpeech();
             }
+        }
+
+        // X button on left controller - toggle TTS provider (ElevenLabs/AllTalk)
+        if (OVRInput.GetDown(ToggleTtsInputButton))
+        {
+            npcController?.ToggleTTSProvider();
         }
     }
 

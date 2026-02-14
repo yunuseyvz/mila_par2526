@@ -81,6 +81,7 @@ namespace LanguageTutor.Core
             if (string.IsNullOrEmpty(_microphoneDevice))
             {
                 Debug.LogError("[StartRecording] Microphone device is null or empty!");
+                OnRecordingError?.Invoke("No microphone found. Please check microphone permissions and device connection.");
                 return;
             }
 
@@ -102,6 +103,8 @@ namespace LanguageTutor.Core
             {
                 Debug.LogError("[StartRecording] EXCEPTION: " + ex.Message);
                 Debug.LogError("[StartRecording] StackTrace: " + ex.StackTrace);
+                _isRecording = false;
+                OnRecordingError?.Invoke($"Failed to start recording: {ex.Message}");
             }
         }
 
@@ -174,9 +177,19 @@ namespace LanguageTutor.Core
         {
             if (_isRecording)
             {
-                Microphone.End(_microphoneDevice);
-                _isRecording = false;
-                Debug.Log("[AudioInputController] Recording cancelled");
+                try
+                {
+                    Microphone.End(_microphoneDevice);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[AudioInputController] Failed to end microphone on cancel: {ex.Message}");
+                }
+                finally
+                {
+                    _isRecording = false;
+                    Debug.Log("[AudioInputController] Recording cancelled");
+                }
             }
         }
 

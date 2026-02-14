@@ -17,6 +17,7 @@ namespace LanguageTutor.UI
         [SerializeField] private EventLog eventLog;
         [SerializeField] private TextMeshProUGUI subtitleText; // Legacy - kept for backward compatibility
         [SerializeField] private TextMeshProUGUI statusText; // Displays current system status
+        [SerializeField] private TextMeshProUGUI ttsStatusText; // Displays active TTS provider and TTS errors
         [SerializeField] private Button talkButton;
         [SerializeField] private Image statusIndicator;
 
@@ -43,6 +44,7 @@ namespace LanguageTutor.UI
         private string _conversationText;
         private List<string> _conversationHistory = new List<string>();
         private string _modeLabel;
+        private string _activeTtsProviderLabel = "Unknown";
 
         private void Awake()
         {
@@ -59,6 +61,20 @@ namespace LanguageTutor.UI
             if (scrollingSubtitles == null && subtitleText == null)
                 Debug.LogWarning("[NPCView] Neither ScrollingSubtitles nor SubtitleText is assigned! Subtitle display will not work.");
 
+            if (ttsStatusText == null)
+            {
+                var allTexts = GetComponentsInChildren<TextMeshProUGUI>(true);
+                foreach (var text in allTexts)
+                {
+                    if (text != null && text.name.Equals("TTSStatus", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        ttsStatusText = text;
+                        Debug.Log("[NPCView] Auto-assigned TTS status text from child object 'TTSStatus'.");
+                        break;
+                    }
+                }
+            }
+
             ApplyForcedTextColors();
             
             if (eventLog == null)
@@ -69,6 +85,11 @@ namespace LanguageTutor.UI
             
             if (talkButton == null)
                 Debug.LogError("[NPCView] TalkButton is not assigned!");
+
+            if (ttsStatusText == null)
+                Debug.LogWarning("[NPCView] TTSStatus text is not assigned and could not be auto-found. TTS provider/error UI will not show.");
+            else
+                SetTtsStatusText("TTS: Unknown");
         }
 
         private void LateUpdate()
@@ -92,6 +113,55 @@ namespace LanguageTutor.UI
             if (statusText != null)
             {
                 statusText.color = forcedTextColor;
+            }
+
+            if (ttsStatusText != null)
+            {
+                ttsStatusText.color = forcedTextColor;
+            }
+        }
+
+        public void SetActiveTtsProvider(string providerLabel)
+        {
+            _activeTtsProviderLabel = string.IsNullOrWhiteSpace(providerLabel) ? "Unknown" : providerLabel.Trim();
+            SetTtsStatusText($"TTS: {_activeTtsProviderLabel}");
+        }
+
+        public void ShowTtsError(string error)
+        {
+            if (string.IsNullOrWhiteSpace(error))
+            {
+                SetTtsStatusText($"TTS: {_activeTtsProviderLabel} - Error");
+                return;
+            }
+
+            string compact = error.Replace("\n", " ").Replace("\r", " ").Trim();
+            if (compact.Length > 80)
+            {
+                compact = compact.Substring(0, 80) + "...";
+            }
+
+            SetTtsStatusText($"TTS: {_activeTtsProviderLabel} - Error: {compact}");
+        }
+
+        private void SetTtsStatusText(string text)
+        {
+            if (ttsStatusText != null)
+            {
+                ttsStatusText.text = text;
+
+                if (forceTextColor)
+                {
+                    ttsStatusText.color = forcedTextColor;
+                }
+                else if (statusText != null)
+                {
+                    ttsStatusText.color = statusText.color;
+                }
+                else if (ttsStatusText.color == Color.black)
+                {
+                    ttsStatusText.color = Color.white;
+                }
             }
         }
 
@@ -387,7 +457,6 @@ namespace LanguageTutor.UI
             }
             ShowStatusMessage("Listening...");
             SetStatusColor(listeningColor);
-            SetButtonText("Stop");
         }
 
         /// <summary>
@@ -420,7 +489,6 @@ namespace LanguageTutor.UI
             ShowStatusMessage(string.IsNullOrWhiteSpace(_modeLabel) ? "Ready" : _modeLabel);
             SetStatusColor(idleColor);
             SetButtonInteractable(true);
-            SetButtonText("Talk");
         }
 
         /// <summary>

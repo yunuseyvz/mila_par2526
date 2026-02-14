@@ -46,15 +46,19 @@ namespace LanguageTutor.Core
         private ILLMAction _currentAction;
         private AudioClip _lastTTSClip;
         private bool _isProcessing;
+        private float _processingStartedRealtime = -1f;
         private bool _isWaitingForObjectTaggingObjects;
         private ConversationGameMode _currentGameMode = ConversationGameMode.FreeTalk;
         private Coroutine _objectTaggingRetryRoutine;
+        private PipelineStage _lastPipelineStage = PipelineStage.Idle;
 
         [Header("Object Tagging")]
         [SerializeField] private float objectTaggingRetryIntervalSeconds = 5f;
 
         private const bool DefaultShowSubtitles = true;
         private const bool DefaultAutoPlayTts = true;
+        private const float ProcessingSafetyBufferSeconds = 10f;
+        private const float MinimumPipelineTimeoutSeconds = 20f;
 
         public ConversationGameMode CurrentGameMode => _currentGameMode;
 
@@ -64,6 +68,7 @@ namespace LanguageTutor.Core
             InitializeSystems();
             SetupEventListeners();
             SetDefaultAction();
+            UpdateTtsProviderStatusUi();
 
             if (npcView != null) npcView.SetIdleState();
 
@@ -116,10 +121,21 @@ namespace LanguageTutor.Core
 
             if (_ttsService != null)
             {
-                var audioClip = await _ttsService.SynthesizeSpeechAsync(text);
-                if (audioClip != null)
+                try
                 {
-                    PlayAudioWithEarlyStop(audioClip);
+                    var audioClip = await _ttsService.SynthesizeSpeechAsync(text);
+                    if (audioClip != null)
+                    {
+                        PlayAudioWithEarlyStop(audioClip);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[NPCController] Speak TTS failed: {ex.Message}");
+                    if (npcView != null)
+                    {
+                        npcView.ShowTtsError(ex.Message);
+                    }
                 }
             }
         }
@@ -171,6 +187,68 @@ namespace LanguageTutor.Core
             }
         }
 
+        public void ReinitializeConversationPipeline()
+        {
+            Debug.Log("[NPCController] Reinitializing conversation pipeline...");
+
+            StopObjectTaggingRetryLoop();
+            CancelOngoingOperations();
+
+            if (_audioInput != null && _audioInput.IsRecording)
+            {
+                _audioInput.CancelRecording();
+            }
+
+            if (npcView != null)
+            {
+                npcView.StopAudio();
+            }
+
+            CleanupEventListeners();
+            InitializeServices();
+
+            if (_llmService == null || _ttsService == null || _sttService == null)
+            {
+                Debug.LogError("[NPCController] Reinitialization failed: one or more services could not be created.");
+                if (npcView != null)
+                {
+                    npcView.ShowErrorMessage("Could not reinitialize conversation services.");
+                    npcView.SetIdleState();
+                }
+                EndProcessing();
+                OnListeningStateChanged?.Invoke(false);
+                return;
+            }
+
+            InitializeSystems();
+            SetupEventListeners();
+
+            _lastTTSClip = null;
+            EndProcessing();
+            OnListeningStateChanged?.Invoke(false);
+
+            if (config != null)
+            {
+                SetGameMode(ConversationGameMode.FreeTalk);
+            }
+
+            if (npcView != null)
+            {
+                npcView.ClearSubtitle();
+                npcView.SetIdleState();
+                npcView.ShowStatusMessage("Conversation pipeline reinitialized");
+            }
+
+            UpdateTtsProviderStatusUi();
+
+            if (avatarAnimationController != null)
+            {
+                avatarAnimationController.SetIdle();
+            }
+
+            Debug.Log("[NPCController] Conversation pipeline reinitialized successfully");
+        }
+
         public ConversationSummary GetConversationSummary()
         {
             return _conversationHistory != null ? _conversationHistory.GetSummary() : new ConversationSummary();
@@ -179,6 +257,31 @@ namespace LanguageTutor.Core
         public void SetTTSSpeed(float speed)
         {
             if (_ttsService != null) _ttsService.SetSpeed(speed);
+        }
+
+        public void ToggleTTSProvider()
+        {
+            if (config == null)
+            {
+                Debug.LogError("[NPCController] Cannot toggle TTS provider: config is missing.");
+                return;
+            }
+
+            var nextProvider = config.tts.provider == TTSSettings.TTSProvider.ElevenLabs
+                ? TTSSettings.TTSProvider.AllTalk
+                : TTSSettings.TTSProvider.ElevenLabs;
+
+            config.tts.provider = nextProvider;
+            Debug.Log($"[NPCController] TTS provider switched to: {nextProvider}");
+
+            ReinitializeConversationPipeline();
+
+            if (npcView != null)
+            {
+                npcView.ShowStatusMessage($"TTS switched to {GetTtsProviderLabel(nextProvider)}");
+            }
+
+            UpdateTtsProviderStatusUi();
         }
 
         public void ReplayLastMessage()
@@ -253,6 +356,8 @@ namespace LanguageTutor.Core
                 npcView.StopAudio();
                 npcView.SetIdleState();
             }
+
+            _ttsService?.CancelSynthesis();
 
             if (avatarAnimationController != null)
             {
@@ -433,87 +538,95 @@ namespace LanguageTutor.Core
         {
             OnListeningStateChanged?.Invoke(false);
             if (audioClip == null) return;
-            _isProcessing = true;
 
-            // Object Quiz mode: Check user's answer against the highlighted object
-            if (_currentGameMode == ConversationGameMode.ObjectTagging && _objectQuizManager != null && _objectQuizManager.IsQuizActive)
+            BeginProcessing();
+            try
             {
-                // First transcribe the user's answer
-                string userAnswer = await _sttService.TranscribeAsync(audioClip);
-
-                if (!string.IsNullOrWhiteSpace(userAnswer))
+                // Object Quiz mode: Check user's answer against the highlighted object
+                if (_currentGameMode == ConversationGameMode.ObjectTagging && _objectQuizManager != null && _objectQuizManager.IsQuizActive)
                 {
-                    string targetLabel = _objectQuizManager.CurrentObjectLabel;
-                    string safeLabel = string.IsNullOrWhiteSpace(targetLabel) ? "object" : targetLabel.Trim();
-                    bool isCorrect = _objectQuizManager.SubmitAnswer(userAnswer);
+                    // First transcribe the user's answer
+                    string userAnswer = await ExecuteWithTimeout(
+                        _sttService.TranscribeAsync(audioClip),
+                        GetSttTimeoutSeconds(),
+                        "Transcription");
 
-                    string feedback;
-                    if (isCorrect)
+                    if (!string.IsNullOrWhiteSpace(userAnswer))
                     {
-                        feedback = $"Correct! It's a {safeLabel}. Well done!";
+                        string targetLabel = _objectQuizManager.CurrentObjectLabel;
+                        string safeLabel = string.IsNullOrWhiteSpace(targetLabel) ? "object" : targetLabel.Trim();
+                        bool isCorrect = _objectQuizManager.SubmitAnswer(userAnswer);
 
-                        if (avatarAnimationController != null)
+                        string feedback;
+                        if (isCorrect)
                         {
-                            avatarAnimationController.PlayClapping(3f);
-                        }
+                            feedback = $"Correct! It's a {safeLabel}. Well done!";
 
-                        _objectQuizManager.EndQuiz();
+                            if (avatarAnimationController != null)
+                            {
+                                avatarAnimationController.PlayClapping(3f);
+                            }
 
-                        // Make the tutor speak the feedback
-                        Speak(feedback);
+                            _objectQuizManager.EndQuiz();
 
-                        // Wait until feedback speech is finished before next quiz
-                        await WaitForSpeechToFinishAsync();
+                            Speak(feedback);
+                            await WaitForSpeechToFinishAsync();
 
-                        // Start next quiz
-                        if (TryStartObjectQuiz(announceStart: false))
-                        {
-                            Speak("What is this?");
+                            if (TryStartObjectQuiz(announceStart: false))
+                            {
+                                Speak("What is this?");
+                            }
+                            else
+                            {
+                                StartObjectTaggingQuizWithRetry();
+                            }
                         }
                         else
                         {
-                            StartObjectTaggingQuizWithRetry();
+                            feedback = $"This is not correct. This is a {safeLabel}.";
+
+                            Speak(feedback);
+                            await WaitForSpeechToFinishAsync();
+
+                            Speak($"Repeat after me: {safeLabel}.");
+                            await WaitForSpeechToFinishAsync();
                         }
                     }
-                    else
-                    {
-                        feedback = $"This is not correct. This is a {safeLabel}.";
 
-                        // Keep current quiz active and same object highlighted until correct pronunciation
-                        Speak(feedback);
-                        await WaitForSpeechToFinishAsync();
-
-                        Speak($"Repeat after me: {safeLabel}.");
-                        await WaitForSpeechToFinishAsync();
-                    }
+                    return;
                 }
 
-                _isProcessing = false;
-                return;
+                if (_currentGameMode == ConversationGameMode.ObjectTagging && config != null)
+                {
+                    string languageName = GetLanguageName(config.conversation.language);
+                    string systemPrompt = BuildGameModeSystemPrompt(_currentGameMode, languageName);
+                    _currentAction = new ChatAction(systemPrompt);
+                }
+
+                var result = await ExecuteWithTimeout(
+                    _conversationPipeline.ExecuteAsync(audioClip, _currentAction),
+                    GetConversationPipelineTimeoutSeconds(),
+                    "Conversation pipeline");
+
+                if (result.Success && result.TTSAudioClip != null && DefaultAutoPlayTts)
+                {
+                    _lastTTSClip = result.TTSAudioClip;
+                    PlayAudioWithEarlyStop(result.TTSAudioClip);
+                }
+
+                if (!result.Success && npcView != null)
+                {
+                    npcView.SetIdleState();
+                    if (avatarAnimationController != null) avatarAnimationController.SetIdle();
+                }
             }
-
-            if (_currentGameMode == ConversationGameMode.ObjectTagging && config != null)
+            catch (Exception ex)
             {
-                string languageName = GetLanguageName(config.conversation.language);
-                string systemPrompt = BuildGameModeSystemPrompt(_currentGameMode, languageName);
-                _currentAction = new ChatAction(systemPrompt);
+                RecoverFromProcessingFailure($"Something went wrong while processing your speech. {GetSafeErrorMessage(ex)}");
             }
-
-            var result = await _conversationPipeline.ExecuteAsync(audioClip, _currentAction);
-
-            if (result.Success && result.TTSAudioClip != null && DefaultAutoPlayTts)
+            finally
             {
-                _lastTTSClip = result.TTSAudioClip;
-
-                // Use helper to play audio with shortened animation
-                PlayAudioWithEarlyStop(result.TTSAudioClip);
-            }
-            _isProcessing = false;
-
-            if (!result.Success && npcView != null)
-            {
-                npcView.SetIdleState();
-                if (avatarAnimationController != null) avatarAnimationController.SetIdle();
+                EndProcessing();
             }
         }
 
@@ -530,6 +643,8 @@ namespace LanguageTutor.Core
 
         private void HandlePipelineStageChanged(PipelineStage stage)
         {
+            _lastPipelineStage = stage;
+
             string status = stage switch
             {
                 PipelineStage.Transcribing => "Transcribing...",
@@ -572,10 +687,26 @@ namespace LanguageTutor.Core
             }
         }
         private void HandleTTSAudioGenerated(AudioClip audio) { }
-        private void HandlePipelineError(string error) { if (npcView != null) npcView.ShowErrorMessage(error); }
+        private void HandlePipelineError(string error)
+        {
+            if (npcView != null)
+            {
+                npcView.ShowErrorMessage(error);
+
+                if (_lastPipelineStage == PipelineStage.SynthesizingSpeech)
+                {
+                    npcView.ShowTtsError(error);
+                }
+            }
+        }
 
         private void Update()
         {
+            if (_isProcessing && HasProcessingTimedOut())
+            {
+                RecoverFromProcessingFailure("Processing took too long and was reset. Please try speaking again.");
+            }
+
             if (!_isProcessing && !_isWaitingForObjectTaggingObjects && _audioInput != null && !_audioInput.IsRecording && npcView != null && !npcView.IsAudioPlaying())
             {
                 npcView.SetIdleState();
@@ -809,7 +940,7 @@ namespace LanguageTutor.Core
 
                     if (npcView != null)
                     {
-                        npcView.ShowStatusMessage($"Object Tagging: no objects found, retrying in {secondsRemaining}s...");
+                        npcView.ShowStatusMessage($"No objects found, retrying in {secondsRemaining}s...");
                     }
 
                     yield return new WaitForSeconds(1f);
@@ -864,6 +995,7 @@ namespace LanguageTutor.Core
             else
             {
                 Debug.LogWarning("[NPCController] No detected objects found. Using default word list.");
+                Speak("I don't see any detected objects yet. Please switch to Object Tagging mode first so I can detect objects. For now, we'll practice with CAT.");
                 var gameAction = new SpellingGameAction();  // Falls back to "CAT"
                 _ = gameAction.ExecuteAsync(_llmService, new LLMActionContext());
             }
@@ -896,6 +1028,142 @@ namespace LanguageTutor.Core
             if (destroyed > 0)
             {
                 Debug.Log($"[NPCController] Cleared Word Clouds letterboxes: {destroyed} objects destroyed.");
+            }
+        }
+
+        private async Task<T> ExecuteWithTimeout<T>(Task<T> task, float timeoutSeconds, string operationName)
+        {
+            int timeoutMs = Mathf.RoundToInt(Mathf.Max(1f, timeoutSeconds) * 1000f);
+            Task timeoutTask = Task.Delay(timeoutMs);
+            Task completedTask = await Task.WhenAny(task, timeoutTask);
+
+            if (completedTask == task)
+            {
+                return await task;
+            }
+
+            CancelOngoingOperations();
+            throw new TimeoutException($"{operationName} timed out after {timeoutSeconds:F1}s");
+        }
+
+        private void BeginProcessing()
+        {
+            _isProcessing = true;
+            _processingStartedRealtime = Time.realtimeSinceStartup;
+        }
+
+        private void EndProcessing()
+        {
+            _isProcessing = false;
+            _processingStartedRealtime = -1f;
+        }
+
+        private bool HasProcessingTimedOut()
+        {
+            if (!_isProcessing || _processingStartedRealtime < 0f)
+            {
+                return false;
+            }
+
+            float elapsed = Time.realtimeSinceStartup - _processingStartedRealtime;
+            return elapsed > GetConversationPipelineTimeoutSeconds();
+        }
+
+        private float GetSttTimeoutSeconds()
+        {
+            float timeout = config != null ? config.stt.timeoutSeconds : 30f;
+            return Mathf.Max(5f, timeout + ProcessingSafetyBufferSeconds);
+        }
+
+        private float GetConversationPipelineTimeoutSeconds()
+        {
+            if (config == null)
+            {
+                return 60f;
+            }
+
+            float timeout = config.stt.timeoutSeconds + config.llm.timeoutSeconds + config.tts.timeoutSeconds + ProcessingSafetyBufferSeconds;
+            return Mathf.Max(MinimumPipelineTimeoutSeconds, timeout);
+        }
+
+        private void CancelOngoingOperations()
+        {
+            try
+            {
+                _sttService?.CancelTranscription();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[NPCController] Failed to cancel STT operation: {ex.Message}");
+            }
+
+            try
+            {
+                _ttsService?.CancelSynthesis();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[NPCController] Failed to cancel TTS operation: {ex.Message}");
+            }
+        }
+
+        private void RecoverFromProcessingFailure(string userMessage)
+        {
+            Debug.LogError($"[NPCController] Recovery triggered: {userMessage}");
+
+            CancelOngoingOperations();
+
+            if (_audioInput != null && _audioInput.IsRecording)
+            {
+                _audioInput.CancelRecording();
+            }
+
+            if (npcView != null)
+            {
+                npcView.StopAudio();
+                npcView.ShowErrorMessage(userMessage);
+                npcView.SetIdleState();
+            }
+
+            if (avatarAnimationController != null)
+            {
+                avatarAnimationController.SetIdle();
+            }
+
+            EndProcessing();
+            OnListeningStateChanged?.Invoke(false);
+        }
+
+        private string GetSafeErrorMessage(Exception ex)
+        {
+            if (ex is TimeoutException)
+            {
+                return "The request timed out.";
+            }
+
+            return "Please try again.";
+        }
+
+        private void UpdateTtsProviderStatusUi()
+        {
+            if (npcView == null || config == null)
+            {
+                return;
+            }
+
+            npcView.SetActiveTtsProvider(GetTtsProviderLabel(config.tts.provider));
+        }
+
+        private static string GetTtsProviderLabel(TTSSettings.TTSProvider provider)
+        {
+            switch (provider)
+            {
+                case TTSSettings.TTSProvider.ElevenLabs:
+                    return "ElevenLabs";
+                case TTSSettings.TTSProvider.AllTalk:
+                    return "AllTalk";
+                default:
+                    return provider.ToString();
             }
         }
     }
