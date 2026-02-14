@@ -71,7 +71,7 @@ namespace LanguageTutor.Actions
             if (controller != null)
             {
                 string wordSource = wordList.Count > 1 ? " from your room" : "";
-                controller.Speak($"Let's practice. Spell {targetWord}{wordSource}.");
+                controller.Speak($"Let's practice. Spell {targetWord}{wordSource} by moving the letter blocks into the correct slots!");
             }
 
             Transform cam = Camera.main != null ? Camera.main.transform : null;

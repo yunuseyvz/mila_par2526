@@ -45,6 +45,9 @@ namespace LanguageTutor.UI
         private List<string> _conversationHistory = new List<string>();
         private string _modeLabel;
         private string _activeTtsProviderLabel = "Unknown";
+        private Coroutine _ttsErrorResetRoutine;
+
+        private const float TtsErrorDisplaySeconds = 10f;
 
         private void Awake()
         {
@@ -124,6 +127,7 @@ namespace LanguageTutor.UI
         public void SetActiveTtsProvider(string providerLabel)
         {
             _activeTtsProviderLabel = string.IsNullOrWhiteSpace(providerLabel) ? "Unknown" : providerLabel.Trim();
+            StopTtsErrorResetRoutine();
             SetTtsStatusText($"TTS: {_activeTtsProviderLabel}");
         }
 
@@ -132,6 +136,7 @@ namespace LanguageTutor.UI
             if (string.IsNullOrWhiteSpace(error))
             {
                 SetTtsStatusText($"TTS: {_activeTtsProviderLabel} - Error");
+                RestartTtsErrorResetRoutine();
                 return;
             }
 
@@ -142,6 +147,29 @@ namespace LanguageTutor.UI
             }
 
             SetTtsStatusText($"TTS: {_activeTtsProviderLabel} - Error: {compact}");
+            RestartTtsErrorResetRoutine();
+        }
+
+        private void RestartTtsErrorResetRoutine()
+        {
+            StopTtsErrorResetRoutine();
+            _ttsErrorResetRoutine = StartCoroutine(RestoreTtsStatusAfterDelay());
+        }
+
+        private void StopTtsErrorResetRoutine()
+        {
+            if (_ttsErrorResetRoutine != null)
+            {
+                StopCoroutine(_ttsErrorResetRoutine);
+                _ttsErrorResetRoutine = null;
+            }
+        }
+
+        private System.Collections.IEnumerator RestoreTtsStatusAfterDelay()
+        {
+            yield return new WaitForSeconds(TtsErrorDisplaySeconds);
+            SetTtsStatusText($"TTS: {_activeTtsProviderLabel}");
+            _ttsErrorResetRoutine = null;
         }
 
         private void SetTtsStatusText(string text)

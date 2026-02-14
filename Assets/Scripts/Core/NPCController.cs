@@ -995,7 +995,7 @@ namespace LanguageTutor.Core
             else
             {
                 Debug.LogWarning("[NPCController] No detected objects found. Using default word list.");
-                Speak("I don't see any detected objects yet. Please switch to Object Tagging mode first so I can detect objects. For now, we'll practice with CAT.");
+                //Speak("I don't see any detected objects yet. Please switch to Object Tagging mode first so I can detect objects. For now, we'll practice with CAT. Spell CAT by moving the letter blocks into the correct slots!");
                 var gameAction = new SpellingGameAction();  // Falls back to "CAT"
                 _ = gameAction.ExecuteAsync(_llmService, new LLMActionContext());
             }
