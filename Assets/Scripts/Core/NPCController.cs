@@ -46,7 +46,12 @@ namespace LanguageTutor.Core
         private ILLMAction _currentAction;
         private AudioClip _lastTTSClip;
         private bool _isProcessing;
+        private bool _isWaitingForObjectTaggingObjects;
         private ConversationGameMode _currentGameMode = ConversationGameMode.FreeTalk;
+        private Coroutine _objectTaggingRetryRoutine;
+
+        [Header("Object Tagging")]
+        [SerializeField] private float objectTaggingRetryIntervalSeconds = 5f;
 
         private const bool DefaultShowSubtitles = true;
         private const bool DefaultAutoPlayTts = true;
@@ -70,6 +75,7 @@ namespace LanguageTutor.Core
 
         private void OnDestroy()
         {
+            StopObjectTaggingRetryLoop();
             CleanupEventListeners();
         }
 
@@ -460,13 +466,13 @@ namespace LanguageTutor.Core
                         await WaitForSpeechToFinishAsync();
 
                         // Start next quiz
-                        if (_objectQuizManager.StartQuiz())
+                        if (TryStartObjectQuiz(announceStart: false))
                         {
                             Speak("What is this?");
                         }
                         else
                         {
-                            Speak("No more objects to practice. Great job!");
+                            StartObjectTaggingQuizWithRetry();
                         }
                     }
                     else
@@ -570,7 +576,7 @@ namespace LanguageTutor.Core
 
         private void Update()
         {
-            if (!_isProcessing && _audioInput != null && !_audioInput.IsRecording && npcView != null && !npcView.IsAudioPlaying())
+            if (!_isProcessing && !_isWaitingForObjectTaggingObjects && _audioInput != null && !_audioInput.IsRecording && npcView != null && !npcView.IsAudioPlaying())
             {
                 npcView.SetIdleState();
                 if (avatarAnimationController != null && avatarAnimationController.GetCurrentState() != AnimationState.Idle)
@@ -721,21 +727,17 @@ namespace LanguageTutor.Core
             // Object Quiz mode: Start quiz when entering ObjectTagging mode
             if (mode == ConversationGameMode.ObjectTagging && _objectQuizManager != null)
             {
-                if (_objectQuizManager.StartQuiz())
-                {
-                    Debug.Log("[NPCController] Started Object Quiz");
-                    Speak("Let's practice identifying objects! What is this?");
-                }
-                else
-                {
-                    Debug.LogWarning("[NPCController] No objects detected for quiz. Please scan the room first.");
-                    Speak("I don't see any objects yet. Please look around so I can detect some objects.");
-                }
+                StartObjectTaggingQuizWithRetry();
             }
-            else if (_objectQuizManager != null && _objectQuizManager.IsQuizActive)
+            else
             {
-                // Leaving ObjectTagging mode - end any active quiz
-                _objectQuizManager.EndQuiz();
+                StopObjectTaggingRetryLoop();
+
+                if (_objectQuizManager != null && _objectQuizManager.IsQuizActive)
+                {
+                    // Leaving ObjectTagging mode - end any active quiz
+                    _objectQuizManager.EndQuiz();
+                }
             }
 
             // Word Building mode specific setup
@@ -744,6 +746,106 @@ namespace LanguageTutor.Core
                 ClearWordCloudsLetterBoxes();
                 StartWordCloudsLetterBoxes();
             }
+        }
+
+        private void StartObjectTaggingQuizWithRetry()
+        {
+            StopObjectTaggingRetryLoop();
+
+            if (_objectQuizManager == null)
+            {
+                return;
+            }
+
+            if (TryStartObjectQuiz(announceStart: true))
+            {
+                return;
+            }
+
+            Debug.LogWarning("[NPCController] No objects detected for quiz. Starting auto-retry loop.");
+            Speak("I don't see any objects yet. Please look around so I can detect some objects.");
+
+            var retryInterval = Mathf.Max(1f, objectTaggingRetryIntervalSeconds);
+            _objectTaggingRetryRoutine = StartCoroutine(RetryObjectTaggingQuizLoop(retryInterval));
+        }
+
+        private bool TryStartObjectQuiz(bool announceStart)
+        {
+            if (_objectQuizManager == null)
+            {
+                return false;
+            }
+
+            if (!_objectQuizManager.StartQuiz())
+            {
+                return false;
+            }
+
+            StopObjectTaggingRetryLoop();
+            Debug.Log("[NPCController] Started Object Quiz");
+
+            if (announceStart)
+            {
+                Speak("Let's practice identifying objects! What is this?");
+            }
+
+            return true;
+        }
+
+        private System.Collections.IEnumerator RetryObjectTaggingQuizLoop(float retryInterval)
+        {
+            _isWaitingForObjectTaggingObjects = true;
+
+            while (ShouldRetryObjectTaggingQuiz())
+            {
+                var secondsRemaining = Mathf.CeilToInt(retryInterval);
+                while (secondsRemaining > 0)
+                {
+                    if (!ShouldRetryObjectTaggingQuiz())
+                    {
+                        _isWaitingForObjectTaggingObjects = false;
+                        yield break;
+                    }
+
+                    if (npcView != null)
+                    {
+                        npcView.ShowStatusMessage($"Object Tagging: no objects found, retrying in {secondsRemaining}s...");
+                    }
+
+                    yield return new WaitForSeconds(1f);
+                    secondsRemaining--;
+                }
+
+                if (TryStartObjectQuiz(announceStart: true))
+                {
+                    _isWaitingForObjectTaggingObjects = false;
+                    yield break;
+                }
+            }
+
+            _isWaitingForObjectTaggingObjects = false;
+        }
+
+        private bool ShouldRetryObjectTaggingQuiz()
+        {
+            if (config == null || _objectQuizManager == null)
+            {
+                return false;
+            }
+
+            return config.conversation.gameMode == ConversationGameMode.ObjectTagging
+                   && !_objectQuizManager.IsQuizActive;
+        }
+
+        private void StopObjectTaggingRetryLoop()
+        {
+            if (_objectTaggingRetryRoutine != null)
+            {
+                StopCoroutine(_objectTaggingRetryRoutine);
+                _objectTaggingRetryRoutine = null;
+            }
+
+            _isWaitingForObjectTaggingObjects = false;
         }
 
         private void StartWordCloudsLetterBoxes()

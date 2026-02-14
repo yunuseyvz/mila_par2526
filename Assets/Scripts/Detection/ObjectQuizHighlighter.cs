@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 #if MRUK_INSTALLED
@@ -7,41 +9,51 @@ using Meta.XR.BuildingBlocks.AIBlocks;
 using Meta.XR.EnvironmentDepth;
 #endif
 
-/// <summary>
-/// Highlights a specific detected object for the quiz system.
-/// Adapted from ObjectDetectionVisualizer to show a single, prominent highlight.
-/// </summary>
 #if MRUK_INSTALLED
 [RequireComponent(typeof(ObjectDetectionAgent), typeof(DepthTextureAccess), typeof(EnvironmentDepthManager))]
 #endif
 public class ObjectQuizHighlighter : MonoBehaviour
 {
-    [Header("Highlight Appearance")]
     [SerializeField] private GameObject highlightPrefab;
-    [SerializeField] private Color highlightColor = Color.yellow;
-    [SerializeField] private Vector3 highlightScaleMultiplier = new Vector3(1.2f, 1.2f, 1.0f);
-    [SerializeField] private float pulseSpeed = 2f;
-    [SerializeField] private float pulseMinScale = 0.9f;
-    [SerializeField] private float pulseMaxScale = 1.1f;
-    [SerializeField] private bool rotateHighlight = true;
-    [SerializeField] private float rotationSpeed = 30f;
-    [SerializeField] private Vector3 rotationOffsetEuler = new Vector3(0f, 0f, 90f);
-    [SerializeField] private bool forcePointDown = true;
-    [SerializeField] private Vector3 pointDownEuler = new Vector3(90f, 0f, 0f);
+    [SerializeField] private bool showBoundingBoxes = true;
+    [SerializeField] private Vector3 fallbackBoxScale = new(0.2f, 0.2f, 1f);
 
-    private GameObject _currentHighlight;
-    private Material _highlightMaterial;
-    private Vector3 _baseScale;
-    private float _pulseTime;
-    private string _currentTargetLabel;
-    private DetectedObjectRegistry.Entry _currentTargetEntry;
+    public bool ShowBoundingBoxes
+    {
+        get => showBoundingBoxes;
+        set
+        {
+            if (showBoundingBoxes == value) return;
+            showBoundingBoxes = value;
+            foreach (var gameObjectRef in _live)
+            {
+                if (!gameObjectRef) continue;
+                var cache = gameObjectRef.GetComponent<RendererCache>() ?? gameObjectRef.AddComponent<RendererCache>();
+                foreach (var rendererRef in cache.Renderers)
+                    rendererRef.enabled = value;
+            }
+        }
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate() => ShowBoundingBoxes = showBoundingBoxes;
+#endif
+
+    public void SetShowBoundingBoxes(bool value) => ShowBoundingBoxes = value;
+
+    public bool IsHighlighting => _live.Count > 0;
+    public string CurrentTargetLabel => _targetLabel;
+
+    private string _targetLabel;
+
+    private readonly List<GameObject> _live = new();
+    private readonly Queue<GameObject> _pool = new();
 
 #if MRUK_INSTALLED
     private ObjectDetectionAgent _agent;
     private PassthroughCameraAccess _cam;
     private DepthTextureAccess _depth;
     private int _eyeIdx;
-    private bool _hasValidFrame;
 
     private struct FrameData
     {
@@ -54,74 +66,39 @@ public class ObjectQuizHighlighter : MonoBehaviour
     private FrameData _frame;
 #endif
 
-    public bool IsHighlighting => _currentHighlight != null && _currentHighlight.activeSelf;
-    public string CurrentTargetLabel => _currentTargetLabel;
-
     private void Awake()
     {
 #if MRUK_INSTALLED
         _agent = GetComponent<ObjectDetectionAgent>();
         _cam = FindAnyObjectByType<PassthroughCameraAccess>();
         _depth = GetComponent<DepthTextureAccess>();
-        
         if (_cam != null)
-        {
             _eyeIdx = _cam.CameraPosition == PassthroughCameraAccess.CameraPositionType.Left ? 0 : 1;
-        }
 #endif
     }
 
 #if MRUK_INSTALLED
     private void OnEnable()
     {
-        if (_agent != null)
-            _agent.OnBoxesUpdated += HandleBoxesUpdated;
-        
-        if (_depth != null)
-            _depth.OnDepthTextureUpdateCPU += OnDepth;
+        _agent.OnBoxesUpdated += HandleBatch;
+        _depth.OnDepthTextureUpdateCPU += OnDepth;
     }
 
     private void OnDisable()
     {
-        if (_agent != null)
-            _agent.OnBoxesUpdated -= HandleBoxesUpdated;
-        
-        if (_depth != null)
-            _depth.OnDepthTextureUpdateCPU -= OnDepth;
+        _agent.OnBoxesUpdated -= HandleBatch;
+        _depth.OnDepthTextureUpdateCPU -= OnDepth;
     }
 
-    private void OnDepth(DepthTextureAccess.DepthFrameData d)
+    private void OnDepth(DepthTextureAccess.DepthFrameData depthFrame)
     {
-        if (_cam == null) return;
-        
         _frame.Pose = _cam.GetCameraPose();
         _frame.CameraIntrinsics = _cam.Intrinsics;
-        _frame.Depth = d.DepthTexturePixels.ToArray();
-        _frame.ViewProjectionMatrix = d.ViewProjectionMatrix;
-        _hasValidFrame = true;
-    }
-
-    private void HandleBoxesUpdated(List<BoxData> batch)
-    {
-        // Only update highlight if we're actively targeting something
-        if (string.IsNullOrWhiteSpace(_currentTargetLabel))
-            return;
-
-        UpdateHighlightPosition(batch);
+        _frame.Depth = depthFrame.DepthTexturePixels.ToArray();
+        _frame.ViewProjectionMatrix = depthFrame.ViewProjectionMatrix.ToArray();
     }
 #endif
 
-    private void Update()
-    {
-        if (_currentHighlight != null && _currentHighlight.activeSelf)
-        {
-            AnimateHighlight();
-        }
-    }
-
-    /// <summary>
-    /// Highlight a specific object by its registry entry.
-    /// </summary>
     public bool HighlightObject(DetectedObjectRegistry.Entry entry)
     {
         if (entry == null || string.IsNullOrWhiteSpace(entry.Label))
@@ -130,19 +107,11 @@ public class ObjectQuizHighlighter : MonoBehaviour
             return false;
         }
 
-        _currentTargetEntry = entry;
-        _currentTargetLabel = entry.Label;
-
-        // Create or reuse highlight at the entry's stored position
-        CreateOrUpdateHighlight(entry.Position, Quaternion.identity, Vector3.one * 0.3f);
-
-        Debug.Log($"[ObjectQuizHighlighter] Highlighting object: {entry.Label} at {entry.Position}");
+        _targetLabel = entry.Label;
+        ShowAtFallbackPose(entry.Position);
         return true;
     }
 
-    /// <summary>
-    /// Highlight an object by label. Will use detection data if available.
-    /// </summary>
     public bool HighlightObjectByLabel(string label)
     {
         if (string.IsNullOrWhiteSpace(label))
@@ -151,86 +120,116 @@ public class ObjectQuizHighlighter : MonoBehaviour
             return false;
         }
 
-        _currentTargetLabel = label;
-        Debug.Log($"[ObjectQuizHighlighter] Set target label to: {label}, waiting for detection update...");
+        _targetLabel = label;
         return true;
     }
 
-    /// <summary>
-    /// Remove the current highlight.
-    /// </summary>
     public void ClearHighlight()
     {
-        if (_currentHighlight != null)
+        _targetLabel = null;
+
+        foreach (var gameObjectRef in _live)
         {
-            _currentHighlight.SetActive(false);
+            gameObjectRef.SetActive(false);
+            _pool.Enqueue(gameObjectRef);
         }
 
-        _currentTargetLabel = null;
-        _currentTargetEntry = null;
-
-        Debug.Log("[ObjectQuizHighlighter] Highlight cleared.");
+        _live.Clear();
     }
 
 #if MRUK_INSTALLED
-    /// <summary>
-    /// Update highlight position based on latest detection data.
-    /// </summary>
-    private void UpdateHighlightPosition(List<BoxData> boxes)
+    private void HandleBatch(List<BoxData> batch)
     {
-        if (!_hasValidFrame || boxes == null || boxes.Count == 0)
+        if (highlightPrefab == null)
+        {
+            Debug.LogError("[ObjectQuizHighlighter] highlightPrefab is null! Cannot create highlight boxes.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_targetLabel) || batch == null || batch.Count == 0)
             return;
 
-        // Find the box matching our target label
-        BoxData? targetBox = null;
-        foreach (var box in boxes)
+        BoxData? target = null;
+        foreach (var detection in batch)
         {
-            if (box.label.Contains(_currentTargetLabel, System.StringComparison.OrdinalIgnoreCase))
+            if (IsTargetMatch(detection.label, _targetLabel))
             {
-                targetBox = box;
+                target = detection;
                 break;
             }
         }
 
-        if (!targetBox.HasValue)
-        {
-            Debug.Log($"[ObjectQuizHighlighter] Target '{_currentTargetLabel}' not found in current detection batch.");
+        if (!target.HasValue)
             return;
-        }
 
-        var b = targetBox.Value;
-        var xmin = b.position.x;
-        var ymin = b.position.y;
-        var xmax = b.scale.x;
-        var ymax = b.scale.y;
+        var detectionBox = target.Value;
+        var xmin = detectionBox.position.x;
+        var ymin = detectionBox.position.y;
+        var xmax = detectionBox.scale.x;
+        var ymax = detectionBox.scale.y;
 
         if (!TryProject(xmin, ymin, xmax, ymax, out var pos, out var rot, out var scl))
+            return;
+
+        ShowAtPose(pos, rot, scl);
+    }
+#endif
+
+    private void ShowAtFallbackPose(Vector3 position)
+    {
+        ShowAtPose(position, GetFacingRotation(position), fallbackBoxScale);
+    }
+
+    private void ShowAtPose(Vector3 position, Quaternion rotation, Vector3 scale)
+    {
+        if (highlightPrefab == null)
         {
-            Debug.LogWarning($"[ObjectQuizHighlighter] Failed to project '{_currentTargetLabel}' to 3D space.");
+            Debug.LogError("[ObjectQuizHighlighter] highlightPrefab is null! Cannot create highlight boxes.");
             return;
         }
 
-        // Apply scale multiplier for more prominent highlight
-        scl.x *= highlightScaleMultiplier.x;
-        scl.y *= highlightScaleMultiplier.y;
-        scl.z *= highlightScaleMultiplier.z;
+        for (var i = _live.Count - 1; i >= 1; i--)
+        {
+            var staleObject = _live[i];
+            staleObject.SetActive(false);
+            _pool.Enqueue(staleObject);
+            _live.RemoveAt(i);
+        }
 
-        CreateOrUpdateHighlight(pos, rot, scl);
+        var quad = _live.Count > 0
+            ? _live[0]
+            : (_pool.Count > 0 ? _pool.Dequeue() : Instantiate(highlightPrefab));
+
+        quad.SetActive(true);
+
+        var rendererCache = quad.GetComponent<RendererCache>() ?? quad.AddComponent<RendererCache>();
+        foreach (var rendererRef in rendererCache.Renderers)
+            rendererRef.enabled = showBoundingBoxes;
+
+        quad.transform.SetPositionAndRotation(position, rotation);
+        quad.transform.localScale = scale;
+        if (_live.Count == 0)
+            _live.Add(quad);
     }
 
-    /// <summary>
-    /// Project 2D bounding box to 3D world space using depth data.
-    /// Adapted from ObjectDetectionVisualizer.TryProject
-    /// </summary>
+    private Quaternion GetFacingRotation(Vector3 position)
+    {
+        var viewer = Camera.main != null ? Camera.main.transform : transform;
+        var lookDirection = position - viewer.position;
+
+        if (lookDirection.sqrMagnitude < 0.0001f)
+            return Quaternion.identity;
+
+        return Quaternion.LookRotation(lookDirection.normalized);
+    }
+
+#if MRUK_INSTALLED
     public bool TryProject(float xmin, float ymin, float xmax, float ymax,
         out Vector3 world, out Quaternion rot, out Vector3 scale)
     {
         world = default;
         rot = default;
         scale = default;
-
-        if (_cam == null || !_hasValidFrame)
-            return false;
 
         var px = (xmin + xmax) * 0.5f;
         var py = (ymin + ymax) * 0.5f;
@@ -261,88 +260,23 @@ public class ObjectQuizHighlighter : MonoBehaviour
     }
 #endif
 
-    /// <summary>
-    /// Create or update the highlight GameObject at the specified position.
-    /// </summary>
-    private void CreateOrUpdateHighlight(Vector3 position, Quaternion rotation, Vector3 scale)
+    private static bool IsTargetMatch(string detectedLabel, string targetLabel)
     {
-        if (_currentHighlight == null)
-        {
-            // Create new highlight
-            if (highlightPrefab != null)
-            {
-                _currentHighlight = Instantiate(highlightPrefab);
-            }
-            else
-            {
-                // Create default cube if no prefab provided
-                _currentHighlight = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                _currentHighlight.name = "QuizHighlight";
+        if (string.IsNullOrWhiteSpace(detectedLabel) || string.IsNullOrWhiteSpace(targetLabel))
+            return false;
 
-                // Remove collider
-                Destroy(_currentHighlight.GetComponent<Collider>());
-
-                // Create glowing material
-                _highlightMaterial = new Material(Shader.Find("Standard"));
-                _highlightMaterial.EnableKeyword("_EMISSION");
-                _highlightMaterial.SetColor("_EmissionColor", highlightColor * 2f);
-                _highlightMaterial.SetColor("_Color", new Color(highlightColor.r, highlightColor.g, highlightColor.b, 0.5f));
-
-                var renderer = _currentHighlight.GetComponent<Renderer>();
-                if (renderer != null)
-                    renderer.material = _highlightMaterial;
-            }
-
-            _pulseTime = 0f;
-        }
-
-        _currentHighlight.SetActive(true);
-        _currentHighlight.transform.position = position;
-        var runtimeRotation = rotation * Quaternion.Euler(rotationOffsetEuler);
-        var downRotation = Quaternion.Euler(pointDownEuler) * Quaternion.Euler(rotationOffsetEuler);
-        _currentHighlight.transform.rotation = forcePointDown ? downRotation : runtimeRotation;
-        _currentHighlight.transform.localScale = scale;
-        _baseScale = scale;
+        return detectedLabel.Equals(targetLabel, StringComparison.OrdinalIgnoreCase)
+               || detectedLabel.Contains(targetLabel, StringComparison.OrdinalIgnoreCase)
+               || targetLabel.Contains(detectedLabel, StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>
-    /// Animate the highlight with pulsing and rotation.
-    /// </summary>
-    private void AnimateHighlight()
+    private sealed class RendererCache : MonoBehaviour
     {
-        if (_currentHighlight == null)
-            return;
+        public Renderer[] Renderers;
 
-        _pulseTime += Time.deltaTime * pulseSpeed;
-
-        // Pulsing scale
-        float pulseScale = Mathf.Lerp(pulseMinScale, pulseMaxScale, (Mathf.Sin(_pulseTime) + 1f) * 0.5f);
-        _currentHighlight.transform.localScale = _baseScale * pulseScale;
-
-        // Rotation
-        if (rotateHighlight)
+        private void Awake()
         {
-            _currentHighlight.transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.Self);
-        }
-
-        // Pulse emission intensity if we have a material
-        if (_highlightMaterial != null)
-        {
-            float intensity = Mathf.Lerp(1.5f, 3f, (Mathf.Sin(_pulseTime * 1.5f) + 1f) * 0.5f);
-            _highlightMaterial.SetColor("_EmissionColor", highlightColor * intensity);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (_currentHighlight != null)
-        {
-            Destroy(_currentHighlight);
-        }
-
-        if (_highlightMaterial != null)
-        {
-            Destroy(_highlightMaterial);
+            Renderers = GetComponentsInChildren<Renderer>(true);
         }
     }
 }
